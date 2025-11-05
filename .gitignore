@@ -1,0 +1,34 @@
+# כל קבצי node_modules (גם בשרת וגם בלקוח)
+node_modules/
+CLIENT/node_modules/
+SERVER/node_modules/
+
+# קבצי Build
+CLIENT/dist/
+SERVER/dist/
+build/
+dist/
+
+# קבצי סביבה
+.env
+CLIENT/.env
+SERVER/.env
+
+# קבצי לוג
+*.log
+logs/
+
+# קבצי מערכת
+.DS_Store
+
+# תיקיות של IDE
+.vscode/
+.idea/
+
+# קבצים זמניים
+*.local
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
