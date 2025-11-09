@@ -4,21 +4,21 @@ const Joi = require("joi");
 
 const userSchema = new mongoose.Schema({
     fullName: String,
-    email: String,
+    email: { type: String, required: true, unique: true },
     password: String,
     apartmentNumber: Number,
     phone: String,
     role: {
         type: String,
-        default: "user" // או 'admin' לוועד הבית
+        enum: ["tenant", "admin"],
+        default: "tenant"
     },
-    // isActive: { type: Boolean, default: true },
-    date_created: {
+    isActive: { type: Boolean, default: true },
+    ArrivalDate: {
         type: Date,
         default: Date.now
     }
 });
-// },{ timestamps: true });
 
 exports.UserModel = mongoose.model("users", userSchema);
 
@@ -35,7 +35,10 @@ exports.validUser = (user) => {
         email: Joi.string().email().required(),
         password: Joi.string().min(6).max(20).required(),
         apartmentNumber: Joi.number().min(1).required(),
-        phone: Joi.string().min(9).max(15).required()
+        phone: Joi.string().min(9).max(15).required(),
+        role: Joi.string().valid("tenant", "admin").optional(),
+        isActive: Joi.boolean().optional(),
+        ArrivalDate: Joi.date().optional()
     });
     return schema.validate(user);
 };
