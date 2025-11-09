@@ -1,6 +1,5 @@
-
 const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
+
 
 // Middleware לאימות JWT - כל משתמש מחובר יכול לעבור
 const auth = (req, res, next) => {

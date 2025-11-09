@@ -10,10 +10,10 @@ const reservationsR = require("./reservationRoutes");
 exports.routesInit = (app) => {
   app.use("/", indexR);
   app.use("/users", usersR);
-//   app.use("/payments", paymentsR);
+  //   app.use("/payments", paymentsR);
   app.use("/issues", issuesR);
   app.use("/rooms", roomsR);
   app.use("/reservations", reservationsR);
-//   app.use("/notices", noticesR);
-//   app.use("/notifications", notificationsR);
+  //   app.use("/notices", noticesR);
+  //   app.use("/notifications", notificationsR);
 };
