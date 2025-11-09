@@ -1,9 +1,9 @@
 const express = require("express");
 const { RoomModel, validRoom } = require("../models/roomModel");
 const router = express.Router();
-const { authAdmin } = require("../middleware/authMiddleware"); 
+const { authAdmin,auth } = require("../middleware/authMiddleware"); 
 
-// יצירת חדר חדש (רק לוועד)
+// יצירת חדר חדש (רק למנהל)
 router.post("/", authAdmin, async (req, res) => {
     if (req.user.role !== "admin") // כאן תיקון
       return res.status(403).json({ msg: "Access denied" });
@@ -21,7 +21,7 @@ router.post("/", authAdmin, async (req, res) => {
   });
   
 // שליפת כל החדרים
-router.get("/list", async (req, res) => {
+router.get("/list",auth, async (req, res) => {
   try {
     const rooms = await RoomModel.find();
     res.json(rooms);

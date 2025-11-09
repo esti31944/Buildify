@@ -1,6 +1,20 @@
 const jwt = require("jsonwebtoken");
 
-// Middleware לאימות JWT והרשאות מנהל
+// Middleware לאימות JWT - כל משתמש מחובר יכול לעבור
+const auth = (req, res, next) => {
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (!token) return res.status(401).json({ msg: "No token, authorization denied" });
+
+    try {
+        const decoded = jwt.verify(token, "secretKey123");
+        req.user = decoded; // מכיל _id ו-role
+        next();
+    } catch (err) {
+        res.status(401).json({ msg: "Token is not valid" });
+    }
+};
+
+// Middleware לאימות JWT והרשאות מנהל בלבד
 const authAdmin = (req, res, next) => {
     const token = req.header("Authorization")?.replace("Bearer ", "");
     if (!token) return res.status(401).json({ msg: "No token, authorization denied" });
@@ -15,4 +29,4 @@ const authAdmin = (req, res, next) => {
     }
 };
 
-module.exports = { authAdmin };
+module.exports = { auth, authAdmin };
