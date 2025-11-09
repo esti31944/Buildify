@@ -1,11 +1,3 @@
-// פעולות עיקריות
-// POST /register – רישום משתמש חדש
-// POST /login – התחברות
-// GET /myInfo – פרטי המשתמש המחובר
-// GET /usersList – רשימת משתמשים (רק לועד)
-// PUT /update/:id – עדכון פרטי משתמש
-// DELETE /:id – מחיקת משתמש
-
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const { UserModel, validUser, validLogin, createToken } = require("../models/usersModel");
@@ -27,7 +19,7 @@ router.post("/register",authAdmin, async (req, res) => {
 
   try {
 
-    // מכאן בדיקות נוספות
+
     const existingUser = await UserModel.findOne({ email: req.body.email });
     if (existingUser) {
       return res.status(400).json({ msg: "Email already exists" });
@@ -40,8 +32,8 @@ router.post("/register",authAdmin, async (req, res) => {
     if (existingActiveApartment) {
       return res.status(400).json({ msg: "An active user already exists for this apartment" });
     }
-    // עד כאן בדיקות נוספות
 
+    
     const user = new UserModel(req.body);
     user.password = await bcrypt.hash(user.password, 10);
     await user.save();
