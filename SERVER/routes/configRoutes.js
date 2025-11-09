@@ -16,7 +16,7 @@ exports.routesInit = (app) => {
   app.use("/rooms", roomsR);
 
 //   app.use("/payments", paymentsR);
-   app.use("/issues", issuesR);
+//   app.use("/issues", issuesR);
 //   app.use("/rooms", roomsR);
   app.use("/reservations", reservationsR);
 //   app.use("/notices", noticesR);
