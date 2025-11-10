@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const { UserModel, validUser, validLogin, createToken } = require("../models/usersModel");
 const {auth, authAdmin } = require("../middleware/authMiddleware");
 const router = express.Router();
-const dotenv = require("dotenv");
+// const dotenv = require("dotenv");
 
 // בדיקה בסיסית
 router.get("/", (req, res) => {

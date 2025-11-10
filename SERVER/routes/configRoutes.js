@@ -5,7 +5,7 @@ const issuesR = require("./issueRoutes");
 const roomsR = require("./roomRoutes");
 const reservationsR = require("./reservationRoutes");
 // const noticesR = require("./notices");
-// const notificationsR = require("./notifications");
+const notificationsR = require("./notificationRoutes");
 
 exports.routesInit = (app) => {
   app.use("/", indexR);
@@ -15,5 +15,5 @@ exports.routesInit = (app) => {
   app.use("/rooms", roomsR);
   app.use("/reservations", reservationsR);
   //   app.use("/notices", noticesR);
-  //   app.use("/notifications", notificationsR);
+    app.use("/notifications", notificationsR);
 };

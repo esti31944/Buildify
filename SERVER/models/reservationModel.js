@@ -16,7 +16,7 @@ exports.ReservationModel = mongoose.model("reservations", reservationSchema);
 
 exports.validReservation = (body) => {
     const schema = Joi.object({
-        userId: Joi.string().required(),
+        // userId לא נדרש כי יגיע מהטוקן ולא מהלקוח
         roomId: Joi.string().required(),
         date: Joi.string().required(),
         timeSlot: Joi.object({
