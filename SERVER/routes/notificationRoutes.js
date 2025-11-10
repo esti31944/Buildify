@@ -42,35 +42,20 @@ router.post("/", authAdmin, async (req, res) => {
 
 //  סימון התראה כנקראה
 router.put("/read/:id", auth, async (req, res) => {
-    //   try {
-    //     const notification = await NotificationModel.findOneAndUpdate(
-    //       { _id: req.params.id, userId: req.user._id },
-    //       { isRead: true },
-    //       { new: true }
-    //     );
-    //     if (!notification) return res.status(404).json({ msg: "Notification not found" });
-    //     res.json(notification);
-    //   } catch (err) {
-    //     res.status(500).json({ msg: "Server error", err });
-    //   }
     try {
-        // נשלוף קודם את ההתראה לפי ה-ID
         const notification = await NotificationModel.findById(req.params.id);
         if (!notification) {
             return res.status(404).json({ msg: "Notification not found" });
         }
 
-        // אם המשתמש הוא מנהל - מותר לו לסמן רק את ההתראות של עצמו
         if (req.user.role === "admin" && notification.userId.toString() !== req.user._id) {
             return res.status(403).json({ msg: "Admins cannot mark others' notifications as read" });
         }
 
-        // אם המשתמש הוא לא המנהל, נוודא שההתראה באמת שלו
         if (req.user.role !== "admin" && notification.userId.toString() !== req.user._id) {
             return res.status(403).json({ msg: "Access denied - not your notification" });
         }
 
-        // אם עברנו את כל הבדיקות - נסמן כנקרא
         notification.isRead = true;
         await notification.save();
 
