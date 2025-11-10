@@ -12,7 +12,7 @@ router.post("/", auth, async (req, res) => {
     // בונה את האובייקט עם userId שמגיע מהטוקן
     const reservationData = {
       ...req.body,
-      userId: req.user._id  // <-- הוספה כאן
+      userId: req.user._id 
     };
 
     const reservation = new ReservationModel(reservationData);

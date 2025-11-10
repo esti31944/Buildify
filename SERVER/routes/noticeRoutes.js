@@ -22,7 +22,7 @@ router.post("/", auth, async (req, res) => {
       title,
       content,
       category,
-      createdBy: req.user._id, // המשתמש המחובר
+      createdBy: req.user._id, 
       expiresAt,
     });
 
