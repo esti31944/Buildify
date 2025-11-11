@@ -7,7 +7,7 @@ export default function Notices() {
 
   const notices = [
     { title: "כיבוי מים מתוכנן", content: "כיבוי מים ביום שישי בין 09:00-12:00" },
-    { title: "מסיבת קהילה", content: "ערב קהילתי בחדר האירועים ב-2025-11-20" }
+    { title: "מסיבת קהילה", content: "ערב קהילתי בחדר האירועים ב-2025-11-25" }
   ];
 
   return (
