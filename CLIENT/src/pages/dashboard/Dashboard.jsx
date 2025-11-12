@@ -1,9 +1,9 @@
 import React from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useSelector } from "react-redux";
 import TenantDashboard from "./TenantDashboard";
 import AdminDashboard from "./AdminDashboard";
 
 export default function Dashboard() {
-  const { user } = useAuth();
-  return user?.role === "admin" ? <AdminDashboard /> : <TenantDashboard />;
+    const user = useSelector((state) => state.auth.user);
+    return user?.role === "admin" ? <AdminDashboard /> : <TenantDashboard />;
 }

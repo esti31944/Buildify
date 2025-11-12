@@ -1,9 +1,9 @@
 import React from "react";
 import Card from "../components/Card";
-import { useAuth } from "../context/AuthContext";
+import { useSelector } from "react-redux";
 
 export default function Documents() {
-  const { user } = useAuth();
+  const user = useSelector((state) => state.auth.user);
 
   return (
     <div>
