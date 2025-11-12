@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import MainLayout from "../layout/MainLayout";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Issues from "../pages/Issues";
@@ -8,10 +9,9 @@ import Documents from "../pages/Documents";
 import Notices from "../pages/Notices";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
-import { useAuth } from "../context/AuthContext";
 
 export default function AppRoutes() {
-  const { user } = useAuth();
+  const user = useSelector((state) => state.auth.user);
 
   if (!user) {
     return (
