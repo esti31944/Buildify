@@ -158,6 +158,10 @@ html,body,#root { height:100%; margin:0; font-family: "Segoe UI", Roboto, Arial,
   min-width: 220px;
   flex: 1 1 260px;
 }
+.nav-link.active {
+  background: rgba(27, 173, 235, 0.2);
+  font-weight: 600;
+}
 
 .card-head { display:flex; justify-content:space-between; align-items:center; gap:12px; }
 .card-title { margin:0; font-size:16px; }
