@@ -20,4 +20,6 @@ router.delete("/:id", authAdmin, usersController.deleteUserById);
 
 router.patch("/toggleActive/:id", authAdmin, usersController.toggleActiveStatus);
 
+router.post("/google-login", usersController.googleLogin);
+
 module.exports = router;

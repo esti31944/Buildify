@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const { UserModel, validUser, validLogin, createToken } = require("../models/usersModel");
-
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // פונקציות קונטרולר
 
 exports.testRoute = (req, res) => {
@@ -122,5 +123,38 @@ exports.toggleActiveStatus = async (req, res) => {
     res.json({ msg: `User is now ${user.isActive ? "active" : "inactive"}` });
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
+  }
+};
+exports.googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const email = payload.email;
+    const fullName = payload.name;
+
+    let user = await UserModel.findOne({ email });
+
+    if (!user) {
+      user = new UserModel({
+        fullName,
+        email,
+        password: "google_user", // לא משתמשים בסיסמה אמיתית
+        apartmentNumber: 0,
+        phone: "",
+        isActive: true,
+      });
+      await user.save();
+    }
+
+    const jwtToken = createToken(user._id, user.role);
+    res.json({ token: jwtToken });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ msg: "Google login failed", err });
   }
 };
