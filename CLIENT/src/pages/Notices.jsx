@@ -10,11 +10,11 @@ export default function Notices() {
   const [formData, setFormData] = useState({ title: "", content: "", type: "announcement" });
   const [editingIndex, setEditingIndex] = useState(null);
 
-  // פונקציה שאחראית על קבלת המודעות מהשרת
+  // מביא את המודעות מהשרת בטעינה ראשונית
   useEffect(() => {
     async function fetchNotices() {
       try {
-        const res = await fetch("/api/notices");  // כאן מתקשרת ל-API שלך
+        const res = await fetch("/api//list/notices"); // קריאה ל-API
         if (!res.ok) throw new Error("שגיאה בטעינת המודעות");
         const data = await res.json();
         setNotices(data);
@@ -32,6 +32,7 @@ export default function Notices() {
     setFormData(prev => ({ ...prev, [name]: value }));
   }
 
+  // הוספת מודעה חדשה לשרת
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -42,56 +43,25 @@ export default function Notices() {
 
     try {
       if (editingIndex !== null) {
-        // עדכון מודעה קיימת בשרת
-        const noticeToUpdate = notices[editingIndex];
-        const res = await fetch(`/api/notices/${noticeToUpdate.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-        if (!res.ok) throw new Error("שגיאה בעדכון המודעה");
-        const updatedNotice = await res.json();
-        setNotices(prev => prev.map((n, i) => (i === editingIndex ? updatedNotice : n)));
-      } else {
-        // הוספת מודעה חדשה לשרת
-        const res = await fetch("/api/notices", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-        if (!res.ok) throw new Error("שגיאה בהוספת המודעה");
-        const newNotice = await res.json();
-        setNotices(prev => [...prev, newNotice]);
+        // כאן לאט ליישם עדכון אם תרצי
+        alert("עדכון לא ממומש כאן");
+        return;
       }
+
+      const res = await fetch("/api/notices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error("שגיאה בהוספת המודעה");
+      const newNotice = await res.json();
+      setNotices(prev => [...prev, newNotice]);
       setFormData({ title: "", content: "", type: "announcement" });
-      setEditingIndex(null);
       setShowForm(false);
     } catch (err) {
       alert(err.message);
     }
-  }
-
-  async function handleDelete(index) {
-    const noticeToDelete = notices[index];
-    try {
-      const res = await fetch(`/api/notices/${noticeToDelete.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("שגיאה במחיקת המודעה");
-      setNotices(prev => prev.filter((_, i) => i !== index));
-    } catch (err) {
-      alert(err.message);
-    }
-  }
-
-  function startEditing(index) {
-    setEditingIndex(index);
-    setFormData(notices[index]);
-    setShowForm(true);
-  }
-
-  function cancelEditing() {
-    setEditingIndex(null);
-    setFormData({ title: "", content: "", type: "announcement" });
-    setShowForm(false);
   }
 
   if (loading) return <div>טוען מודעות...</div>;
@@ -163,9 +133,9 @@ export default function Notices() {
             </div>
 
             <button type="submit" className="btn btn-success" style={{ marginRight: 8 }}>
-              {editingIndex !== null ? "עדכן" : "שמור"}
+              שמור
             </button>
-            <button type="button" className="btn btn-secondary" onClick={cancelEditing}>
+            <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>
               ביטול
             </button>
           </form>
@@ -179,14 +149,6 @@ export default function Notices() {
             <small style={{ color: "#666", marginTop: 6, display: "block" }}>
               סוג: {n.type === "event" ? "אירוע" : "הודעה"}
             </small>
-            <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-              <button className="btn btn-primary" onClick={() => startEditing(i)}>
-                עדכן
-              </button>
-              <button className="btn btn-secondary" onClick={() => handleDelete(i)}>
-                מחק
-              </button>
-            </div>
           </Card>
         ))}
       </div>
