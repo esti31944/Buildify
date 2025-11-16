@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const { UserModel, validUser, validLogin, createToken } = require("../models/usersModel");
-
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // פונקציות קונטרולר
 
 exports.testRoute = (req, res) => {
@@ -122,5 +123,44 @@ exports.toggleActiveStatus = async (req, res) => {
     res.json({ msg: `User is now ${user.isActive ? "active" : "inactive"}` });
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
+  }
+};
+exports.googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const email = payload.email;
+
+    // מחפשים משתמש קיים לפי אימייל
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      // אם לא קיים – מחזירים שגיאה
+      return res.status(404).json({ msg: "משתמש לא רשום במערכת" });
+    }
+
+    // אם המשתמש קיים – יוצרים JWT
+    const jwtToken = createToken(user._id, user.role);
+
+    // אפשר גם לשלוח את פרטי המשתמש יחד עם הטוקן
+    const userData = {
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      apartmentNumber: user.apartmentNumber,
+      phone: user.phone,
+      isActive: user.isActive,
+    };
+
+    res.json({ token: jwtToken, user: userData });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ msg: "Google login failed", err });
   }
 };
