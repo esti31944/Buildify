@@ -1,33 +1,51 @@
 import React, { useState, useEffect } from "react";
 import Card from "../components/Card";
 
+// פונקציה לפענוח JWT
+function parseJwt(token) {
+  try {
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch {
+    return null;
+  }
+}
+
 export default function Notices() {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ 
-    title: "", 
-    content: "", 
-    category: "announcement", 
-    expiresAt: "" // תאריך בתקן ISO, ריק כברירת מחדל
-  });
-  const [editingIndex, setEditingIndex] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // מביא את המודעות מהשרת בטעינה ראשונית
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    content: "",
+    category: "announcement",
+    expiresAt: ""
+  });
+
+  const [editingId, setEditingId] = useState(null);
+
+  // --- פענוח טוקן ---
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setCurrentUser(parseJwt(token));
+    }
+  }, []);
+
+  // --- טעינת המודעות ---
   useEffect(() => {
     async function fetchNotices() {
       try {
-        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTE5ODBjYTVmNjUyMDI3NmU3Y2Q3ZTQiLCJyb2xlIjoidGVuYW50IiwiaWF0IjoxNzYzMjc5MDg2LCJleHAiOjE3NjMzNjU0ODZ9.HmoVJdEUBgY3e1mXmTvyle-YcE7kJh_LQ1FVmjcvIrE        ";
-  
+        const token = localStorage.getItem("token");
+
         const res = await fetch("http://localhost:3001/notices/list", {
-          headers: {
-            "Authorization": `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` },
         });
-  
-        if (!res.ok) throw new Error(`שגיאה בטעינת המודעות: קוד ${res.status}`);
+
+        if (!res.ok) throw new Error(`שגיאה בטעינת המודעות: ${res.status}`);
         const data = await res.json();
         setNotices(data);
       } catch (err) {
@@ -36,16 +54,17 @@ export default function Notices() {
         setLoading(false);
       }
     }
-  
+
     fetchNotices();
   }, []);
-  
+
+  // --- שינוי שדות ---
   function handleChange(e) {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   }
 
-  // הוספת מודעה חדשה לשרת
+  // --- שליחה: יצירה / עדכון ---
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -54,39 +73,92 @@ export default function Notices() {
       return;
     }
 
+    const token = localStorage.getItem("token");
+
+    const sendData = {
+      title: formData.title,
+      content: formData.content,
+      category: formData.category,
+    };
+    if (formData.expiresAt) sendData.expiresAt = formData.expiresAt;
+
     try {
-      if (editingIndex !== null) {
-        alert("עדכון לא ממומש כאן");
-        return;
+      let res;
+
+      // עדכון
+      if (editingId) {
+        res = await fetch(`http://localhost:3001/notices/${editingId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(sendData),
+        });
+
+        if (!res.ok) throw new Error("שגיאה בעדכון ההודעה");
+
+        const updated = await res.json();
+
+        setNotices(prev =>
+          prev.map(n => (n._id === editingId ? updated : n))
+        );
+
+      } else {
+        // יצירה
+        res = await fetch("http://localhost:3001/notices", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(sendData),
+        });
+
+        if (!res.ok) throw new Error("שגיאה בהוספת המודעה");
+
+        const newNotice = await res.json();
+        setNotices(prev => [...prev, newNotice]);
       }
 
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTBjNzkzNDZjZmFiYzU4OGNkNzEzYTgiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjMwMzA4MzQsImV4cCI6MTc2MzExNzIzNH0.69cCgxpYNYCgXQoViaUdPjzcOkOEWVmf21aD-10aU88";
-
-      // בונים אובייקט לשליחה, אם expiresAt ריק - לא שולחים אותו
-      const sendData = {
-        title: formData.title,
-        content: formData.content,
-        category: formData.category,
-      };
-      if (formData.expiresAt) sendData.expiresAt = formData.expiresAt;
-
-      const res = await fetch("http://localhost:3001/notices", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(sendData),
-      });
-
-      if (!res.ok) throw new Error("שגיאה בהוספת המודעה");
-      const newNotice = await res.json();
-      setNotices(prev => [...prev, newNotice]);
+      // ניקוי טופס
       setFormData({ title: "", content: "", category: "announcement", expiresAt: "" });
+      setEditingId(null);
       setShowForm(false);
+
     } catch (err) {
       alert(err.message);
     }
+  }
+
+  // --- מחיקה ---
+  async function deleteNotice(id) {
+    const token = localStorage.getItem("token");
+    if (!window.confirm("האם למחוק את ההודעה?")) return;
+
+    const res = await fetch(`http://localhost:3001/notices/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+      alert("שגיאה במחיקה");
+      return;
+    }
+
+    setNotices(prev => prev.filter(n => n._id !== id));
+  }
+
+  // --- כניסה למצב עריכה ---
+  function startEdit(n) {
+    setEditingId(n._id);
+    setFormData({
+      title: n.title,
+      content: n.content,
+      category: n.category,
+      expiresAt: n.expiresAt ? n.expiresAt.split("T")[0] : "",
+    });
+    setShowForm(true);
   }
 
   if (loading) return <div>טוען מודעות...</div>;
@@ -115,8 +187,7 @@ export default function Notices() {
             }}
           >
             <div>
-              <label>
-                כותרת:<br />
+              <label>כותרת:<br />
                 <input
                   type="text"
                   name="title"
@@ -129,8 +200,7 @@ export default function Notices() {
             </div>
 
             <div>
-              <label>
-                תוכן:<br />
+              <label>תוכן:<br />
                 <textarea
                   name="content"
                   value={formData.content}
@@ -143,8 +213,7 @@ export default function Notices() {
             </div>
 
             <div>
-              <label>
-                סוג הודעה:<br />
+              <label>סוג הודעה:<br />
                 <select
                   name="category"
                   value={formData.category}
@@ -158,8 +227,7 @@ export default function Notices() {
             </div>
 
             <div>
-              <label>
-                תאריך תפוגה (אופציונלי):<br />
+              <label>תאריך תפוגה (אופציונלי):<br />
                 <input
                   type="date"
                   name="expiresAt"
@@ -173,7 +241,8 @@ export default function Notices() {
             <button type="submit" className="btn btn-success" style={{ marginRight: 8 }}>
               שמור
             </button>
-            <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>
+
+            <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); }}>
               ביטול
             </button>
           </form>
@@ -181,19 +250,46 @@ export default function Notices() {
       </div>
 
       <div style={{ display: "grid", gap: 12 }}>
-        {notices.map((n, i) => (
-          <Card key={n.id || i} title={n.title}>
-            <div>{n.content}</div>
-            <small style={{ color: "#666", marginTop: 6, display: "block" }}>
-              סוג: {n.category === "event" ? "אירוע" : "הודעה"}
-            </small>
-            {n.expiresAt && (
-              <small style={{ color: "#999", display: "block" }}>
-                פג תוקף ב: {new Date(n.expiresAt).toLocaleDateString()}
+        {notices.map((n) => {
+          const canManage =
+            currentUser &&
+            (currentUser.role === "admin" || currentUser._id === n.createdBy);
+
+          return (
+            <Card key={n._id} title={n.title}>
+              <div>{n.content}</div>
+
+              <small style={{ color: "#666", marginTop: 6, display: "block" }}>
+                סוג: {n.category === "event" ? "אירוע" : "הודעה"}
               </small>
-            )}
-          </Card>
-        ))}
+
+              {n.expiresAt && (
+                <small style={{ color: "#999", display: "block" }}>
+                  פג תוקף ב: {new Date(n.expiresAt).toLocaleDateString()}
+                </small>
+              )}
+
+              {canManage && (
+                <div style={{ marginTop: 10 }}>
+                  <button
+                    className="btn btn-warning"
+                    onClick={() => startEdit(n)}
+                    style={{ marginRight: 8 }}
+                  >
+                    ✏️ עדכן
+                  </button>
+
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => deleteNotice(n._id)}
+                  >
+                    🗑️ מחק
+                  </button>
+                </div>
+              )}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
