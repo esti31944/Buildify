@@ -8,13 +8,27 @@ export default function Rooms() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ name: "", description: "" });
 
-  // טוקן לדוגמה - תעדכני לפי הצורך
-  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTBjNzkzNDZjZmFiYzU4OGNkNzEzYTgiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjMwMzA4MzQsImV4cCI6MTc2MzExNzIzNH0.69cCgxpYNYCgXQoViaUdPjzcOkOEWVmf21aD-10aU88";
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // מצב עדכון: מכיל את ה-ID של החדר שמתעדכנים או null אם לא בעדכון
+  const [editingRoomId, setEditingRoomId] = useState(null);
 
   useEffect(() => {
-    async function fetchRooms() {
+    const token = localStorage.getItem("token");
+    if (token) {
       try {
-        const res = await fetch("http://localhost:3001/rooms", {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        setIsAdmin(payload.role === "admin");
+      } catch (err) {
+        console.error("JWT decode error:", err);
+      }
+    }
+
+    async function fetchRooms() {
+      const token = localStorage.getItem("token");
+
+      try {
+        const res = await fetch("http://localhost:3001/rooms/list", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -31,7 +45,7 @@ export default function Rooms() {
     }
 
     fetchRooms();
-  }, [token]);
+  }, []);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -46,24 +60,77 @@ export default function Rooms() {
       return;
     }
 
-    try {
-      const res = await fetch("http://localhost:3001/rooms", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
+    const token = localStorage.getItem("token");
 
-      if (!res.ok) throw new Error("שגיאה בהוספת החדר");
-      const newRoom = await res.json();
-      setRooms((prev) => [...prev, newRoom]);
+    try {
+      let res;
+      if (editingRoomId) {
+        // עדכון חדר קיים
+        res = await fetch(`http://localhost:3001/rooms/${editingRoomId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
+        });
+      } else {
+        // הוספת חדר חדש
+        res = await fetch("http://localhost:3001/rooms", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
+        });
+      }
+
+      if (!res.ok) throw new Error("שגיאה בשמירת החדר");
+      const savedRoom = await res.json();
+
+      if (editingRoomId) {
+        // עדכון ברשימה
+        setRooms((prev) =>
+          prev.map((room) => (room._id === editingRoomId ? savedRoom : room))
+        );
+      } else {
+        // הוספה לרשימה
+        setRooms((prev) => [...prev, savedRoom]);
+      }
+
       setFormData({ name: "", description: "" });
       setShowForm(false);
+      setEditingRoomId(null);
     } catch (err) {
       alert(err.message);
     }
+  }
+
+  async function handleDelete(id) {
+    const token = localStorage.getItem("token");
+    if (!window.confirm("את בטוחה שברצונך למחוק את החדר?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:3001/rooms/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("שגיאה במחיקת החדר");
+
+      setRooms((prev) => prev.filter((room) => room._id !== id));
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  function startEdit(room) {
+    setFormData({ name: room.name, description: room.description || "" });
+    setShowForm(true);
+    setEditingRoomId(room._id);
   }
 
   if (loading) return <div>טוען חדרים...</div>;
@@ -73,13 +140,13 @@ export default function Rooms() {
     <div>
       <h1>רשימת חדרים</h1>
 
-      {!showForm && (
+      {isAdmin && !showForm && (
         <button onClick={() => setShowForm(true)} style={{ marginBottom: 12 }}>
           ➕ הוסף חדר
         </button>
       )}
 
-      {showForm && (
+      {showForm && isAdmin && (
         <form
           onSubmit={handleSubmit}
           style={{
@@ -117,9 +184,16 @@ export default function Rooms() {
           </div>
 
           <button type="submit" style={{ marginRight: 8 }}>
-            שמור
+            {editingRoomId ? "עדכן" : "שמור"}
           </button>
-          <button type="button" onClick={() => setShowForm(false)}>
+          <button
+            type="button"
+            onClick={() => {
+              setShowForm(false);
+              setEditingRoomId(null);
+              setFormData({ name: "", description: "" });
+            }}
+          >
             ביטול
           </button>
         </form>
@@ -127,9 +201,21 @@ export default function Rooms() {
 
       <ul>
         {rooms.map((room) => (
-          <li key={room.id || room._id}>
+          <li key={room._id || room.id} style={{ marginBottom: 10 }}>
             <strong>{room.name}</strong>
             {room.description && <p>{room.description}</p>}
+
+            {isAdmin && (
+              <>
+                <button
+                  onClick={() => startEdit(room)}
+                  style={{ marginRight: 8 }}
+                >
+                  עדכן
+                </button>
+                <button onClick={() => handleDelete(room._id)}>מחק</button>
+              </>
+            )}
           </li>
         ))}
       </ul>
