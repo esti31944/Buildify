@@ -23,10 +23,12 @@ const userSchema = new mongoose.Schema({
 exports.UserModel = mongoose.model("users", userSchema);
 
 // פונקציה ליצירת טוקן JWT
+
 exports.createToken = (user_id, role) => {
-    const token = jwt.sign({ _id: user_id, role }, "secretKey123", { expiresIn: "24h" });
-    return token;
+  const token = jwt.sign({ _id: user_id, role }, process.env.JWT_SECRET, { expiresIn: "24h" });
+  return token;
 };
+
 
 // ולידציה להרשמה
 exports.validUser = (user) => {
