@@ -4,7 +4,7 @@ const issuesR = require("./issueRoutes");
 const roomsR = require("./roomRoutes");
 const reservationsR = require("./reservationRoutes");
 const paymentsR = require("./paymentRoutes");
-// const noticesR = require("./notices");
+const noticesR = require("./noticeRoutes");
 const notificationsR = require("./notificationRoutes");
 
 exports.routesInit = (app) => {
@@ -14,6 +14,6 @@ exports.routesInit = (app) => {
   app.use("/rooms", roomsR);
   app.use("/reservations", reservationsR);
   app.use("/payments", paymentsR);
-  //   app.use("/notices", noticesR);
+    app.use("/notices", noticesR);
     app.use("/notifications", notificationsR);
 };

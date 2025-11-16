@@ -7,15 +7,27 @@ export default function Notices() {
   const [error, setError] = useState(null);
 
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ title: "", content: "", type: "announcement" });
+  const [formData, setFormData] = useState({ 
+    title: "", 
+    content: "", 
+    category: "announcement", 
+    expiresAt: "" // תאריך בתקן ISO, ריק כברירת מחדל
+  });
   const [editingIndex, setEditingIndex] = useState(null);
 
   // מביא את המודעות מהשרת בטעינה ראשונית
   useEffect(() => {
     async function fetchNotices() {
       try {
-        const res = await fetch("/api//list/notices"); // קריאה ל-API
-        if (!res.ok) throw new Error("שגיאה בטעינת המודעות");
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTE5ODBjYTVmNjUyMDI3NmU3Y2Q3ZTQiLCJyb2xlIjoidGVuYW50IiwiaWF0IjoxNzYzMjc5MDg2LCJleHAiOjE3NjMzNjU0ODZ9.HmoVJdEUBgY3e1mXmTvyle-YcE7kJh_LQ1FVmjcvIrE        ";
+  
+        const res = await fetch("http://localhost:3001/notices/list", {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+  
+        if (!res.ok) throw new Error(`שגיאה בטעינת המודעות: קוד ${res.status}`);
         const data = await res.json();
         setNotices(data);
       } catch (err) {
@@ -24,9 +36,10 @@ export default function Notices() {
         setLoading(false);
       }
     }
+  
     fetchNotices();
   }, []);
-
+  
   function handleChange(e) {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -43,21 +56,33 @@ export default function Notices() {
 
     try {
       if (editingIndex !== null) {
-        // כאן לאט ליישם עדכון אם תרצי
         alert("עדכון לא ממומש כאן");
         return;
       }
 
-      const res = await fetch("/api/notices", {
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTBjNzkzNDZjZmFiYzU4OGNkNzEzYTgiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjMwMzA4MzQsImV4cCI6MTc2MzExNzIzNH0.69cCgxpYNYCgXQoViaUdPjzcOkOEWVmf21aD-10aU88";
+
+      // בונים אובייקט לשליחה, אם expiresAt ריק - לא שולחים אותו
+      const sendData = {
+        title: formData.title,
+        content: formData.content,
+        category: formData.category,
+      };
+      if (formData.expiresAt) sendData.expiresAt = formData.expiresAt;
+
+      const res = await fetch("http://localhost:3001/notices", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(sendData),
       });
 
       if (!res.ok) throw new Error("שגיאה בהוספת המודעה");
       const newNotice = await res.json();
       setNotices(prev => [...prev, newNotice]);
-      setFormData({ title: "", content: "", type: "announcement" });
+      setFormData({ title: "", content: "", category: "announcement", expiresAt: "" });
       setShowForm(false);
     } catch (err) {
       alert(err.message);
@@ -121,14 +146,27 @@ export default function Notices() {
               <label>
                 סוג הודעה:<br />
                 <select
-                  name="type"
-                  value={formData.type}
+                  name="category"
+                  value={formData.category}
                   onChange={handleChange}
                   style={{ padding: 6, marginBottom: 8 }}
                 >
                   <option value="event">אירוע</option>
                   <option value="announcement">הודעה</option>
                 </select>
+              </label>
+            </div>
+
+            <div>
+              <label>
+                תאריך תפוגה (אופציונלי):<br />
+                <input
+                  type="date"
+                  name="expiresAt"
+                  value={formData.expiresAt}
+                  onChange={handleChange}
+                  style={{ padding: 6, marginBottom: 8 }}
+                />
               </label>
             </div>
 
@@ -147,8 +185,13 @@ export default function Notices() {
           <Card key={n.id || i} title={n.title}>
             <div>{n.content}</div>
             <small style={{ color: "#666", marginTop: 6, display: "block" }}>
-              סוג: {n.type === "event" ? "אירוע" : "הודעה"}
+              סוג: {n.category === "event" ? "אירוע" : "הודעה"}
             </small>
+            {n.expiresAt && (
+              <small style={{ color: "#999", display: "block" }}>
+                פג תוקף ב: {new Date(n.expiresAt).toLocaleDateString()}
+              </small>
+            )}
           </Card>
         ))}
       </div>
