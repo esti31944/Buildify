@@ -151,15 +151,18 @@
 // }
 
 // 👇👇VVVVVV
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import IssueCard from "../components/IssueCard";
+import FaultReportForm from "../components/FaultReportForm"
 import { useSelector, useDispatch } from "react-redux";
 import { fetchMyIssues } from "../features/issues/issuesSlice";
+import "../styles/Issues.css"
 
 export default function Issues() {
     const dispatch = useDispatch();
     const { list, loading, error } = useSelector((state) => state.issues);
     const user = useSelector((state) => state.auth.user);
+    const [showForm, setShowForm] = useState(false);
 
     // useEffect(() => {
     //     if (user?.id) dispatch(fetchMyIssues(user.id));
@@ -170,32 +173,45 @@ export default function Issues() {
         dispatch(fetchMyIssues(testUserId));
     }, [dispatch]);
 
-
     if (loading) return <p>טוען...</p>;
     if (error) return <p>שגיאה: {error}</p>;
-
-    // const mockIssues = [
-    //     { title: "נזילה בחדר מדרגות", date: "2025-11-01", reporter: "רות כהן", status: "פתוחה" },
-    //     { title: "תאורה בחניה", date: "2025-11-05", reporter: "דני לוי", status: "בטיפול" },
-    //     { title: "שער כניסה תקוע", date: "2025-11-09", reporter: "מיכל ברק", status: "תוקנה" }
-    // ];
 
     return (
         <div>
             <h1 style={{ marginBottom: 12 }}>ניהול תקלות</h1>
-            {user?.role != "admin" && (
+
+            {user?.role !== "admin" && (
                 <div style={{ marginBottom: 12 }}>
-                    <button className="btn btn-primary">הוסף תקלה חדשה</button>
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => setShowForm(true)}>
+                        הוסף תקלה חדשה
+                    </button>
                 </div>
             )}
-            {/* <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))" }}>
-                {mockIssues.map((it, i) => <IssueCard key={i} {...it} />)}
-            </div> */}
-            <div style={{
-                display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))"
-            }}>
-                {list.map((it, i) => <IssueCard key={i} {...it} />)}
+
+            <div className="issues-grid">
+                {list.length > 0 ? (
+                    list.map((it, i) => <IssueCard key={i} {...it} />)
+                ) : (
+                    <p>לא נמצאו תקלות</p>
+                )}
             </div>
+
+            {/* === חלון קופץ לטופס === */}
+            {showForm && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <button
+                            className="modal-close"
+                            onClick={() => setShowForm(false)}
+                        >
+                            ✕
+                        </button>
+                        <FaultReportForm/>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
