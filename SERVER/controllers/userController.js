@@ -135,24 +135,30 @@ exports.googleLogin = async (req, res) => {
 
     const payload = ticket.getPayload();
     const email = payload.email;
-    const fullName = payload.name;
 
-    let user = await UserModel.findOne({ email });
+    // מחפשים משתמש קיים לפי אימייל
+    const user = await UserModel.findOne({ email });
 
     if (!user) {
-      user = new UserModel({
-        fullName,
-        email,
-        password: "google_user", // לא משתמשים בסיסמה אמיתית
-        apartmentNumber: 0,
-        phone: "",
-        isActive: true,
-      });
-      await user.save();
+      // אם לא קיים – מחזירים שגיאה
+      return res.status(404).json({ msg: "משתמש לא רשום במערכת" });
     }
 
+    // אם המשתמש קיים – יוצרים JWT
     const jwtToken = createToken(user._id, user.role);
-    res.json({ token: jwtToken });
+
+    // אפשר גם לשלוח את פרטי המשתמש יחד עם הטוקן
+    const userData = {
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      apartmentNumber: user.apartmentNumber,
+      phone: user.phone,
+      isActive: user.isActive,
+    };
+
+    res.json({ token: jwtToken, user: userData });
   } catch (err) {
     console.error(err);
     res.status(400).json({ msg: "Google login failed", err });
