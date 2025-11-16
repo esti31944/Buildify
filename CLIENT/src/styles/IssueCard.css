@@ -29,3 +29,33 @@
     color: #777;
   }
   
+
+  .issue-image-wrapper {
+    width: 100%;
+    height: 160px; /* גובה קבוע כמו של תמונה רגילה */
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f1f1f1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .issue-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .issue-image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #e5e5e5;
+    color: #777;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-style: italic;
+  }
+  

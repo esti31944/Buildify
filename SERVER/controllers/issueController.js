@@ -7,14 +7,29 @@ const testRoute = (req, res) => {
 };
 
 // דיווח תקלה חדש
+// const createIssue = async (req, res) => {
+//   const validBody = validIssue(req.body);
+//   if (validBody.error) {
+//     return res.status(400).json(validBody.error.details);
+//   }
+
+//   try {
+//     const issue = new IssueModel(req.body);
+//     await issue.save();
+//     res.status(201).json(issue);
+//   } catch (err) {
+//     res.status(500).json({ msg: "Server error", err });
+//   }
+// };
 const createIssue = async (req, res) => {
-  const validBody = validIssue(req.body);
+  const issueData = { ...req.body, userId: req.user._id };
+  const validBody = validIssue(issueData);
   if (validBody.error) {
     return res.status(400).json(validBody.error.details);
   }
 
   try {
-    const issue = new IssueModel(req.body);
+    const issue = new IssueModel(issueData);
     await issue.save();
     res.status(201).json(issue);
   } catch (err) {
@@ -70,7 +85,7 @@ const updateIssueStatus = async (req, res) => {
 
 // קבלת התקלות של המשתמש המחובר
 const getMyIssues = async (req, res) => {
-  const userId = req.query.userId;
+  const userId = req.user._id;
   try {
     const issues = await IssueModel.find({ userId }).sort({ createdAt: -1 });
     res.json(issues);

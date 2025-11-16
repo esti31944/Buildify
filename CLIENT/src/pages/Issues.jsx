@@ -155,7 +155,7 @@ import React, { useState, useEffect } from "react";
 import IssueCard from "../components/IssueCard";
 import FaultReportForm from "../components/FaultReportForm"
 import { useSelector, useDispatch } from "react-redux";
-import { fetchMyIssues } from "../features/issues/issuesSlice";
+import { fetchMyIssues, fetchAllIssues } from "../features/issues/issuesSlice";
 import "../styles/Issues.css"
 
 export default function Issues() {
@@ -164,13 +164,35 @@ export default function Issues() {
     const user = useSelector((state) => state.auth.user);
     const [showForm, setShowForm] = useState(false);
 
+    // 1111
+    // useEffect(() => {
+    //     if (user?.id) dispatch(fetchMyIssues(user.id));
+    // }, [dispatch, user]);
     // useEffect(() => {
     //     if (user?.id) dispatch(fetchMyIssues(user.id));
     // }, [dispatch, user]);
 
+    // 2222
+    // useEffect(() => {
+    //     if (!user) return;
+
+    //     if (user.role === "admin") {
+    //         dispatch(fetchAllIssues());
+    //     } else {
+    //         dispatch(fetchMyIssues(user.id));
+    //     }
+    // }, [dispatch, user]);
+
+
     useEffect(() => {
-        const testUserId = "690bb129150027b72da5891a";
-        dispatch(fetchMyIssues(testUserId));
+        // למשתמש
+        // const testUserId = "690bb129150027b72da5891a";
+        // dispatch(fetchMyIssues(testUserId));
+        // dispatch(fetchMyIssues());
+        // למנהל
+        // const testUserId = "690c79346cfabc588cd713a8";
+        // dispatch(fetchAllIssues(testUserId));
+        dispatch(fetchAllIssues());
     }, [dispatch]);
 
     if (loading) return <p>טוען...</p>;
@@ -208,7 +230,7 @@ export default function Issues() {
                         >
                             ✕
                         </button>
-                        <FaultReportForm/>
+                        <FaultReportForm />
                     </div>
                 </div>
             )}
