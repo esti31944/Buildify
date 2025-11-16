@@ -7,26 +7,25 @@ export default function Notices() {
   const [error, setError] = useState(null);
 
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ 
-    title: "", 
-    content: "", 
-    category: "announcement", 
-    expiresAt: "" // תאריך בתקן ISO, ריק כברירת מחדל
+  const [formData, setFormData] = useState({
+    title: "",
+    content: "",
+    category: "announcement",
+    expiresAt: ""
   });
   const [editingIndex, setEditingIndex] = useState(null);
 
-  // מביא את המודעות מהשרת בטעינה ראשונית
   useEffect(() => {
     async function fetchNotices() {
       try {
-        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTE5ODBjYTVmNjUyMDI3NmU3Y2Q3ZTQiLCJyb2xlIjoidGVuYW50IiwiaWF0IjoxNzYzMjc5MDg2LCJleHAiOjE3NjMzNjU0ODZ9.HmoVJdEUBgY3e1mXmTvyle-YcE7kJh_LQ1FVmjcvIrE        ";
-  
+        const token = localStorage.getItem("token");
+
         const res = await fetch("http://localhost:3001/notices/list", {
           headers: {
             "Authorization": `Bearer ${token}`
           }
         });
-  
+
         if (!res.ok) throw new Error(`שגיאה בטעינת המודעות: קוד ${res.status}`);
         const data = await res.json();
         setNotices(data);
@@ -36,16 +35,15 @@ export default function Notices() {
         setLoading(false);
       }
     }
-  
+
     fetchNotices();
   }, []);
-  
+
   function handleChange(e) {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   }
 
-  // הוספת מודעה חדשה לשרת
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -60,9 +58,8 @@ export default function Notices() {
         return;
       }
 
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTBjNzkzNDZjZmFiYzU4OGNkNzEzYTgiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjMwMzA4MzQsImV4cCI6MTc2MzExNzIzNH0.69cCgxpYNYCgXQoViaUdPjzcOkOEWVmf21aD-10aU88";
+      const token = localStorage.getItem("token");
 
-      // בונים אובייקט לשליחה, אם expiresAt ריק - לא שולחים אותו
       const sendData = {
         title: formData.title,
         content: formData.content,
