@@ -22,8 +22,6 @@ export default function FaultReportForm() {
         setError('');
         setSubmitted(true);
         try {
-            // await dispatch(createIssue({ ...formData, userId: user._id })).unwrap();
-            // await dispatch(createIssue({ ...formData, userId: "690c7ef1d8ff598025ee6983" })).unwrap();
             await dispatch(createIssue({ ...formData})).unwrap();
             setSubmitted(true);
         } catch (err) {

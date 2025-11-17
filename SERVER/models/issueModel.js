@@ -25,7 +25,7 @@ exports.IssueModel = mongoose.model("issues", issueSchema);
 
 exports.validIssue = (issue) => {
     const schema = Joi.object({
-        // userId: Joi.string().hex().length(24).required(),
+        userId: Joi.string().hex().length(24).required(),
         title: Joi.string().min(2).max(200).required(),
         description: Joi.string().min(5).max(1000).required(),
         imageUrl: Joi.string().uri().allow("", null),
