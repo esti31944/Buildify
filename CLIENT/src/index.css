@@ -230,7 +230,7 @@ body,
 
 .badge {
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: 10px;
   font-size: 12px;
   white-space: nowrap;
 }
@@ -244,11 +244,13 @@ body,
 .badge.progress {
   background: #eef2ff;
   color: #4f46e5;
+  border: 1px solid #dfddff;
 }
 
 .badge.fixed {
   background: #ecfdf5;
   color: #065f46;
+  border: 1px solid #b1e4c0;
 }
 
 /* Auth */

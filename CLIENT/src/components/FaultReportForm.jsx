@@ -119,10 +119,6 @@ export default function FaultReportForm() {
                     </div>
                 )}
             </div>
-
-            <div className="fault-report-footer">
-                <p>הדיווח ישלח לטיפול הצוות הרלוונטי</p>
-            </div>
         </div>
     );
 }
