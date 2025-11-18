@@ -144,7 +144,7 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
                             <button onClick={handleCancel}
                                 className="fault-report-cancel-btn"
                             >
-                                ביטול
+                                רוקן שדות
                             </button>
                         </div>
                     </div>
