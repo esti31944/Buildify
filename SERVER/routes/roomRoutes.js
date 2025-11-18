@@ -11,6 +11,9 @@ router.post("/", authAdmin, roomsController.createRoom);
 router.get("/list", auth, roomsController.getRoomsList);
 
 // עדכון חדר
+router.get("/:id", auth, roomsController.getRoomById);
+
+// עדכון חדר
 router.put("/:id", authAdmin, roomsController.updateRoom);
 
 // מחיקת חדר
