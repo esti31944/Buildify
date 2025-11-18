@@ -1,5 +1,5 @@
 const express = require("express");
-const { authAdmin } = require("../middleware/authMiddleware");
+const { authAdmin, auth } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 const {
@@ -15,7 +15,7 @@ const {
 router.get("/", testRoute);
 
 // דיווח תקלה חדש
-router.post("/", createIssue);
+router.post("/",auth, createIssue);
 
 // עדכון כללי של תקלה
 router.put("/update/:id", updateIssue);
@@ -24,9 +24,9 @@ router.put("/update/:id", updateIssue);
 router.put("/updateStatus/:id", authAdmin, updateIssueStatus);
 
 // קבלת התקלות של המשתמש המחובר
-router.get("/myIssues", getMyIssues);
+router.get("/myIssues",auth, getMyIssues);
 
 // רשימת כל התקלות (ועד)
-router.get("/list", getAllIssues);
+router.get("/list", authAdmin, getAllIssues);
 
 module.exports = router;
