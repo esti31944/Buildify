@@ -17,6 +17,18 @@ exports.createRoom = async (req, res) => {
   }
 };
 
+// שליפת חדר לפי ID
+exports.getRoomById = async (req, res) => {
+  try {
+    const room = await RoomModel.findById(req.params.id);
+    if (!room) return res.status(404).json({ msg: "Room not found" });
+
+    res.json(room);
+  } catch (err) {
+    res.status(500).json({ msg: "Server error", err });
+  }
+};
+
 // שליפת כל החדרים
 exports.getRoomsList = async (req, res) => {
   try {

@@ -21,7 +21,7 @@ const paymentSchema = new mongoose.Schema({
         enum: ["bank", "cash", "credit"], 
         default: "bank" 
     },
-    dueDate: { type: Date, required: true },
+    // dueDate: { type: Date, required: true },
     paymentDate: { type: Date }, // אם שולם
     notes: { type: String, trim: true, default: "" }
 }, { timestamps: true });
@@ -37,7 +37,7 @@ exports.validPayment = (payment) => {
         amount: Joi.number().positive().required(),
         status: Joi.string().valid("paid", "unpaid", "late"),
         paymentMethod: Joi.string().valid("bank", "cash", "credit"),
-        dueDate: Joi.date().required(),
+        // dueDate: Joi.date().required(),
         paymentDate: Joi.date().allow(null),
         notes: Joi.string().max(1000).allow("", null)
     });
@@ -52,7 +52,7 @@ exports.validPaymentUpdate = (payment) => {
         amount: Joi.number().positive(),
         status: Joi.string().valid("paid", "unpaid", "late"),
         paymentMethod: Joi.string().valid("bank", "cash", "credit"),
-        dueDate: Joi.date(),
+        // dueDate: Joi.date(),
         paymentDate: Joi.date().allow(null),
         notes: Joi.string().max(1000).allow("", null)
     });

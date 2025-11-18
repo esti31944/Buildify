@@ -5,6 +5,7 @@ import MainLayout from "../layout/MainLayout";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Issues from "../pages/Issues";
 import Payments from "../pages/Payments";
+import PaymentsManager from "../pages/PaymentsManager";
 import Documents from "../pages/Documents";
 import Notices from "../pages/Notices";
 import Login from "../pages/auth/Login";
@@ -29,6 +30,7 @@ export default function AppRoutes() {
         <Route index element={<Dashboard />} />
         <Route path="/issues" element={<Issues />} />
         <Route path="/payments" element={<Payments />} />
+        <Route path="/PaymentsManager" element={<PaymentsManager />} />
         <Route path="/documents" element={<Documents />} />
         <Route path="/notices" element={<Notices />} />
       </Route>
