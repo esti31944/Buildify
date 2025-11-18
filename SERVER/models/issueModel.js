@@ -15,10 +15,6 @@ const issueSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
 });
 
 exports.IssueModel = mongoose.model("issues", issueSchema);
@@ -27,7 +23,7 @@ exports.validIssue = (issue) => {
     const schema = Joi.object({
         userId: Joi.string().hex().length(24).required(),
         title: Joi.string().min(2).max(200).required(),
-        description: Joi.string().min(5).max(1000).required(),
+        description: Joi.string().min(1).max(1000).required(),
         imageUrl: Joi.string().uri().allow("", null),
         status: Joi.string().valid("new", "in_progress", "fixed")
     });
@@ -37,7 +33,7 @@ exports.validIssue = (issue) => {
 exports.validIssueUpdate = (issue) => {
     const schema = Joi.object({
         title: Joi.string().min(2).max(200).optional().allow(""),
-        description: Joi.string().min(5).max(1000).optional().allow(""),
+        description: Joi.string().min(1).max(1000).optional().allow(""),
         imageUrl: Joi.string().uri().allow("", null).optional(),
         status: Joi.string().valid("new", "in_progress", "fixed").optional()
     });

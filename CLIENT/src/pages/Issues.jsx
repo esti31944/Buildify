@@ -81,7 +81,7 @@ export default function Issues() {
 
             <Modal open={showForm} onClose={() => setShowForm(false)}>
                 <Box
-                    sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "90%", maxWidth: 550, bgcolor: "white", p: 3, borderRadius: 3, boxShadow: 6, maxHeight: "95vh", overflowY: "auto", position: "relative", }}
+                    sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "90%", maxWidth: 550, bgcolor: "white", p: 3, borderRadius: 3, boxShadow: 6, maxHeight: "95vh", overflowY: "auto" }}
                 >
                     <Button
                         onClick={() => setShowForm(false)}

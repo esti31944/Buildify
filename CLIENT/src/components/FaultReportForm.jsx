@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createIssue ,updateIssue,fetchAllIssues,fetchMyIssues} from '../features/issues/issuesSlice';
+import { createIssue, updateIssue, fetchAllIssues, fetchMyIssues } from '../features/issues/issuesSlice';
 import '../styles/FaultReportForm.css';
 
 export default function FaultReportForm({ onClose, initialData = null, mode = "create" }) {
@@ -12,12 +12,33 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState('');
 
+    const validateForm = (formData) => {
+        if (!formData.title.trim() || formData.title.length < 2 || formData.title.length > 200) {
+            return 'כותרת התקלה חייבת להיות בין 2 ל-200 תווים';
+        }
+        if (!formData.description.trim() || formData.description.length < 1 || formData.description.length > 1000) {
+            return 'תיאור התקלה חייב להיות בין 1 ל-1000 תווים';
+        }
+        if (formData.imageUrl && !/^https?:\/\/\S+$/.test(formData.imageUrl)) {
+            return 'כתובת התמונה אינה חוקית';
+        }
+        return null;
+    }
+
     const handleSubmit = async () => {
+        setError('');
+
         if (!formData.title.trim() || !formData.description.trim()) {
             setError('אנא מלא את כל השדות המסומנים בכוכבית');
             return;
         }
-        setError('');
+
+        const errorMsg = validateForm(formData);
+        if (errorMsg) {
+            setError(errorMsg);
+            return;
+        }
+
         try {
             if (mode === "create") {
                 await dispatch(createIssue(formData)).unwrap();

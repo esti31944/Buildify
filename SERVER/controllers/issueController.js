@@ -31,26 +31,15 @@ const updateIssue = async (req, res) => {
   }
 
   try {
-    // const issue = await IssueModel.findByIdAndUpdate(
-    //   req.params.id,
-    //   { ...req.body, updatedAt: Date.now() },
-    //   { new: true }
-    // );
-    // if (!issue) {
-    //   return res.status(404).json({ msg: "Issue not found" });
-    // }
-    // res.json(issue);
     const issue = await IssueModel.findById(req.params.id);
     if (!issue) {
       return res.status(404).json({ msg: "Issue not found" });
     }
 
-    // בדיקה שהמשתמש הוא בעל התקלה
     if (issue.userId.toString() !== req.user._id) {
       return res.status(403).json({ msg: "You are not allowed to update this issue" });
     }
 
-    // עדכון בפועל
     const updatedIssue = await IssueModel.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedAt: Date.now() },
