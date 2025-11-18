@@ -12,9 +12,12 @@ exports.getAllPayments = async (req, res) => {
 
 // התשלומים של המשתמש המחובר
 exports.getMyPayments = async (req, res) => {
-  const userId = req.query.userId; // אפשר לשנות ל־req.user._id אם יש Middleware שמכניס את המשתמש
+  const userId = req.user._id; 
+
+  
   try {
     const payments = await PaymentModel.find({ userId }).sort({ dueDate: -1 });
+      console.log(payments,"hello");
     res.json(payments);
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });

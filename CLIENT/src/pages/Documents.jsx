@@ -1,17 +1,40 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
+  Button,
+  IconButton,
+  Divider,
+  TextField,
+  Paper,
+} from "@mui/material";
+
+import ReservationModal from "./ReservationModal";
+import HomeWorkIcon from "@mui/icons-material/HomeWork";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
 
 export default function Rooms() {
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ name: "", description: "" });
-
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // מצב עדכון: מכיל את ה-ID של החדר שמתעדכנים או null אם לא בעדכון
+  const [showForm, setShowForm] = useState(false);
   const [editingRoomId, setEditingRoomId] = useState(null);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -19,26 +42,20 @@ export default function Rooms() {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         setIsAdmin(payload.role === "admin");
-      } catch (err) {
-        console.error("JWT decode error:", err);
-      }
+      } catch {}
     }
 
     async function fetchRooms() {
-      const token = localStorage.getItem("token");
-
       try {
         const res = await fetch("http://localhost:3001/rooms/list", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!res.ok) throw new Error(`שגיאה בטעינת החדרים: ${res.status}`);
+        if (!res.ok) throw new Error("בעיה בטעינת חדרים");
         const data = await res.json();
         setRooms(data);
-      } catch (err) {
-        setError(err.message);
+      } catch (e) {
+        setError(e.message);
       } finally {
         setLoading(false);
       }
@@ -49,77 +66,61 @@ export default function Rooms() {
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((p) => ({ ...p, [name]: value }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-
-    if (!formData.name.trim()) {
-      alert("אנא הזיני שם חדר");
-      return;
-    }
-
     const token = localStorage.getItem("token");
 
+    const url = editingRoomId
+      ? `http://localhost:3001/rooms/${editingRoomId}`
+      : `http://localhost:3001/rooms`;
+
+    const method = editingRoomId ? "PUT" : "POST";
+
     try {
-      let res;
-      if (editingRoomId) {
-        // עדכון חדר קיים
-        res = await fetch(`http://localhost:3001/rooms/${editingRoomId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        });
-      } else {
-        // הוספת חדר חדש
-        res = await fetch("http://localhost:3001/rooms", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        });
-      }
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
 
-      if (!res.ok) throw new Error("שגיאה בשמירת החדר");
-      const savedRoom = await res.json();
+      if (!res.ok) throw new Error("שגיאה בשמירה");
+
+      const saved = await res.json();
 
       if (editingRoomId) {
-        // עדכון ברשימה
         setRooms((prev) =>
-          prev.map((room) => (room._id === editingRoomId ? savedRoom : room))
+          prev.map((r) => (r._id === editingRoomId ? saved : r))
         );
       } else {
-        // הוספה לרשימה
-        setRooms((prev) => [...prev, savedRoom]);
+        setRooms((prev) => [...prev, saved]);
       }
 
       setFormData({ name: "", description: "" });
-      setShowForm(false);
       setEditingRoomId(null);
+      setShowForm(false);
     } catch (err) {
       alert(err.message);
     }
   }
 
   async function handleDelete(id) {
+    if (!window.confirm("למחוק את החדר?")) return;
+
     const token = localStorage.getItem("token");
-    if (!window.confirm("את בטוחה שברצונך למחוק את החדר?")) return;
 
     try {
       const res = await fetch(`http://localhost:3001/rooms/${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) throw new Error("שגיאה במחיקת החדר");
+      if (!res.ok) throw new Error("שגיאה במחיקה");
 
       setRooms((prev) => prev.filter((room) => room._id !== id));
     } catch (err) {
@@ -129,96 +130,137 @@ export default function Rooms() {
 
   function startEdit(room) {
     setFormData({ name: room.name, description: room.description || "" });
-    setShowForm(true);
     setEditingRoomId(room._id);
+    setShowForm(true);
   }
 
-  if (loading) return <div>טוען חדרים...</div>;
+  if (loading) return <div>טוען...</div>;
   if (error) return <div>שגיאה: {error}</div>;
 
   return (
-    <div>
-      <h1>רשימת חדרים</h1>
+    <Box sx={{ maxWidth: 900, mx: "auto", p: 2 }}>
+      <Typography variant="h4" fontWeight="bold" mb={3}>
+        חדרים זמינים
+      </Typography>
 
+      {/* כפתור הוספה */}
       {isAdmin && !showForm && (
-        <button onClick={() => setShowForm(true)} style={{ marginBottom: 12 }}>
-          ➕ הוסף חדר
-        </button>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setShowForm(true)}
+          sx={{ mb: 3, borderRadius: 3 }}
+        >
+          הוסף חדר
+        </Button>
       )}
 
-      {showForm && isAdmin && (
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            border: "1px solid #ccc",
-            padding: 12,
-            borderRadius: 6,
-            marginBottom: 20,
-          }}
-        >
-          <div>
-            <label>
-              שם חדר:<br />
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                style={{ width: "100%", padding: 6, marginBottom: 8 }}
-              />
-            </label>
-          </div>
+      {/* טופס */}
+      {showForm && (
+        <Paper sx={{ p: 3, mb: 3, borderRadius: 4 }} elevation={3}>
+          <Typography variant="h6" mb={2}>
+            {editingRoomId ? "עריכת חדר" : "הוספת חדר חדש"}
+          </Typography>
 
-          <div>
-            <label>
-              תיאור (אופציונלי):<br />
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={3}
-                style={{ width: "100%", padding: 6, marginBottom: 8 }}
-              />
-            </label>
-          </div>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              label="שם חדר"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              fullWidth
+              required
+              sx={{ mb: 2 }}
+            />
 
-          <button type="submit" style={{ marginRight: 8 }}>
-            {editingRoomId ? "עדכן" : "שמור"}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setShowForm(false);
-              setEditingRoomId(null);
-              setFormData({ name: "", description: "" });
+            <TextField
+              label="תיאור"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              fullWidth
+              multiline
+              rows={3}
+              sx={{ mb: 2 }}
+            />
+
+            <Button variant="contained" type="submit" sx={{ mr: 2 }}>
+              שמור
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setShowForm(false);
+                setEditingRoomId(null);
+              }}
+            >
+              ביטול
+            </Button>
+          </form>
+        </Paper>
+      )}
+
+      {/* רשימת חדרים */}
+      <Box sx={{ display: "grid", gap: 2 }}>
+        {rooms.map((room) => (
+          <Card
+            key={room._id}
+            sx={{
+              bgcolor: "#F5F9FF",
+              borderRadius: 4,
+              boxShadow: "0 4px 10px rgba(0,0,0,0.06)",
             }}
           >
-            ביטול
-          </button>
-        </form>
-      )}
+            <CardContent sx={{ display: "flex", alignItems: "center" }}>
+              <HomeWorkIcon sx={{ fontSize: 40, color: "#247CFF", ml: 2 }} />
 
-      <ul>
-        {rooms.map((room) => (
-          <li key={room._id || room.id} style={{ marginBottom: 10 }}>
-            <strong>{room.name}</strong>
-            {room.description && <p>{room.description}</p>}
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography variant="h6">{room.name}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {room.description || "ללא תיאור"}
+                </Typography>
+              </Box>
 
-            {isAdmin && (
-              <>
-                <button
-                  onClick={() => startEdit(room)}
-                  style={{ marginRight: 8 }}
-                >
-                  עדכן
-                </button>
-                <button onClick={() => handleDelete(room._id)}>מחק</button>
-              </>
-            )}
-          </li>
+              {isAdmin && (
+                <>
+                  <IconButton onClick={() => startEdit(room)}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDelete(room._id)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </>
+              )}
+            </CardContent>
+
+            <Divider />
+
+            <CardActions sx={{ p: 2, justifyContent: "flex-end" }}>
+              <Button
+                variant="contained"
+                sx={{ borderRadius: 3 }}
+                onClick={() => {
+                  setSelectedRoomId(room._id);
+                  setIsModalOpen(true);
+                }}
+              >
+                הזמן עכשיו
+              </Button>
+            </CardActions>
+          </Card>
         ))}
-      </ul>
-    </div>
+      </Box>
+
+      {/* ⭐ כאן מודל ההזמנה! ⭐ */}
+      {isModalOpen && (
+        <ReservationModal
+          roomId={selectedRoomId}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
+    </Box>
   );
 }
