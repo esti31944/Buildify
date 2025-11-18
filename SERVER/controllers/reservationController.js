@@ -14,61 +14,46 @@ function isOverlap(aFrom, aTo, bFrom, bTo) {
 }
 
 exports.createReservation = async (req, res) => {
-  const { error } = validReservation(req.body);
-  if (error) return res.status(400).json({ message: error.details[0].message });
-
-  const { roomId, date, timeSlot } = req.body;
-  const userId = req.user && req.user._id; // auth middleware must set req.user
+  const validBody = validReservation(req.body);
+  if (validBody.error) return res.status(400).json(validBody.error.details);
 
   try {
+    const { roomId, date, timeSlot } = req.body;
+
     const room = await RoomModel.findById(roomId);
-    if (!room) return res.status(404).json({ message: "Room not found" });
+    if (!room) return res.status(404).json({ msg: "Room not found" });
 
-    // validate time order
-    const reqFrom = hhmmToMinutes(timeSlot.from);
-    const reqTo = hhmmToMinutes(timeSlot.to);
-    if (reqFrom >= reqTo) return res.status(400).json({ message: "Invalid time range" });
-
-    // check against room opening hours
-    const openFrom = hhmmToMinutes(room.openingHours?.from || "00:00");
-    const openTo = hhmmToMinutes(room.openingHours?.to || "23:59");
-    if (reqFrom < openFrom || reqTo > openTo) {
-      return res.status(400).json({ message: `Requested time outside room opening hours (${room.openingHours.from} - ${room.openingHours.to})` });
+    // בדיקת שעות פתיחה
+    if (timeSlot.from < room.openingHours.from || timeSlot.to > room.openingHours.to) {
+      return res.status(400).json({ msg: "ההזמנה מחוץ לשעות הפעילות" });
     }
 
-    // fetch existing reservations for that room + date
-    const existing = await ReservationModel.find({ roomId, date });
-
-    for (const ex of existing) {
-      const exFrom = hhmmToMinutes(ex.timeSlot.from);
-      const exTo = hhmmToMinutes(ex.timeSlot.to);
-      if (isOverlap(reqFrom, reqTo, exFrom, exTo)) {
-        return res.status(409).json({ message: "הטווח מבוקש חופף להזמנה קיימת" });
-      }
-    }
-
-    // create reservation
-    const newRes = new ReservationModel({
-      userId,
+    // בדיקת התנגשות
+    const exists = await ReservationModel.findOne({
       roomId,
       date,
-      timeSlot: { from: timeSlot.from, to: timeSlot.to }
+      $or: [
+        { "timeSlot.from": { $lt: timeSlot.to }, "timeSlot.to": { $gt: timeSlot.from } }
+      ]
     });
 
-    const saved = await newRes.save();
+    if (exists) {
+      return res.status(400).json({ msg: "החדר כבר תפוס בשעות אלו" });
+    }
 
-    // push to room.reservations (optional but kept consistent)
-    room.reservations = room.reservations || [];
-    room.reservations.push(saved._id);
-    await room.save();
+    const reservation = new ReservationModel({
+      ...req.body,
+      userId: req.user._id,
+    });
 
-    // return created reservation
-    return res.status(201).json(saved);
+    await reservation.save();
+    res.status(201).json(reservation);
+
   } catch (err) {
-    console.error("createReservation error:", err);
-    return res.status(500).json({ message: "Server error" });
+    res.status(500).json({ msg: "Server error", err });
   }
 };
+
 
 exports.getReservationsList = async (req, res) => {
   // optional query params: roomId, date, userId
@@ -107,4 +92,3 @@ exports.updateReservation = async (req, res) => {
   // optional: implement update with same overlap checks; omitted for brevity but recommended
   return res.status(501).json({ message: "Not implemented" });
 };
- 
