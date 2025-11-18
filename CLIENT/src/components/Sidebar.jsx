@@ -1,50 +1,128 @@
-// components>Sidebar.jsx
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../features/auth/authSlice";
+import { Box, Paper, Typography, Button, Divider } from "@mui/material";
+import Logo from "../assets/logo_remove.png";
+
+// אייקונים
+import HomeIcon from "@mui/icons-material/Home";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import PaymentIcon from "@mui/icons-material/Payment";
+import FolderIcon from "@mui/icons-material/Folder";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+
+const IconWrapper = ({ icon, color }) => (
+  <Box
+    sx={{
+      width: 32,
+      height: 32,
+      borderRadius: "50%",
+      bgcolor: color + "33", // גרסה חצי שקופה של הצבע
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    {React.cloneElement(icon, { style: { color: color, fontSize: 20 } })}
+  </Box>
+);
 
 export default function Sidebar() {
-    const dispatch = useDispatch();
-    const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
 
-    const links =
-        user?.role === "admin"
-            ? [
-                { to: "/", label: "דשבורד" },
-                { to: "/issues", label: "תקלות" },
-                { to: "/payments", label: "תשלומים" },
-                { to: "/documents", label: "חדרים/מסמכים" },
-                { to: "/notices", label: "לוח מודעות" }
-            ]
-            : [
-                { to: "/", label: "הבית שלי" },
-                { to: "/issues", label: "התקלות שלי" },
-                { to: "/payments", label: "התשלומים שלי" },
-                { to: "/documents", label: "חדרים/מסמכים" },
-                { to: "/notices", label: "לוח מודעות" }
-            ];
+  const links =
+    user?.role === "admin"
+      ? [
+          { to: "/", label: "דף הבית", icon: <HomeIcon />, color: "#1976d2" },
+          { to: "/issues", label: "תקלות", icon: <ReportProblemIcon />, color: "#d32f2f" },
+          { to: "/PaymentsManager", label: "תשלומים", icon: <PaymentIcon />, color: "#388e3c" },
+          { to: "/documents", label: "חדרים/מסמכים", icon: <FolderIcon />, color: "#fbc02d" },
+          { to: "/notices", label: "לוח מודעות", icon: <NotificationsIcon />, color: "#7b1fa2" },
+        ]
+      : [
+          { to: "/", label: "הבית שלי", icon: <HomeIcon />, color: "#1976d2" },
+          { to: "/issues", label: "התקלות שלי", icon: <ReportProblemIcon />, color: "#d32f2f" },
+          { to: "/payments", label: "התשלומים שלי", icon: <PaymentIcon />, color: "#388e3c" },
+          { to: "/documents", label: "חדרים/מסמכים", icon: <FolderIcon />, color: "#fbc02d" },
+          { to: "/notices", label: "לוח מודעות", icon: <NotificationsIcon />, color: "#7b1fa2" },
+        ];
 
-    return (
-        <aside className="sidebar">
-            <div className="logo">ועד דיגיטלי</div>
-            <nav className="nav">
-                {links.map(l => (
-                    <NavLink key={l.to} to={l.to} className="nav-link">
-                        {l.label}
-                    </NavLink>
-                ))}
-            </nav>
+  return (
+    <Paper
+      elevation={8}
+      sx={{
+        width: 240,
+        p: 3,
+        borderRadius: 4,
+        bgcolor: "#fff",
+        boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+        minHeight: "calc(100vh - 56px)",
+        position: "sticky",
+        top: 28,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+      }}
+    >
+        
 
-            <div style={{ marginTop: 12 }}>
-                <div style={{ color: "#374151", fontSize: 14, marginBottom: 8 }}>
-                    {user?.fullName} <br />
-                    <span style={{ color: "#9ca3af", fontSize: 12 }}>{user?.role === "admin" ? "מנהל" : "דייר"}</span>
-                </div>
-                <button className="btn btn-ghost" onClick={() => dispatch(logout())}>
-                    התנתק
-                </button>
-            </div>
-        </aside>
-    );
+       <img src={Logo} alt="Logo" />;
+      
+
+      {/* ניווט */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        {links.map((l) => (
+          <Button
+            key={l.to}
+            component={NavLink}
+            to={l.to}
+            fullWidth
+            sx={{
+              justifyContent: "flex-start",
+              textTransform: "none",
+              color: "#000",
+              borderRadius: 2,
+              py: 1,
+              "&.active": { bgcolor: "#e0e0e0" },
+              "&:hover": { bgcolor: "#f5f5f5" },
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <IconWrapper icon={l.icon} color={l.color} />
+              <Box sx={{ width: 16 }} />
+              {l.label}
+            </Box>
+          </Button>
+        ))}
+      </Box>
+
+      <Divider sx={{ my: 2, bgcolor: "#ccc" }} />
+
+      <Box>
+        <Typography sx={{ color: "#000", fontSize: 14, mb: 1 }}>
+          {user?.fullName}
+        </Typography>
+        <Typography sx={{ color: "#777", fontSize: 12, mb: 2 }}>
+          {user?.role === "admin" ? "מנהל" : "דייר"}
+        </Typography>
+
+        <Button
+          variant="outlined"
+          fullWidth
+          sx={{
+            py: 1.5,
+            borderRadius: 3,
+            color: "#000",
+            borderColor: "#999",
+            "&:hover": { borderColor: "#000", backgroundColor: "#eee" },
+          }}
+          onClick={() => dispatch(logout())}
+        >
+          התנתק
+        </Button>
+      </Box>
+    </Paper>
+  );
 }
