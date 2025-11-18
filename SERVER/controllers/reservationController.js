@@ -83,12 +83,8 @@ exports.getReservationById = async (req, res) => {
     return res.json(reservation);
   } catch (err) {
     console.error("getReservationById error:", err);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
 
-
-exports.deleteReservation = async (req, res) => {
+  exports.deleteReservation = async (req, res) => {
   try {
     const id = req.params.id;
     const removed = await ReservationModel.findByIdAndDelete(id);

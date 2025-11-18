@@ -31,15 +31,22 @@ const updateIssue = async (req, res) => {
   }
 
   try {
-    const issue = await IssueModel.findByIdAndUpdate(
+    const issue = await IssueModel.findById(req.params.id);
+    if (!issue) {
+      return res.status(404).json({ msg: "Issue not found" });
+    }
+
+    if (issue.userId.toString() !== req.user._id) {
+      return res.status(403).json({ msg: "You are not allowed to update this issue" });
+    }
+
+    const updatedIssue = await IssueModel.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedAt: Date.now() },
       { new: true }
     );
-    if (!issue) {
-      return res.status(404).json({ msg: "Issue not found" });
-    }
-    res.json(issue);
+
+    res.json(updatedIssue);
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
   }
