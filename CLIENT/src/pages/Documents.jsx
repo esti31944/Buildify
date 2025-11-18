@@ -18,6 +18,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 
+import MyReservationsModal from "./MyReservationsModal"; // הוספתי את המודאל להצגת הזמנות אישיות
+
 export default function Rooms() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,6 +37,8 @@ export default function Rooms() {
     name: "",
     description: "",
   });
+
+  const [isMyResModalOpen, setIsMyResModalOpen] = useState(false); // מצב פתיחת מודאל ההזמנות האישיות
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -142,6 +146,15 @@ export default function Rooms() {
       <Typography variant="h4" fontWeight="bold" mb={3}>
         חדרים זמינים
       </Typography>
+
+      {/* כפתור לצפייה בהזמנות שלי */}
+      <Button
+        variant="outlined"
+        sx={{ mb: 3 }}
+        onClick={() => setIsMyResModalOpen(true)}
+      >
+        צפה בהזמנות שלי
+      </Button>
 
       {/* כפתור הוספה */}
       {isAdmin && !showForm && (
@@ -260,6 +273,11 @@ export default function Rooms() {
           roomId={selectedRoomId}
           onClose={() => setIsModalOpen(false)}
         />
+      )}
+
+      {/* מודאל הזמנות אישיות */}
+      {isMyResModalOpen && (
+        <MyReservationsModal onClose={() => setIsMyResModalOpen(false)} />
       )}
     </Box>
   );
