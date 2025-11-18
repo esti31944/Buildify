@@ -64,7 +64,10 @@ exports.getReservationsList = async (req, res) => {
   if (userId) filter.userId = userId;
 
   try {
-    const list = await ReservationModel.find(filter).sort({ date: 1, "timeSlot.from": 1 });
+    const list = await ReservationModel.find(filter)
+      .populate("roomId", "name")  // כאן עושים populate לשם החדר בלבד
+      .sort({ date: 1, "timeSlot.from": 1 });
+
     return res.json(list);
   } catch (err) {
     console.error("getReservationsList error:", err);
@@ -72,7 +75,16 @@ exports.getReservationsList = async (req, res) => {
   }
 };
 
-exports.deleteReservation = async (req, res) => {
+exports.getReservationById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const reservation = await ReservationModel.findById(id);
+    if (!reservation) return res.status(404).json({ message: "Not found" });
+    return res.json(reservation);
+  } catch (err) {
+    console.error("getReservationById error:", err);
+
+  exports.deleteReservation = async (req, res) => {
   try {
     const id = req.params.id;
     const removed = await ReservationModel.findByIdAndDelete(id);
