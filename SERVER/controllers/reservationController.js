@@ -83,7 +83,8 @@ exports.getReservationById = async (req, res) => {
     return res.json(reservation);
   } catch (err) {
     console.error("getReservationById error:", err);
-
+  }}
+  
   exports.deleteReservation = async (req, res) => {
   try {
     const id = req.params.id;
