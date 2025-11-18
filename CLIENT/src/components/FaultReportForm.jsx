@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createIssue } from '../features/issues/issuesSlice';
+import { createIssue ,updateIssue,fetchAllIssues,fetchMyIssues} from '../features/issues/issuesSlice';
 import '../styles/FaultReportForm.css';
 
-export default function FaultReportForm() {
+export default function FaultReportForm({ onClose, initialData = null, mode = "create" }) {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
-    const [formData, setFormData] = useState({
-        title: '',
-        description: '',
-        imageUrl: ''
-    });
+    const [formData, setFormData] = useState(
+        initialData || { title: '', description: '', imageUrl: '' });
+
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState('');
 
@@ -20,12 +18,22 @@ export default function FaultReportForm() {
             return;
         }
         setError('');
-        setSubmitted(true);
         try {
-            await dispatch(createIssue({ ...formData})).unwrap();
-            setSubmitted(true);
+            if (mode === "create") {
+                await dispatch(createIssue(formData)).unwrap();
+            } else {
+                const { _id, ...dataToUpdate } = formData;
+                await dispatch(updateIssue({ id: initialData._id, data: dataToUpdate })).unwrap();
+            }
+            if (user.role === "admin") {
+                dispatch(fetchAllIssues());
+            } else {
+                dispatch(fetchMyIssues());
+            }
+            onClose();
+
         } catch (err) {
-            setError('שגיאה בשליחת הדיווח, נסה שוב');
+            setError("שגיאה בשליחה");
             console.error(err);
         }
     };
@@ -53,7 +61,9 @@ export default function FaultReportForm() {
                             <line x1="9" y1="14" x2="15" y2="14" />
                         </svg>
                     </div>
-                    <h1 className="fault-report-title">דיווח תקלה חדשה</h1>
+                    <h1 className="fault-report-title">
+                        {mode === "create" ? "דיווח תקלה חדשה" : "עריכת תקלה"}
+                    </h1>
                 </div>
 
                 {submitted ? (
@@ -108,7 +118,7 @@ export default function FaultReportForm() {
 
                         <div className="fault-report-buttons">
                             <button onClick={handleSubmit} className="fault-report-submit-btn">
-                                שלח דיווח
+                                {mode === "create" ? "שלח דיווח" : "שמור שינויים"}
                             </button>
                             <button onClick={handleCancel}
                                 className="fault-report-cancel-btn"

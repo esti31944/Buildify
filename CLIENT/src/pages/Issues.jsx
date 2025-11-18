@@ -13,6 +13,7 @@ export default function Issues() {
     const user = useSelector((state) => state.auth.user);
 
     const [showForm, setShowForm] = useState(false);
+    const [editIssue, setEditIssue] = useState(null);
     const [tab, setTab] = useState(0);
 
     useEffect(() => {
@@ -45,7 +46,10 @@ export default function Issues() {
                     startIcon={<AddIcon />}
                     variant="contained"
                     sx={{ mb: 2 }}
-                    onClick={() => setShowForm(true)}
+                    onClick={() => {
+                        setEditIssue(null);
+                        setShowForm(true);
+                    }}
                 >
                     דווח על תקלה
                 </Button>
@@ -54,14 +58,20 @@ export default function Issues() {
             <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mb: 3 }}>
                 <Tab label={`חדשות (${filtered.new.length})`} />
                 <Tab label={`בטיפול (${filtered.in_progress.length})`} />
-                <Tab label={`תוקנו (${filtered.fixed.length})`} />
+                <Tab label={`טופלו (${filtered.fixed.length})`} />
             </Tabs>
 
             <Stack spacing={2}>
                 {(tab === 0 ? filtered.new :
                     tab === 1 ? filtered.in_progress : filtered.fixed
                 ).map((item) => (
-                    <IssueCard key={item._id} {...item} />
+                    <IssueCard
+                        key={item._id} {...item}
+                        onEdit={(data) => {
+                            setEditIssue(data);
+                            setShowForm(true);
+                        }}
+                    />
                 ))}
 
                 {(tab === 0 && filtered.new.length === 0) && <p>אין תקלות חדשות</p>}
@@ -71,38 +81,20 @@ export default function Issues() {
 
             <Modal open={showForm} onClose={() => setShowForm(false)}>
                 <Box
-                    sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        width: "90%",
-                        maxWidth: 550,
-                        bgcolor: "white",
-                        p: 3,
-                        borderRadius: 3,
-                        boxShadow: 6,
-                        maxHeight: "95vh",
-                        overflowY: "auto",
-                        position: "relative",
-                    }}
+                    sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "90%", maxWidth: 550, bgcolor: "white", p: 3, borderRadius: 3, boxShadow: 6, maxHeight: "95vh", overflowY: "auto", position: "relative", }}
                 >
                     <Button
                         onClick={() => setShowForm(false)}
-                        sx={{
-                            position: "absolute",
-                            top: 8,
-                            left: 8,
-                            minWidth: "unset",
-                            padding: "4px",
-                            fontSize: "20px",
-                            lineHeight: "1",
-                        }}
+                        sx={{ position: "absolute", top: 8, left: 8, minWidth: "unset", padding: "4px", fontSize: "20px", lineHeight: "1", }}
                     >
                         ✕
                     </Button>
 
-                    <FaultReportForm onClose={() => setShowForm(false)} />
+                    <FaultReportForm
+                        onClose={() =>setShowForm(false)}
+                        initialData={editIssue}
+                        mode={editIssue ? "edit" : "create"}
+                    />
                 </Box>
             </Modal>
 

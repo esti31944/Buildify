@@ -36,10 +36,10 @@ exports.validIssue = (issue) => {
 
 exports.validIssueUpdate = (issue) => {
     const schema = Joi.object({
-        title: Joi.string().min(2).max(200),
-        description: Joi.string().min(5).max(1000),
-        imageUrl: Joi.string().uri().allow("", null),
-        status: Joi.string().valid("new", "in_progress", "fixed")
+        title: Joi.string().min(2).max(200).optional().allow(""),
+        description: Joi.string().min(5).max(1000).optional().allow(""),
+        imageUrl: Joi.string().uri().allow("", null).optional(),
+        status: Joi.string().valid("new", "in_progress", "fixed").optional()
     });
     return schema.validate(issue);
 };

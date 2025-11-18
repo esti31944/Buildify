@@ -18,7 +18,7 @@ router.get("/", testRoute);
 router.post("/",auth, createIssue);
 
 // עדכון כללי של תקלה
-router.put("/update/:id", updateIssue);
+router.put("/update/:id",auth, updateIssue);
 
 // עדכון סטטוס תקלה (רק מנהל)
 router.put("/updateStatus/:id", authAdmin, updateIssueStatus);

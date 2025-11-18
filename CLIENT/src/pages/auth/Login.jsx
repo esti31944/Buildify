@@ -39,7 +39,7 @@ export default function Login() {
       if (err.response && err.response.status === 401) {
         alert('אימייל או סיסמה לא נכונים');
       } else {
-        alert('שגיאה בשרת, נסי שוב מאוחר יותר');
+        alert('שגיאה בשרת, נסה שוב מאוחר יותר');
       }
     }
   };
