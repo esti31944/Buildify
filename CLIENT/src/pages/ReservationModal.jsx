@@ -22,8 +22,11 @@ export default function ReservationModal({ roomId, onClose }) {
 
   useEffect(() => {
     loadRoom();
+  }, [roomId]);
+
+  useEffect(() => {
     loadReservations();
-  }, []);
+  }, [roomId, date]);
 
   async function loadRoom() {
     const token = localStorage.getItem("token");
@@ -32,22 +35,33 @@ export default function ReservationModal({ roomId, onClose }) {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    const room = await res.json();
-
-    console.log("📌 Loaded room:", room);
-
-    setOpeningHours(room.openingHours);
+    if (res.ok) {
+      const room = await res.json();
+      console.log("📌 Loaded room:", room);
+      setOpeningHours(room.openingHours);
+    }
   }
 
   async function loadReservations() {
+    if (!date) {
+      setReservations([]);
+      return;
+    }
+
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`http://localhost:3001/reservations/list`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(
+      `http://localhost:3001/reservations/list?roomId=${roomId}&date=${date}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
-    const data = await res.json();
-    setReservations(data.filter((r) => r.roomId === roomId));
+    if (res.ok) {
+      const data = await res.json();
+      console.log("📌 Loaded reservations for room and date:", data);
+      setReservations(data);
+    }
   }
 
   function generateHours(openingHours) {
@@ -55,21 +69,30 @@ export default function ReservationModal({ roomId, onClose }) {
       return [];
     }
 
-    const [startH] = openingHours.from.split(":").map(Number);
-    const [endH] = openingHours.to.split(":").map(Number);
+    const [startH, startM] = openingHours.from.split(":").map(Number);
+    const [endH, endM] = openingHours.to.split(":").map(Number);
 
     const arr = [];
-    for (let h = startH; h < endH; h++) {
-      arr.push(`${String(h).padStart(2, "0")}:00`);
-      arr.push(`${String(h).padStart(2, "0")}:30`);
+    let currentMinutes = startH * 60 + startM;
+    const endMinutes = endH * 60 + endM;
+
+    while (currentMinutes < endMinutes) {
+      const hh = Math.floor(currentMinutes / 60);
+      const mm = currentMinutes % 60;
+      arr.push(`${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`);
+      currentMinutes += 30;
     }
 
     return arr;
   }
 
-  // הפונקציה שמחזירה את השעות התפוסות לפי התאריך וההזמנות, מפצלת אותן לפי סוג השעה
+  function timeToMinutes(timeStr) {
+    const [hh, mm] = timeStr.split(":").map(Number);
+    return hh * 60 + mm;
+  }
+
   function getBusyHoursByType() {
-    if (!date || !openingHours) return { startHours: [], endHours: [], middleHours: [] };
+    if (!openingHours) return { startHours: [], endHours: [], middleHours: [] };
 
     const allHours = generateHours(openingHours);
     const startHours = [];
@@ -77,8 +100,6 @@ export default function ReservationModal({ roomId, onClose }) {
     const middleHours = [];
 
     reservations.forEach((r) => {
-      if (r.date !== date) return;
-
       const fromIndex = allHours.indexOf(r.timeSlot.from);
       const toIndex = allHours.indexOf(r.timeSlot.to);
 
@@ -92,29 +113,39 @@ export default function ReservationModal({ roomId, onClose }) {
       }
     });
 
+    console.log("Busy Hours:", { startHours, endHours, middleHours });
     return { startHours, endHours, middleHours };
   }
 
   function isOverlapping(newFrom, newTo) {
+    const newFromM = timeToMinutes(newFrom);
+    const newToM = timeToMinutes(newTo);
+
     return reservations.some((res) => {
-      if (res.date !== date) return false;
-      const a1 = res.timeSlot.from;
-      const a2 = res.timeSlot.to;
-      return newFrom < a2 && newTo > a1;
+      const resFromM = timeToMinutes(res.timeSlot.from);
+      const resToM = timeToMinutes(res.timeSlot.to);
+
+      return newFromM < resToM && newToM > resFromM;
     });
   }
 
   async function handleSubmit() {
     setError("");
 
-    if (!date || !fromHour || !toHour)
-      return setError("חובה למלא את כל השדות");
+    if (!date || !fromHour || !toHour) {
+      setError("חובה למלא את כל השדות");
+      return;
+    }
 
-    if (fromHour >= toHour)
-      return setError("שעת התחלה חייבת להיות לפני שעת סיום");
+    if (fromHour >= toHour) {
+      setError("שעת התחלה חייבת להיות לפני שעת סיום");
+      return;
+    }
 
-    if (isOverlapping(fromHour, toHour))
-      return setError("הטווח שהוזן כבר תפוס!");
+    if (isOverlapping(fromHour, toHour)) {
+      setError("הטווח שהוזן כבר תפוס!");
+      return;
+    }
 
     const token = localStorage.getItem("token");
 
@@ -132,7 +163,10 @@ export default function ReservationModal({ roomId, onClose }) {
         }),
       });
 
-      if (!res.ok) throw new Error("שגיאה בהזמנה");
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.msg || "שגיאה בהזמנה");
+      }
 
       alert("ההזמנה נשמרה בהצלחה");
       onClose();
@@ -170,7 +204,6 @@ export default function ReservationModal({ roomId, onClose }) {
               let disabled = false;
               let sx = {};
 
-              // בשדה שעת התחלה - חסום התחלה ואמצע, לא חסום סיום
               if (startHours.includes(h) || middleHours.includes(h)) {
                 disabled = true;
                 if (startHours.includes(h)) sx = { borderBottom: "3px solid red" };
@@ -178,7 +211,16 @@ export default function ReservationModal({ roomId, onClose }) {
               }
 
               return (
-                <MenuItem key={h} value={h} disabled={disabled} sx={sx}>
+                <MenuItem
+                  key={h}
+                  value={h}
+                  disabled={disabled}
+                  sx={{
+                    ...sx,
+                    backgroundColor: disabled ? "#f0f0f0" : "inherit",
+                    color: disabled ? "#999" : "inherit",
+                  }}
+                >
                   {h}
                 </MenuItem>
               );
@@ -195,7 +237,6 @@ export default function ReservationModal({ roomId, onClose }) {
               let disabled = false;
               let sx = {};
 
-              // בשדה שעת סיום - חסום סיום ואמצע, לא חסום התחלה
               if (endHours.includes(h)) {
                 disabled = true;
                 sx = { borderTop: "3px solid blue" };
@@ -205,7 +246,16 @@ export default function ReservationModal({ roomId, onClose }) {
               }
 
               return (
-                <MenuItem key={h} value={h} disabled={disabled} sx={sx}>
+                <MenuItem
+                  key={h}
+                  value={h}
+                  disabled={disabled}
+                  sx={{
+                    ...sx,
+                    backgroundColor: disabled ? "#f0f0f0" : "inherit",
+                    color: disabled ? "#999" : "inherit",
+                  }}
+                >
                   {h}
                 </MenuItem>
               );

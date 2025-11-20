@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Box,
   Card,
@@ -18,13 +19,21 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 
+import MyReservationsModal from "./MyReservationsModal";
+
+import {
+  fetchRooms,
+  addRoom,
+  updateRoom,
+  deleteRoom,
+} from "../features/room/RoomSlice";
+
 export default function Rooms() {
+  const dispatch = useDispatch();
+  const { rooms, loading, error } = useSelector((state) => state.rooms);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState(null);
-  const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -36,6 +45,8 @@ export default function Rooms() {
     description: "",
   });
 
+  const [isMyResModalOpen, setIsMyResModalOpen] = useState(false);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -44,25 +55,8 @@ export default function Rooms() {
         setIsAdmin(payload.role === "admin");
       } catch {}
     }
-
-    async function fetchRooms() {
-      try {
-        const res = await fetch("http://localhost:3001/rooms/list", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) throw new Error("בעיה בטעינת חדרים");
-        const data = await res.json();
-        setRooms(data);
-      } catch (e) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchRooms();
-  }, []);
+    dispatch(fetchRooms());
+  }, [dispatch]);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -71,60 +65,26 @@ export default function Rooms() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const token = localStorage.getItem("token");
-
-    const url = editingRoomId
-      ? `http://localhost:3001/rooms/${editingRoomId}`
-      : `http://localhost:3001/rooms`;
-
-    const method = editingRoomId ? "PUT" : "POST";
-
     try {
-      const res = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!res.ok) throw new Error("שגיאה בשמירה");
-
-      const saved = await res.json();
-
       if (editingRoomId) {
-        setRooms((prev) =>
-          prev.map((r) => (r._id === editingRoomId ? saved : r))
-        );
+        await dispatch(updateRoom({ id: editingRoomId, formData })).unwrap();
       } else {
-        setRooms((prev) => [...prev, saved]);
+        await dispatch(addRoom(formData)).unwrap();
       }
-
       setFormData({ name: "", description: "" });
       setEditingRoomId(null);
       setShowForm(false);
     } catch (err) {
-      alert(err.message);
+      alert(err);
     }
   }
 
   async function handleDelete(id) {
     if (!window.confirm("למחוק את החדר?")) return;
-
-    const token = localStorage.getItem("token");
-
     try {
-      const res = await fetch(`http://localhost:3001/rooms/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) throw new Error("שגיאה במחיקה");
-
-      setRooms((prev) => prev.filter((room) => room._id !== id));
+      await dispatch(deleteRoom(id)).unwrap();
     } catch (err) {
-      alert(err.message);
+      alert(err);
     }
   }
 
@@ -143,7 +103,14 @@ export default function Rooms() {
         חדרים זמינים
       </Typography>
 
-      {/* כפתור הוספה */}
+      <Button
+        variant="outlined"
+        sx={{ mb: 3 }}
+        onClick={() => setIsMyResModalOpen(true)}
+      >
+        צפה בהזמנות שלי
+      </Button>
+
       {isAdmin && !showForm && (
         <Button
           variant="contained"
@@ -155,7 +122,6 @@ export default function Rooms() {
         </Button>
       )}
 
-      {/* טופס */}
       {showForm && (
         <Paper sx={{ p: 3, mb: 3, borderRadius: 4 }} elevation={3}>
           <Typography variant="h6" mb={2}>
@@ -200,7 +166,6 @@ export default function Rooms() {
         </Paper>
       )}
 
-      {/* רשימת חדרים */}
       <Box sx={{ display: "grid", gap: 2 }}>
         {rooms.map((room) => (
           <Card
@@ -254,12 +219,15 @@ export default function Rooms() {
         ))}
       </Box>
 
-      {/* ⭐ כאן מודל ההזמנה! ⭐ */}
       {isModalOpen && (
         <ReservationModal
           roomId={selectedRoomId}
           onClose={() => setIsModalOpen(false)}
         />
+      )}
+
+      {isMyResModalOpen && (
+        <MyReservationsModal onClose={() => setIsMyResModalOpen(false)} />
       )}
     </Box>
   );

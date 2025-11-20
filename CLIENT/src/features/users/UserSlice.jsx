@@ -17,7 +17,7 @@ export const fetchAllUsers = createAsyncThunk(
 export const createUser = createAsyncThunk(
     "users/createUser",
     async (newUser) => {
-        const res = await axios.post("/users", newUser);
+        const res = await axios.post("/users/register", newUser);
         return res.data;
     }
 );
@@ -34,7 +34,7 @@ export const fetchUserById = createAsyncThunk(
 export const updateUser = createAsyncThunk(
     "users/updateUser",
     async ({ id, updatedFields }) => {
-        const res = await axios.put(`/users/${id}`, updatedFields);
+        const res = await axios.put(`/users/update/${id}`, updatedFields);
         return res.data;
     }
 );

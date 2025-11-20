@@ -64,11 +64,26 @@ exports.getReservationsList = async (req, res) => {
   if (userId) filter.userId = userId;
 
   try {
-    const list = await ReservationModel.find(filter).sort({ date: 1, "timeSlot.from": 1 });
+    const list = await ReservationModel.find(filter)
+      .populate("roomId", "name")  // כאן עושים populate לשם החדר בלבד
+      .sort({ date: 1, "timeSlot.from": 1 });
+
     return res.json(list);
   } catch (err) {
     console.error("getReservationsList error:", err);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getReservationById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const reservation = await ReservationModel.findById(id);
+    if (!reservation) return res.status(404).json({ message: "Not found" });
+    return res.json(reservation);
+  } catch (err) {
+    console.error("getReservationById error:", err);
+    return res.status(500).json({ message: "Server error" });  // חסר החזרה כאן
   }
 };
 
