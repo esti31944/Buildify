@@ -36,7 +36,11 @@ exports.validUser = (user) => {
         fullName: Joi.string().min(2).max(100).required(),
         email: Joi.string().email().required(),
         password: Joi.string().min(6).max(20).required(),
-        apartmentNumber: Joi.number().min(1).required(),
+        apartmentNumber: Joi.when('role',{
+            is: 'tenant',
+            then: Joi.number().min(1).required(),
+            otherwise: Joi.number().allow(null, "").optional()
+        }),
         phone: Joi.string().min(9).max(15).required(),
         role: Joi.string().valid("tenant", "admin").optional(),
         isActive: Joi.boolean().optional(),
