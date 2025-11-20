@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Card from "../components/Card";
 
-// פונקציה לפענוח JWT
+import {
+  fetchNotices,
+  createNotice,
+  updateNotice,
+  deleteNotice as deleteNoticeAction
+} from "../features/notice/NoticeSlice";
+
 function parseJwt(token) {
   try {
     return JSON.parse(atob(token.split(".")[1]));
@@ -11,9 +18,11 @@ function parseJwt(token) {
 }
 
 export default function Notices() {
-  const [notices, setNotices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+
+  const { list: notices, loading, error } = useSelector(
+    (state) => state.notices
+  );
 
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -30,41 +39,19 @@ export default function Notices() {
   // --- פענוח טוקן ---
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      setCurrentUser(parseJwt(token));
-    }
+    if (token) setCurrentUser(parseJwt(token));
   }, []);
 
-  // --- טעינת המודעות ---
+  // --- טעינת המודעות מה-Slice ---
   useEffect(() => {
-    async function fetchNotices() {
-      try {
-        const token = localStorage.getItem("token");
+    dispatch(fetchNotices());
+  }, [dispatch]);
 
-        const res = await fetch("http://localhost:3001/notices/list", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) throw new Error(`שגיאה בטעינת המודעות: ${res.status}`);
-        const data = await res.json();
-        setNotices(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchNotices();
-  }, []);
-
-  // --- שינוי שדות ---
   function handleChange(e) {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((p) => ({ ...p, [name]: value }));
   }
 
-  // --- שליחה: יצירה / עדכון ---
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -73,83 +60,31 @@ export default function Notices() {
       return;
     }
 
-    const token = localStorage.getItem("token");
-
-    const sendData = {
+    const payload = {
       title: formData.title,
       content: formData.content,
       category: formData.category,
     };
-    if (formData.expiresAt) sendData.expiresAt = formData.expiresAt;
 
-    try {
-      let res;
+    if (formData.expiresAt) payload.expiresAt = formData.expiresAt;
 
-      // עדכון
-      if (editingId) {
-        res = await fetch(`http://localhost:3001/notices/${editingId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(sendData),
-        });
-
-        if (!res.ok) throw new Error("שגיאה בעדכון ההודעה");
-
-        const updated = await res.json();
-
-        setNotices(prev =>
-          prev.map(n => (n._id === editingId ? updated : n))
-        );
-
-      } else {
-        // יצירה
-        res = await fetch("http://localhost:3001/notices", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(sendData),
-        });
-
-        if (!res.ok) throw new Error("שגיאה בהוספת המודעה");
-
-        const newNotice = await res.json();
-        setNotices(prev => [...prev, newNotice]);
-      }
-
-      // ניקוי טופס
-      setFormData({ title: "", content: "", category: "announcement", expiresAt: "" });
-      setEditingId(null);
-      setShowForm(false);
-
-    } catch (err) {
-      alert(err.message);
+    if (editingId) {
+      await dispatch(updateNotice({ id: editingId, data: payload }));
+    } else {
+      await dispatch(createNotice(payload));
     }
-  }
 
-  // --- מחיקה ---
-  async function deleteNotice(id) {
-    const token = localStorage.getItem("token");
-    if (!window.confirm("האם למחוק את ההודעה?")) return;
-
-    const res = await fetch(`http://localhost:3001/notices/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
+    setFormData({
+      title: "",
+      content: "",
+      category: "announcement",
+      expiresAt: ""
     });
 
-    if (!res.ok) {
-      alert("שגיאה במחיקה");
-      return;
-    }
-
-    setNotices(prev => prev.filter(n => n._id !== id));
+    setEditingId(null);
+    setShowForm(false);
   }
 
-  // --- כניסה למצב עריכה ---
   function startEdit(n) {
     setEditingId(n._id);
     setFormData({
@@ -159,6 +94,11 @@ export default function Notices() {
       expiresAt: n.expiresAt ? n.expiresAt.split("T")[0] : "",
     });
     setShowForm(true);
+  }
+
+  async function deleteNotice(id) {
+    if (!window.confirm("האם למחוק את ההודעה?")) return;
+    await dispatch(deleteNoticeAction(id));
   }
 
   if (loading) return <div>טוען מודעות...</div>;
@@ -187,7 +127,8 @@ export default function Notices() {
             }}
           >
             <div>
-              <label>כותרת:<br />
+              <label>
+                כותרת:<br />
                 <input
                   type="text"
                   name="title"
@@ -200,7 +141,8 @@ export default function Notices() {
             </div>
 
             <div>
-              <label>תוכן:<br />
+              <label>
+                תוכן:<br />
                 <textarea
                   name="content"
                   value={formData.content}
@@ -213,7 +155,8 @@ export default function Notices() {
             </div>
 
             <div>
-              <label>סוג הודעה:<br />
+              <label>
+                סוג הודעה:<br />
                 <select
                   name="category"
                   value={formData.category}
@@ -227,7 +170,8 @@ export default function Notices() {
             </div>
 
             <div>
-              <label>תאריך תפוגה (אופציונלי):<br />
+              <label>
+                תאריך תפוגה (אופציונלי):<br />
                 <input
                   type="date"
                   name="expiresAt"
@@ -242,7 +186,14 @@ export default function Notices() {
               שמור
             </button>
 
-            <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => {
+                setShowForm(false);
+                setEditingId(null);
+              }}
+            >
               ביטול
             </button>
           </form>

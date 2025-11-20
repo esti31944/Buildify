@@ -43,7 +43,7 @@ export default function MyReservationsModal({ onClose }) {
     let userId = null;
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
-      userId = payload._id || payload.id; // תוודא את השדה הנכון לפי הטוקן שלך
+      userId = payload._id || payload.id; 
     } catch {
       setError("טוקן לא תקין");
       setLoading(false);
@@ -52,9 +52,10 @@ export default function MyReservationsModal({ onClose }) {
 
     async function fetchReservations() {
       try {
-        const res = await fetch(`http://localhost:3001/reservations/list?userId=${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          `http://localhost:3001/reservations/list?userId=${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
         if (!res.ok) throw new Error("בעיה בטעינת ההזמנות");
 
@@ -73,10 +74,22 @@ export default function MyReservationsModal({ onClose }) {
   return (
     <Modal open={true} onClose={onClose}>
       <Box sx={style}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-          <Typography variant="h6" component="h2">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            mb: 2,
+            width: "100%",
+          }}
+        >
+          <Typography
+            variant="h6"
+            component="h2"
+            sx={{ textAlign: "right", width: "100%" }}
+          >
             ההזמנות שלי
           </Typography>
+
           <IconButton onClick={onClose} size="small">
             <CloseIcon />
           </IconButton>
@@ -89,13 +102,13 @@ export default function MyReservationsModal({ onClose }) {
         )}
 
         {error && (
-          <Typography color="error" sx={{ mb: 2 }}>
+          <Typography color="error" sx={{ mb: 2, textAlign: "right" }}>
             {error}
           </Typography>
         )}
 
         {!loading && !error && reservations.length === 0 && (
-          <Typography>אין הזמנות להצגה.</Typography>
+          <Typography sx={{ textAlign: "right" }}>אין הזמנות להצגה.</Typography>
         )}
 
         {!loading && !error && reservations.length > 0 && (
@@ -106,7 +119,9 @@ export default function MyReservationsModal({ onClose }) {
                   primary={`חדר: ${resv.roomId.name || resv.roomId}`}
                   secondary={
                     <>
-                      <div>{`תאריך: ${new Date(resv.date).toLocaleDateString()}`}</div>
+                      <div>{`תאריך: ${new Date(
+                        resv.date
+                      ).toLocaleDateString()}`}</div>
                       <div>{`שעה: ${resv.timeSlot.from} - ${resv.timeSlot.to}`}</div>
                     </>
                   }
