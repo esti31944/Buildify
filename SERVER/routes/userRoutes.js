@@ -14,7 +14,7 @@ router.get("/list", authAdmin, usersController.getUsersList);
 
 router.get("/myInfo", auth, usersController.getMyInfo);
 
-router.put("/update/:id", authAdmin, usersController.updateUserById);
+router.put("/update/:id", auth, usersController.updateUserById);
 
 router.delete("/:id", authAdmin, usersController.deleteUserById);
 

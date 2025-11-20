@@ -36,7 +36,7 @@ import {
   updatePayment,
   deletePayment,
 } from "../features/Payments/Paymentslice";
-import { fetchAllUsers } from "../features/User/UserSlice"; // הנחה שיש Slice כזה
+import { fetchAllUsers } from "../features/users/UserSlice"; // הנחה שיש Slice כזה
 
 export default function PaymentsManager() {
   const dispatch = useDispatch();

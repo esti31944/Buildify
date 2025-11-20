@@ -85,7 +85,7 @@ exports.getReservationById = async (req, res) => {
     console.error("getReservationById error:", err);
     return res.status(500).json({ message: "Server error" });  // חסר החזרה כאן
   }
-}; // <-- סוגר הפונקציה החסר
+};
 
 exports.deleteReservation = async (req, res) => {
   try {

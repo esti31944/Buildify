@@ -20,12 +20,15 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ msg: "Email already exists" });
     }
 
-    const existingActiveApartment = await UserModel.findOne({
-      apartmentNumber: req.body.apartmentNumber,
-      isActive: true
-    });
-    if (existingActiveApartment) {
-      return res.status(400).json({ msg: "An active user already exists for this apartment" });
+    if (req.body.role === "tenant") {
+      const existingActiveApartment = await UserModel.findOne({
+        apartmentNumber: req.body.apartmentNumber,
+        isActive: true
+      });
+
+      if (existingActiveApartment) {
+        return res.status(400).json({ msg: "An active user already exists for this apartment" });
+      }
     }
 
     const user = new UserModel(req.body);
@@ -64,7 +67,7 @@ exports.loginUser = async (req, res) => {
 
 exports.getUsersList = async (req, res) => {
   try {
-    const users = await UserModel.find({}, { password: 0 });
+    const users = await UserModel.find({}, { password: 0 }).sort({ apartmentNumber: 1 });
     res.json(users);
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
@@ -85,13 +88,26 @@ exports.getMyInfo = async (req, res) => {
 exports.updateUserById = async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (req.user.role !== "admin" && req.user._id !== id) {
+      return res.status(403).json({ msg: "Permission denied" });
+    }
+
     const data = { ...req.body };
+
+    if (req.user.role === "tenant") {
+      const allowedFields = ["phone", "email", "password"];
+      Object.keys(data).forEach((key) => {
+        if (!allowedFields.includes(key)) delete data[key];
+      });
+    }
 
     if (data.password) {
       data.password = await bcrypt.hash(data.password, 10);
     }
 
     const updated = await UserModel.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+
     if (!updated) return res.status(404).json({ msg: "User not found" });
 
     updated.password = "******";
