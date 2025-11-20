@@ -74,7 +74,6 @@ exports.getReservationsList = async (req, res) => {
   }
 };
 
-
 exports.getReservationById = async (req, res) => {
   try {
     const id = req.params.id;
