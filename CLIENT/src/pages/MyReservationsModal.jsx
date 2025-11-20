@@ -11,6 +11,7 @@ import {
   IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const style = {
   position: "absolute",
@@ -30,6 +31,7 @@ export default function MyReservationsModal({ onClose }) {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -39,11 +41,10 @@ export default function MyReservationsModal({ onClose }) {
       return;
     }
 
-    // חילוץ userId מהטוקן (JWT)
     let userId = null;
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
-      userId = payload._id || payload.id; 
+      userId = payload._id || payload.id;
     } catch {
       setError("טוקן לא תקין");
       setLoading(false);
@@ -70,6 +71,47 @@ export default function MyReservationsModal({ onClose }) {
 
     fetchReservations();
   }, []);
+
+  async function handleDelete(id, dateStr) {
+    // המרת תאריך להזמנה ל-Date
+    const reservationDate = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // לאפס זמן לשעה 00:00
+
+    // בדיקה אם התאריך עבר
+    if (reservationDate < today) {
+      setError("לא ניתן למחוק הזמנה מתאריך שעבר.");
+      return;
+    }
+
+    // אישור מחיקה
+    const confirmed = window.confirm("האם אתה בטוח שברצונך למחוק הזמנה זו?");
+    if (!confirmed) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("לא נמצא טוקן משתמש");
+      return;
+    }
+    setDeletingId(id);
+    try {
+      const res = await fetch(`http://localhost:3001/reservations/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "שגיאה במחיקת ההזמנה");
+      }
+
+      setReservations((prev) => prev.filter((r) => r._id !== id));
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
     <Modal open={true} onClose={onClose}>
@@ -114,7 +156,20 @@ export default function MyReservationsModal({ onClose }) {
         {!loading && !error && reservations.length > 0 && (
           <List>
             {reservations.map((resv) => (
-              <ListItem key={resv._id} divider>
+              <ListItem
+                key={resv._id}
+                divider
+                secondaryAction={
+                  <IconButton
+                    edge="end"
+                    aria-label="delete"
+                    onClick={() => handleDelete(resv._id, resv.date)}
+                    disabled={deletingId === resv._id}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                }
+              >
                 <ListItemText
                   primary={`חדר: ${resv.roomId.name || resv.roomId}`}
                   secondary={
