@@ -56,7 +56,6 @@ exports.createReservation = async (req, res) => {
 
 
 exports.getReservationsList = async (req, res) => {
-  // optional query params: roomId, date, userId
   const { roomId, date, userId } = req.query;
   const filter = {};
   if (roomId) filter.roomId = roomId;
@@ -65,7 +64,7 @@ exports.getReservationsList = async (req, res) => {
 
   try {
     const list = await ReservationModel.find(filter)
-      .populate("roomId", "name")  // כאן עושים populate לשם החדר בלבד
+      .populate("roomId", "name")
       .sort({ date: 1, "timeSlot.from": 1 });
 
     return res.json(list);
@@ -75,6 +74,7 @@ exports.getReservationsList = async (req, res) => {
   }
 };
 
+
 exports.getReservationById = async (req, res) => {
   try {
     const id = req.params.id;
@@ -83,16 +83,16 @@ exports.getReservationById = async (req, res) => {
     return res.json(reservation);
   } catch (err) {
     console.error("getReservationById error:", err);
-  }}
-  
-  exports.deleteReservation = async (req, res) => {
+    
   try {
     const id = req.params.id;
     const removed = await ReservationModel.findByIdAndDelete(id);
     if (!removed) return res.status(404).json({ message: "Not found" });
 
-    // remove from room.reservations
-    await RoomModel.updateOne({ _id: removed.roomId }, { $pull: { reservations: removed._id } });
+    await RoomModel.updateOne(
+      { _id: removed.roomId },
+      { $pull: { reservations: removed._id } }
+    );
 
     return res.json({ message: "deleted" });
   } catch (err) {
@@ -101,7 +101,7 @@ exports.getReservationById = async (req, res) => {
   }
 };
 
+
 exports.updateReservation = async (req, res) => {
-  // optional: implement update with same overlap checks; omitted for brevity but recommended
   return res.status(501).json({ message: "Not implemented" });
 };
