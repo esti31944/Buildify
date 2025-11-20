@@ -33,12 +33,12 @@ export default function Sidebar() {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
 
-    const links =
+  const links =
         user?.role === "admin"
             ? [
                 { to: "/", label: "דף הבית", icon: <HomeIcon />, color: "#1976d2" },
                 { to: "/issues", label: "תקלות", icon: <ReportProblemIcon />, color: "#d32f2f" },
-                { to: "/PaymentsManager", label: "תשלומים", icon: <PaymentIcon />, color: "#388e3c" },
+                { to: "/payments", label: "תשלומים", icon: <PaymentIcon />, color: "#388e3c" },
                 { to: "/documents", label: "חדרים", icon: <FolderIcon />, color: "#fbc02d" },
                 { to: "/notices", label: "לוח מודעות", icon: <NotificationsIcon />, color: "#7b1fa2" },
                 { to: "/tenants", label: "ניהול דיירים", icon: <PeopleIcon />, color: "#fb8c00" },
