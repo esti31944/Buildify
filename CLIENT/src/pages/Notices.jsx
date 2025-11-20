@@ -9,6 +9,16 @@ import {
   deleteNotice as deleteNoticeAction
 } from "../features/notice/NoticeSlice";
 
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  MenuItem,
+} from "@mui/material";
+
 function parseJwt(token) {
   try {
     return JSON.parse(atob(token.split(".")[1]));
@@ -42,7 +52,7 @@ export default function Notices() {
     if (token) setCurrentUser(parseJwt(token));
   }, []);
 
-  // --- טעינת המודעות מה-Slice ---
+  // --- טעינת המודעות ---
   useEffect(() => {
     dispatch(fetchNotices());
   }, [dispatch]);
@@ -101,105 +111,111 @@ export default function Notices() {
     await dispatch(deleteNoticeAction(id));
   }
 
-  if (loading) return <div>טוען מודעות...</div>;
-  if (error) return <div>שגיאה: {error}</div>;
+  if (loading) return <div style={{ textAlign: "right" }} dir="rtl">טוען מודעות...</div>;
+  if (error) return <div style={{ textAlign: "right" }} dir="rtl">שגיאה: {error}</div>;
 
   return (
-    <div>
+    <div dir="rtl" style={{ textAlign: "right" }}>
       <h1>לוח מודעות</h1>
 
       <div style={{ marginTop: 10, marginBottom: 10 }}>
-        {!showForm && (
-          <button className="btn btn-primary" onClick={() => setShowForm(true)}>
-            ➕ הוסף מודעה
-          </button>
-        )}
-
-        {showForm && (
-          <form
-            onSubmit={handleSubmit}
-            style={{
-              marginTop: 10,
-              marginBottom: 10,
-              border: "1px solid #ccc",
-              padding: 12,
-              borderRadius: 6,
-            }}
-          >
-            <div>
-              <label>
-                כותרת:<br />
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  required
-                  style={{ width: "100%", padding: 6, marginBottom: 8 }}
-                />
-              </label>
-            </div>
-
-            <div>
-              <label>
-                תוכן:<br />
-                <textarea
-                  name="content"
-                  value={formData.content}
-                  onChange={handleChange}
-                  required
-                  rows={4}
-                  style={{ width: "100%", padding: 6, marginBottom: 8 }}
-                />
-              </label>
-            </div>
-
-            <div>
-              <label>
-                סוג הודעה:<br />
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  style={{ padding: 6, marginBottom: 8 }}
-                >
-                  <option value="event">אירוע</option>
-                  <option value="announcement">הודעה</option>
-                </select>
-              </label>
-            </div>
-
-            <div>
-              <label>
-                תאריך תפוגה (אופציונלי):<br />
-                <input
-                  type="date"
-                  name="expiresAt"
-                  value={formData.expiresAt}
-                  onChange={handleChange}
-                  style={{ padding: 6, marginBottom: 8 }}
-                />
-              </label>
-            </div>
-
-            <button type="submit" className="btn btn-success" style={{ marginRight: 8 }}>
-              שמור
-            </button>
-
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => {
-                setShowForm(false);
-                setEditingId(null);
-              }}
-            >
-              ביטול
-            </button>
-          </form>
-        )}
+        <Button variant="contained" onClick={() => setShowForm(true)}>
+          ➕ הוסף מודעה
+        </Button>
       </div>
 
+      {/* מודל MUI לטופס */}
+      <Dialog
+        open={showForm}
+        onClose={() => {
+          setShowForm(false);
+          setEditingId(null);
+        }}
+        dir="rtl"
+      >
+        <DialogTitle style={{ textAlign: "right" }}>
+          {editingId ? "עדכון מודעה" : "הוספת מודעה חדשה"}
+        </DialogTitle>
+
+        <DialogContent dividers>
+          <form id="notice-form" onSubmit={handleSubmit} style={{ minWidth: 400 }}>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="כותרת *"
+              name="title"
+              fullWidth
+              variant="outlined"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              inputProps={{ style: { textAlign: "right" } }}
+            />
+
+            <TextField
+              margin="dense"
+              label="תוכן *"
+              name="content"
+              fullWidth
+              variant="outlined"
+              multiline
+              rows={4}
+              value={formData.content}
+              onChange={handleChange}
+              required
+              inputProps={{ style: { textAlign: "right" } }}
+            />
+
+            <TextField
+              margin="dense"
+              label="סוג הודעה"
+              name="category"
+              select
+              fullWidth
+              variant="outlined"
+              value={formData.category}
+              onChange={handleChange}
+              SelectProps={{ style: { textAlign: "right" } }}
+            >
+              <MenuItem value="event">אירוע</MenuItem>
+              <MenuItem value="announcement">הודעה</MenuItem>
+            </TextField>
+
+            <TextField
+              margin="dense"
+              label="תאריך תפוגה (אופציונלי)"
+              name="expiresAt"
+              type="date"
+              fullWidth
+              variant="outlined"
+              value={formData.expiresAt}
+              onChange={handleChange}
+              InputLabelProps={{
+                shrink: true,
+                style: { textAlign: "right" }
+              }}
+              inputProps={{ style: { textAlign: "right" } }}
+            />
+          </form>
+        </DialogContent>
+
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setShowForm(false);
+              setEditingId(null);
+            }}
+          >
+            ביטול
+          </Button>
+
+          <Button type="submit" form="notice-form" variant="contained">
+            שמור
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* רשימת מודעות */}
       <div style={{ display: "grid", gap: 12 }}>
         {notices.map((n) => {
           const canManage =
@@ -207,35 +223,37 @@ export default function Notices() {
             (currentUser.role === "admin" || currentUser._id === n.createdBy);
 
           return (
-            <Card key={n._id} title={n.title}>
+            <Card key={n._id} title={n.title} style={{ textAlign: "right" }}>
               <div>{n.content}</div>
 
-              <small style={{ color: "#666", marginTop: 6, display: "block" }}>
+              <small style={{ color: "#666", marginTop: 6, display: "block", textAlign: "right" }}>
                 סוג: {n.category === "event" ? "אירוע" : "הודעה"}
               </small>
 
               {n.expiresAt && (
-                <small style={{ color: "#999", display: "block" }}>
+                <small style={{ color: "#999", display: "block", textAlign: "right" }}>
                   פג תוקף ב: {new Date(n.expiresAt).toLocaleDateString()}
                 </small>
               )}
 
               {canManage && (
-                <div style={{ marginTop: 10 }}>
-                  <button
-                    className="btn btn-warning"
+                <div style={{ marginTop: 10, textAlign: "right" }}>
+                  <Button
+                    variant="outlined"
+                    color="warning"
                     onClick={() => startEdit(n)}
                     style={{ marginRight: 8 }}
                   >
                     ✏️ עדכן
-                  </button>
+                  </Button>
 
-                  <button
-                    className="btn btn-danger"
+                  <Button
+                    variant="outlined"
+                    color="error"
                     onClick={() => deleteNotice(n._id)}
                   >
                     🗑️ מחק
-                  </button>
+                  </Button>
                 </div>
               )}
             </Card>
