@@ -99,8 +99,25 @@ exports.getReservationById = async (req, res) => {
     console.error("deleteReservation error:", err);
     return res.status(500).json({ message: "Server error" });
   }
-};
+}};
 
+exports.deleteReservation = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const removed = await ReservationModel.findByIdAndDelete(id);
+    if (!removed) return res.status(404).json({ message: "Not found" });
+
+    await RoomModel.updateOne(
+      { _id: removed.roomId },
+      { $pull: { reservations: removed._id } }
+    );
+
+    return res.json({ message: "deleted" });
+  } catch (err) {
+    console.error("deleteReservation error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
 
 exports.updateReservation = async (req, res) => {
   return res.status(501).json({ message: "Not implemented" });
