@@ -21,6 +21,14 @@ export const createUser = createAsyncThunk(
         return res.data;
     }
 );
+// שליפת פרטי משתמש לפי ID
+export const fetchUserById = createAsyncThunk(
+    "users/fetchUserById",
+    async (id) => {
+        const res = await axios.get(`/users/myInfo`);
+        return res.data;
+    }
+);
 
 // עדכון משתמש
 export const updateUser = createAsyncThunk(
@@ -40,7 +48,6 @@ export const deleteUser = createAsyncThunk(
     }
 );
 
-// --- SLICE --- //
 
 const usersSlice = createSlice({
     name: "users",
@@ -53,7 +60,6 @@ const usersSlice = createSlice({
     extraReducers: (builder) => {
         builder
 
-            // --- FETCH ALL USERS --- //
             .addCase(fetchAllUsers.pending, (state) => {
                 state.loading = true;
             })

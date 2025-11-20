@@ -3,7 +3,7 @@ const { authAdmin,auth } = require("../middleware/authMiddleware");
 const paymentsController = require("../controllers/paymentController");
 
 const router = express.Router();
-const { testRoute,getAllPayments,getMyPayments,createPayment,updatePayment,deletePayment } = require("../controllers/paymentController"   );
+const { testRoute,getAllPayments,getMyPayments,createPayment,updatePayment,deletePayment,updatePaymentStatus } = require("../controllers/paymentController"   );
 // GET / – רשימת כל התשלומים (רק ועד)
 router.get("/", authAdmin, getAllPayments);
 
@@ -11,12 +11,15 @@ router.get("/", authAdmin, getAllPayments);
 router.get("/myPayments",auth, getMyPayments);
 
 // POST / – יצירת תשלום חדש
-router.post("/",auth, createPayment);
+router.post("/",authAdmin, createPayment);
 
 // PUT /:id – עדכון תשלום
-router.put("/:id", updatePayment);
+router.put("/:id",authAdmin, updatePayment);
+
+router.put("/updateStatus/:id",auth, updatePaymentStatus);
 
 // DELETE /:id – מחיקה
 router.delete("/:id", authAdmin, deletePayment);
+
 
 module.exports = router;

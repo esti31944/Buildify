@@ -1,4 +1,4 @@
-// src/features/payments/paymentsSlice.js
+// src/features/payments/paymentsSlice.jsx
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../api/axiosInstance";
 
@@ -18,8 +18,8 @@ export const fetchMyPayments = createAsyncThunk(
   "payments/fetchMyPayments",
   async () => {
     const res = await axios.get("/payments/myPayments");
-    console.log(res.data,"hi");
-    
+    console.log(res.data, "hi");
+
     return res.data;
   }
 );
@@ -48,6 +48,14 @@ export const deletePayment = createAsyncThunk(
   async (id) => {
     await axios.delete(`/payments/${id}`);
     return id;
+  }
+);
+
+export const updatePaymentStatus = createAsyncThunk(
+  "payments/updatePaymentStatus",
+  async ({ id, status }) => {
+    const res = await axios.put(`/payments/updateStatus/${id}`, { status });
+    return res.data.payment;
   }
 );
 
@@ -107,7 +115,14 @@ const paymentsSlice = createSlice({
       .addCase(deletePayment.fulfilled, (state, action) => {
         const id = action.payload;
         state.list = state.list.filter((p) => p._id !== id);
-      });
+      })
+      // --- UPDATE PAYMENT STATUS --- //
+      .addCase(updatePaymentStatus.fulfilled, (state, action) => {
+        const updated = action.payload;
+        const idx = state.list.findIndex((p) => p._id === updated._id);
+        if (idx !== -1) state.list[idx] = updated;
+      })
+      ;
   },
 });
 
