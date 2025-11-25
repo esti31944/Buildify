@@ -18,6 +18,8 @@ import HomeWorkIcon from "@mui/icons-material/HomeWork";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 
 import MyReservationsModal from "./MyReservationsModal";
 
@@ -98,32 +100,79 @@ export default function Rooms() {
   if (error) return <div>שגיאה: {error}</div>;
 
   return (
-    <Box sx={{ maxWidth: 900, mx: "auto", p: 2 }}>
-      <Typography variant="h4" fontWeight="bold" mb={3}>
-        חדרים זמינים
+    <Box sx={{ maxWidth: 900, mx: "auto", p: 2, direction: "rtl" }}>
+      {/* כותרת ראשית */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          mb: 2,
+          justifyContent: "flex-start",
+          gap: 1,
+        }}
+      >
+        <HomeWorkIcon sx={{ fontSize: 32, color: "#2c7be5" }} />
+        <Typography variant="h5" fontWeight="bold">
+          חדרים משותפים
+        </Typography>
+      </Box>
+      <Typography color="text.secondary" mb={3}>
+        הזמן חדרים משותפים בבניין
       </Typography>
 
-      <Button
-        variant="outlined"
-        sx={{ mb: 3 }}
-        onClick={() => setIsMyResModalOpen(true)}
+      {/* אזור הזמנות שלי */}
+      <Paper
+        elevation={1}
+        sx={{
+          backgroundColor: "#e7f0ff",
+          borderRadius: 3,
+          p: 2,
+          mb: 4,
+        }}
       >
-        צפה בהזמנות שלי
-      </Button>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            mb: 1,
+            justifyContent: "space-between",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <CalendarTodayIcon sx={{ color: "#1565c0" }} />
+            <Typography fontWeight="bold">ההזמנות שלי</Typography>
+          </Box>
 
+          <Button
+            variant="text"
+            size="small"
+            onClick={() => setIsMyResModalOpen(true)}
+            sx={{ fontWeight: "bold", color: "#1565c0" }}
+          >
+            צפה בכולן
+          </Button>
+        </Box>
+
+        {/* כאן אתה תוכל למפות את ההזמנות שלי */}
+        {/* דוגמה - מומלץ להחליף לפי הנתונים האמיתיים */}
+        {/* לדוגמה, תוכל למפות את ההזמנות בתוך המודל MyReservationsModal */}
+      </Paper>
+
+      {/* כפתור הוספת חדר למנהלים */}
       {isAdmin && !showForm && (
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setShowForm(true)}
-          sx={{ mb: 3, borderRadius: 3 }}
+          sx={{ mb: 3, borderRadius: 3, backgroundColor: "#1565c0" }}
         >
           הוסף חדר
         </Button>
       )}
 
+      {/* טופס הוספה/עריכה */}
       {showForm && (
-        <Paper sx={{ p: 3, mb: 3, borderRadius: 4 }} elevation={3}>
+        <Paper sx={{ p: 3, mb: 4, borderRadius: 3 }} elevation={3}>
           <Typography variant="h6" mb={2}>
             {editingRoomId ? "עריכת חדר" : "הוספת חדר חדש"}
           </Typography>
@@ -150,75 +199,123 @@ export default function Rooms() {
               sx={{ mb: 2 }}
             />
 
-            <Button variant="contained" type="submit" sx={{ mr: 2 }}>
-              שמור
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={() => {
-                setShowForm(false);
-                setEditingRoomId(null);
-              }}
-            >
-              ביטול
-            </Button>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Button
+                variant="contained"
+                type="submit"
+                sx={{ borderRadius: 3, backgroundColor: "#1565c0" }}
+              >
+                שמור
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingRoomId(null);
+                }}
+                sx={{ borderRadius: 3 }}
+              >
+                ביטול
+              </Button>
+            </Box>
           </form>
         </Paper>
       )}
 
-      <Box sx={{ display: "grid", gap: 2 }}>
-        {rooms.map((room) => (
-          <Card
-            key={room._id}
-            sx={{
-              bgcolor: "#F5F9FF",
-              borderRadius: 4,
-              boxShadow: "0 4px 10px rgba(0,0,0,0.06)",
-            }}
-          >
-            <CardContent sx={{ display: "flex", alignItems: "center" }}>
-              <HomeWorkIcon sx={{ fontSize: 40, color: "#247CFF", ml: 2 }} />
+      {/* רשימת חדרים זמינים */}
+      <Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            mb: 2,
+            justifyContent: "flex-start",
+            gap: 1,
+          }}
+        >
+          <MeetingRoomIcon sx={{ color: "#333", fontSize: 26 }} />
+          <Typography variant="h6" fontWeight="bold">
+            חדרים זמינים
+          </Typography>
+        </Box>
 
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="h6">{room.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {room.description || "ללא תיאור"}
-                </Typography>
-              </Box>
+        <Box
+          sx={{
+            display: "grid",
+            gap: 2,
+            gridTemplateColumns: "repeat(3, 1fr)",
+          }}
+        >
+          {rooms.map((room) => (
+            <Card
+              key={room._id}
+              sx={{
+                borderRadius: 3,
+                boxShadow: "0 1px 6px rgba(0,0,0,0.12)",
+                padding: 1,
+                direction: "rtl",
+              }}
+            >
+              <CardContent sx={{ display: "flex", alignItems: "center" }}>
+                <HomeWorkIcon sx={{ fontSize: 28, color: "#247CFF", ml: 2 }} />
 
-              {isAdmin && (
-                <>
-                  <IconButton onClick={() => startEdit(room)}>
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    color="error"
-                    onClick={() => handleDelete(room._id)}
+                <Box sx={{ flexGrow: 1, textAlign: "right" }}>
+                  <Typography variant="subtitle1">{room.name}</Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ fontSize: 13 }}
                   >
-                    <DeleteIcon />
-                  </IconButton>
-                </>
-              )}
-            </CardContent>
+                    {room.description || "ללא תיאור"}
+                  </Typography>
+                </Box>
 
-            <Divider />
+                {isAdmin && (
+                  <Box>
+                    <IconButton onClick={() => startEdit(room)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      color="error"
+                      onClick={() => handleDelete(room._id)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                )}
+              </CardContent>
 
-            <CardActions sx={{ p: 2, justifyContent: "flex-end" }}>
-              <Button
-                variant="contained"
-                sx={{ borderRadius: 3 }}
-                onClick={() => {
-                  setSelectedRoomId(room._id);
-                  setIsModalOpen(true);
+              <Divider />
+
+              <CardActions
+                sx={{
+                  p: 2,
+                  justifyContent: "flex-end",
                 }}
               >
-                הזמן עכשיו
-              </Button>
-            </CardActions>
-          </Card>
-        ))}
+                <Button
+                  variant="contained"
+                  sx={{
+                    borderRadius: 1,
+                    minWidth: 130,
+                    paddingY: 1,
+                    backgroundColor: "#247CFF",
+                    "&:hover": { backgroundColor: "#1a5fcc" },
+                  }}
+                  onClick={() => {
+                    setSelectedRoomId(room._id);
+                    setIsModalOpen(true);
+                  }}
+                >
+                  הזמן עכשיו
+                </Button>
+              </CardActions>
+            </Card>
+          ))}
+        </Box>
       </Box>
 
+      {/* מודל הזמנה */}
       {isModalOpen && (
         <ReservationModal
           roomId={selectedRoomId}
@@ -226,6 +323,7 @@ export default function Rooms() {
         />
       )}
 
+      {/* מודל ההזמנות שלי */}
       {isMyResModalOpen && (
         <MyReservationsModal onClose={() => setIsMyResModalOpen(false)} />
       )}
