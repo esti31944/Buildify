@@ -19,46 +19,69 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
         if (!formData.description.trim() || formData.description.length < 1 || formData.description.length > 1000) {
             return 'תיאור התקלה חייב להיות בין 1 ל-1000 תווים';
         }
-        if (formData.imageUrl && !/^https?:\/\/\S+$/.test(formData.imageUrl)) {
-            return 'כתובת התמונה אינה חוקית';
-        }
+        // if (formData.imageUrl && !/^https?:\/\/\S+$/.test(formData.imageUrl)) {
+        //     return 'כתובת התמונה אינה חוקית';
+        // }
         return null;
     }
 
     const handleSubmit = async () => {
         setError('');
-
+    
         if (!formData.title.trim() || !formData.description.trim()) {
             setError('אנא מלא את כל השדות המסומנים בכוכבית');
             return;
         }
-
+    
         const errorMsg = validateForm(formData);
         if (errorMsg) {
             setError(errorMsg);
             return;
         }
-
+    
         try {
-            if (mode === "create") {
-                await dispatch(createIssue(formData)).unwrap();
-            } else {
-                const { _id, ...dataToUpdate } = formData;
-                await dispatch(updateIssue({ id: initialData._id, data: dataToUpdate })).unwrap();
+            // יצירת אובייקט FormData
+            const data = new FormData();
+            data.append("title", formData.title);
+            data.append("description", formData.description);
+    
+            // אם יש תמונה - נוסיף
+            if (formData.image) {
+                data.append("image", formData.image);
             }
+    
+            if (mode === "create") {
+                await dispatch(createIssue(data)).unwrap();
+            } else {
+                const { _id, ...rest } = formData;
+    
+                const updateData = new FormData();
+                updateData.append("title", rest.title);
+                updateData.append("description", rest.description);
+    
+                if (rest.image) {
+                    updateData.append("image", rest.image);
+                }
+    
+                await dispatch(updateIssue({ id: initialData._id, data: updateData })).unwrap();
+            }
+    
             if (user.role === "admin") {
                 dispatch(fetchAllIssues());
             } else {
                 dispatch(fetchMyIssues());
             }
+    
             onClose();
-
+    
         } catch (err) {
+            console.log({data},"check");
+
             setError("שגיאה בשליחה");
             console.error(err);
         }
     };
-
+    
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -127,14 +150,20 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
                             <label className="fault-report-label">
                                 כתובת לתמונה <span className="fault-report-optional">(אופציונלי)</span>
                             </label>
-                            <input
+                            {/* <input
                                 type="text"
                                 name="imageUrl"
                                 value={formData.imageUrl}
                                 onChange={handleChange}
                                 className="fault-report-input"
                                 placeholder="לא נבחר כרגע"
+                            /> */}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
                             />
+
                         </div>
 
                         <div className="fault-report-buttons">

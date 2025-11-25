@@ -7,21 +7,51 @@ const testRoute = (req, res) => {
 };
 
 // דיווח תקלה חדש
-const createIssue = async (req, res) => {
-  const issueData = { ...req.body, userId: req.user._id };
-  const validBody = validIssue(issueData);
-  if (validBody.error) {
-    return res.status(400).json(validBody.error.details);
-  }
+// const createIssue = async (req, res) => {
+//   const issueData = { ...req.body, userId: req.user._id };
+//   const validBody = validIssue(issueData);
+//   if (validBody.error) {
+//     return res.status(400).json(validBody.error.details);
+//   }
 
+//   try {
+//     const issue = new IssueModel(issueData);
+//     await issue.save();
+//     res.status(201).json(issue);
+//   } catch (err) {
+//     res.status(500).json({ msg: "Server error", err });
+//   }
+// };
+const createIssue = async (req, res) => {
   try {
+    console.log("req.body:", req.body);
+    console.log("req.file:", req.file);
+
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+
+    const issueData = {
+      ...req.body,
+      userId: req.user._id,
+      imageUrl: imagePath
+    };
+
+    const validBody = validIssue(issueData);
+    if (validBody.error) {
+      console.log("Validation error:", validBody.error.details);
+      return res.status(400).json(validBody.error.details);
+    }
+
     const issue = new IssueModel(issueData);
     await issue.save();
+
     res.status(201).json(issue);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ msg: "Server error", err });
   }
 };
+
+
 
 // עדכון כללי של תקלה
 const updateIssue = async (req, res) => {

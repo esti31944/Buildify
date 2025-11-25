@@ -12,10 +12,31 @@ export const fetchMyIssues = createAsyncThunk("issues/fetchMyIssues", async () =
   return res.data;
 });
 
-export const createIssue = createAsyncThunk("issues/createIssue", async (newIssue) => {
-  const res = await axios.post("/issues", newIssue);
-  return res.data;
-});
+export const createIssue = createAsyncThunk(
+  "issues/createIssue",
+  async (formData, thunkAPI) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post("/issues", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // ❗ אל תוסיף כאן Content-Type, axios ידאג לזה עם FormData
+        },
+      });
+
+      return res.data;
+    } catch (err) {
+      // בודק אם יש תגובת שגיאה מהשרת
+      if (err.response && err.response.data) {
+        
+        return thunkAPI.rejectWithValue(err.response.data.message || "שגיאה בשרת");
+      }
+      return thunkAPI.rejectWithValue(err.message);
+    }
+  }
+);
+
+
 
 export const updateIssue = createAsyncThunk(
   "issues/updateIssue",
