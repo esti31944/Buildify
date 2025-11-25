@@ -33,14 +33,15 @@ export const createPayment = createAsyncThunk(
   }
 );
 
-// עדכון תשלום
 export const updatePayment = createAsyncThunk(
   "payments/updatePayment",
-  async ({ id, updatedFields }) => {
-    const res = await axios.put(`/payments/${id}`, updatedFields);
+  async ({ id, updatedData }) => {
+    const res = await axios.put(`/payments/${id}`, { updatedData }); // חייב לעטוף
     return res.data;
   }
 );
+
+
 
 // מחיקת תשלום
 export const deletePayment = createAsyncThunk(

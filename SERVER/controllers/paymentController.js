@@ -49,10 +49,13 @@ exports.updatePayment = async (req, res) => {
   }
 
   try {
+    console.log("Updating payment:", req.params.id, req.body);
+
     const payment = await PaymentModel.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updatedAt: Date.now() },
+      { ...req.body.updatedData, updatedAt: Date.now() },
       { new: true }
+      
     );
     if (!payment) {
       return res.status(404).json({ msg: "Payment not found" });

@@ -13,6 +13,7 @@ import UserCards from "../components/payments/UserCards";
 import PaymentsTable from "../components/payments/PaymentsTable";
 import PaymentForm from "../components/payments/PaymentForm";
 import AdminActions from "../components/payments/AdminActions";
+import dayjs from "dayjs";
 
 import { Box, Typography } from "@mui/material";
 
@@ -35,49 +36,70 @@ export default function PaymentsNEW() {
         month: "",
         amount: "",
         userId: "",
+        fullName: "",
     });
 
-    // פתיחת חלון
-    const handleOpen = (payment = null) => {
-        if (payment) {
-            setEditMode(true);
-            setForm({
-                title: payment.title,
-                month: payment.month,
-                amount: payment.amount,
-                userId: payment.userId,
-                _id: payment._id,
-            });
-        } else {
-            setEditMode(false);
-            setForm({
-                title: "",
-                month: "",
-                amount: "",
-                userId: "",
-            });
-        }
-        setOpen(true);
-    };
 
-    const handleClose = () => {
+// --- פתיחת טופס עריכה / חדש --- //
+const handleOpen = (payment = null) => {
+    if (payment) {
+        setEditMode(true);
+        setForm({
+            _id: payment._id,
+            title: payment.title || "",
+            amount: payment.amount || "",
+            month: payment.month ? dayjs(payment.month).startOf("month") : null,
+            userId: payment.userId?._id || payment.userId || "",
+            fullName: payment.userId?.fullName || ""
+        });
+    } else {
+        setEditMode(false);
+        setForm({
+            _id: null,
+            title: "",
+            amount: "",
+            month: null,
+            userId: "",
+            fullName: ""
+        });
+    }
+    setOpen(true);
+};
+
+// --- שמירה (יצירה / עדכון) --- //
+const handleSubmit = () => {
+    const { title, amount, month, userId, _id } = form;
+
+    // המרת month ל-Date תקין, amount למספר, userId רק אם קיים
+    const payload = {
+        title,
+        amount: Number(amount),
+        month: month ? dayjs(month).startOf("month").toDate() : null,
+    };
+console.log("Payload being sent:", payload, "Edit mode:", editMode, "ID:", form._id);
+
+if (!editMode && userId) payload.userId = userId;
+
+    console.log("Submitting payload:", payload, "Edit mode:", editMode, "ID:", _id);
+
+if (editMode) {
+    dispatch(updatePayment({ id: form._id, updatedData: payload }))
+        .then(() => dispatch(fetchAllPayments()));
+} else {
+    dispatch(createPayment(payload))
+        .then(() => dispatch(fetchAllPayments()));
+}
+
+
+
+    handleClose();
+};
+
+      const handleClose = () => {
         setOpen(false);
-        setForm({ title: "", month: "", amount: "", userId: "" });
+        setForm({ title: "", month: "", amount: "", userId: "", fullName: "" });
     };
 
-    // שמירה (יצירה / עדכון)
-    const handleSubmit = () => {
-        if (editMode) {
-            dispatch(updatePayment({ id: form._id, updatedData: form })).then(() => {
-                dispatch(fetchAllPayments());
-            });
-        } else {
-            dispatch(createPayment(form)).then(() => {
-                dispatch(fetchAllPayments());
-            });
-        }
-        handleClose();
-    };
 
     // מחיקה
     const handleDelete = (id) => {
