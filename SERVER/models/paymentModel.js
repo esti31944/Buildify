@@ -3,24 +3,25 @@ const Joi = require("joi");
 
 const paymentSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
-    type: { 
-        type: String, 
-        enum: ["monthly", "extra"], 
-        default: "monthly" 
+    type: {
+        type: String,
+        enum: ["monthly", "extra"],
+        default: "monthly"
     },
-    month: { type: Date, default: Date.now }, 
-    title: { type: String, required: true, trim: true }, 
+    month: { type: Date, default: Date.now },
+    title: { type: String, required: true, trim: true },
     amount: { type: Number, required: true },
-    status: { 
-        type: String, 
-        enum: ["unpaid","pending", "paid"], 
-        default: "unpaid" 
+    status: {
+        type: String,
+        enum: ["unpaid", "pending", "paid"],
+        default: "unpaid"
     },
-    paymentMethod: { 
-        type: String, 
-        enum: ["bank", "cash", "credit"], 
-        default: "bank" 
+    paymentMethod: {
+        type: String,
+        enum: ["bank", "cash", "credit"],
+        default: "bank"
     },
+    filePath: { type: String, trim: true, default: "" },
     paymentDate: { type: Date }, // אם שולם
     notes: { type: String, trim: true, default: "" }
 }, { timestamps: true });
@@ -40,6 +41,7 @@ exports.validPayment = (payment) => {
         paymentMethod: Joi.string().valid("bank", "cash", "credit"),
         paymentDate: Joi.date().allow(null),
         notes: Joi.string().max(1000).allow("", null)
+
     });
     return schema.validate(payment);
 };

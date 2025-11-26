@@ -18,7 +18,6 @@ exports.getMyPayments = async (req, res) => {
 
   try {
     const payments = await PaymentModel.find({ userId }).sort({ dueDate: -1 });
-    console.log(payments, "hello");
     res.json(payments);
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
@@ -49,10 +48,13 @@ exports.updatePayment = async (req, res) => {
   }
 
   try {
+    console.log("Updating payment:", req.params.id, req.body);
+
     const payment = await PaymentModel.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updatedAt: Date.now() },
+      { ...req.body.updatedData, updatedAt: Date.now() },
       { new: true }
+      
     );
     if (!payment) {
       return res.status(404).json({ msg: "Payment not found" });
@@ -63,6 +65,8 @@ exports.updatePayment = async (req, res) => {
   }
 };
 exports.updatePaymentStatus = async (req, res) => {
+    console.log("come to upload");
+
 try {
     const payment = await PaymentModel.findById(req.params.id);
     if (!payment) {
@@ -108,6 +112,28 @@ try {
     res.status(500).json({ msg: "Server error", err });
   }
 };
+
+exports.uploadFile = async (req, res) => {
+  
+    const paymentId = req.params.id;
+
+    if (!req.file) return res.status(400).json({ msg: "No file uploaded" });
+
+    try {
+        const payment = await PaymentModel.findByIdAndUpdate(
+            paymentId,
+            { filePath: req.file.path, updatedAt: Date.now() },
+            { new: true }
+        );
+
+        if (!payment) return res.status(404).json({ msg: "Payment not found" });
+
+        res.json({ msg: "File updated successfully", payment });
+    } catch (err) {
+        res.status(500).json({ msg: "Server error", err });
+    }
+};
+
 
 // מחיקת תשלום
 exports.deletePayment = async (req, res) => {
