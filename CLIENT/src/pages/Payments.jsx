@@ -66,20 +66,27 @@ export default function PaymentsNEW() {
     };
 
     // שמירה (יצירה / עדכון)
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (editMode) {
-            dispatch(updatePayment({ id: form._id, updatedData: form })).then(() => {
-                dispatch(fetchAllPayments());
-            });
+            // במקרה של עריכה, נניח שמדובר בתשלום יחיד - אפשר להשאיר כמו שהוא או לשנות לפי הצורך
+            await dispatch(updatePayment({ id: form._id, updatedData: form }));
+            dispatch(fetchAllPayments());
         } else {
-            dispatch(createPayment(form)).then(() => {
-                dispatch(fetchAllPayments());
-            });
+            // במקרה של יצירה, נשלח בקשה לכל משתמש בנפרד
+            if (Array.isArray(form.userId)) {
+                for (const userId of form.userId) {
+                    const paymentForUser = { ...form, userId }; // יוצרים עותק עם userId אחד
+                    await dispatch(createPayment(paymentForUser));
+                }
+            } else {
+                // מקרה שבו משתמש יחיד בלבד נבחר
+                await dispatch(createPayment(form));
+            }
+            dispatch(fetchAllPayments());
         }
         handleClose();
     };
-
-    // מחיקה
+        // מחיקה
     const handleDelete = (id) => {
         dispatch(deletePayment(id)).then(() => {
             dispatch(fetchAllPayments());

@@ -14,9 +14,7 @@ export default function AdminActions({ handleOpen }) {
                 תשלום חדש
             </Button>
 
-            <Button variant="contained" color="secondary" startIcon={<AddIcon />}>
-                הוסף לכולם
-            </Button>
+            
         </Box>
     );
 }

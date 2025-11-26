@@ -8,6 +8,23 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 
 export default function PaymentForm({ open, onClose, onSubmit, form, setForm, editMode, users }) {
+
+    const handleUserChange = (e) => {
+        const value = e.target.value;
+
+        if (value.includes("all")) {
+            // אם כבר כל המשתמשים נבחרו, ננקה את הבחירה
+            if (form.userId.length === users.length) {
+                setForm({ ...form, userId: [] });
+            } else {
+                // בחר את כל המשתמשים
+                setForm({ ...form, userId: users.map(u => u._id) });
+            }
+        } else {
+            setForm({ ...form, userId: value });
+        }
+    };
+
     return (
         <Dialog open={open} onClose={onClose} fullWidth>
             <DialogTitle>{editMode ? "עריכת תשלום" : "תשלום חדש"}</DialogTitle>
@@ -39,13 +56,28 @@ export default function PaymentForm({ open, onClose, onSubmit, form, setForm, ed
                 />
 
                 <FormControl fullWidth>
-                    <InputLabel id="user-select-label">משתמש</InputLabel>
+                    <InputLabel id="user-select-label">משתמשים</InputLabel>
                     <Select
+                        multiple
                         labelId="user-select-label"
-                        value={form.userId}
-                        label="משתמש"
-                        onChange={(e) => setForm({ ...form, userId: e.target.value })}
+                        value={form.userId || []}
+                        label="משתמשים"
+                        onChange={handleUserChange}
+                        renderValue={(selected) => {
+                            const selectedNames = users
+                                .filter(u => selected.includes(u._id))
+                                .map(u => u.fullName)
+                                .join(", ");
+                            return selectedNames;
+                        }}
                     >
+                        <MenuItem
+                            value="all"
+                            style={{ fontWeight: "bold", borderBottom: "1px solid #ccc" }}
+                        >
+                            כל המשתמשים
+                        </MenuItem>
+
                         {users?.map((u) => (
                             <MenuItem key={u._id} value={u._id}>
                                 {u.fullName}
