@@ -59,6 +59,25 @@ export const updatePaymentStatus = createAsyncThunk(
     return res.data.payment;
   }
 );
+export const uploadPaymentFile = createAsyncThunk(
+  "payments/uploadPaymentFile",
+  async ({ paymentId, file }, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await axios.put(`/payments/uploadFile/${paymentId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      return res.data.payment;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+
 
 
 // --- SLICE --- //
@@ -123,8 +142,17 @@ const paymentsSlice = createSlice({
         const idx = state.list.findIndex((p) => p._id === updated._id);
         if (idx !== -1) state.list[idx] = updated;
       })
-      ;
-  },
+      
+      .addCase(uploadPaymentFile.fulfilled, (state, action) => {
+        const updated = action.payload;
+        const idx = state.list.findIndex((p) => p._id === updated._id);
+        if (idx !== -1) state.list[idx] = updated;
+      })
+    .addCase(uploadPaymentFile.rejected, (state, action) => {
+      state.error = action.payload;
+    });
+
+},
 });
 
 export default paymentsSlice.reducer;
