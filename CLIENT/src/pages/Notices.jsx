@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Card from "../components/Card";
 
 import {
   fetchNotices,
@@ -17,7 +16,62 @@ import {
   Button,
   TextField,
   MenuItem,
+  Paper,
+  Box,
+  Typography,
+  IconButton,
+  Tabs,
+  Tab,
 } from "@mui/material";
+
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+
+function StickyNoteCard({ title, children, color = "#FFFFFF" }) {
+  return (
+    <Paper
+      elevation={3}
+      sx={{
+        p: 2,
+        background: color,
+        borderRadius: "8px",
+        boxShadow: "0 4px 6px rgba(0,0,0,0.15)",
+        transform: "rotate(-1.5deg)",
+        transition: "0.2s",
+        position: "relative",
+        ":hover": {
+          transform: "rotate(0deg)",
+          boxShadow: "0 6px 10px rgba(0,0,0,0.22)",
+        },
+        textAlign: "right",
+        overflowWrap: "break-word",
+        wordBreak: "break-word",
+      }}
+      dir="rtl"
+    >
+      <div
+        style={{
+          position: "absolute",
+          top: -10,
+          right: 10,
+          fontSize: "24px",
+          transform: "rotate(15deg)",
+          pointerEvents: "none",
+        }}
+      >
+        📌
+      </div>
+
+      <Typography variant="h6" sx={{ mb: 1, fontWeight: "bold" }}>
+        {title}
+      </Typography>
+
+      <Box sx={{ fontSize: "15px", overflowWrap: "break-word" }}>
+        {children}
+      </Box>
+    </Paper>
+  );
+}
 
 function parseJwt(token) {
   try {
@@ -36,6 +90,9 @@ export default function Notices() {
 
   const [currentUser, setCurrentUser] = useState(null);
 
+  // נשמור את הערך של הטאב הנבחר (all, event, announcement)
+  const [filterCategory, setFilterCategory] = useState("all");
+
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -46,18 +103,16 @@ export default function Notices() {
 
   const [editingId, setEditingId] = useState(null);
 
-  // --- פענוח טוקן ---
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) setCurrentUser(parseJwt(token));
   }, []);
 
-  // --- טעינת המודעות ---
   useEffect(() => {
     dispatch(fetchNotices());
   }, [dispatch]);
 
-  function handleChange(e) {
+  function handleChangeForm(e) {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
   }
@@ -111,12 +166,42 @@ export default function Notices() {
     await dispatch(deleteNoticeAction(id));
   }
 
-  if (loading) return <div style={{ textAlign: "right" }} dir="rtl">טוען מודעות...</div>;
-  if (error) return <div style={{ textAlign: "right" }} dir="rtl">שגיאה: {error}</div>;
+  // חישוב מספר הפריטים בכל קטגוריה
+  const counts = {
+    all: notices.length,
+    event: notices.filter(n => n.category === "event").length,
+    announcement: notices.filter(n => n.category === "announcement").length,
+  };
+
+  const filteredNotices = notices.filter((n) => {
+    if (filterCategory === "all") return true;
+    return n.category === filterCategory;
+  });
+
+  if (loading) return <div dir="rtl">טוען מודעות...</div>;
+  if (error) return <div dir="rtl">שגיאה: {error}</div>;
+
+  // עזרה ל-MUI Tabs כדי שיתמוך בערכים של מחרוזות במקום אינדקסים
+  function handleTabChange(event, newValue) {
+    setFilterCategory(newValue);
+  }
 
   return (
     <div dir="rtl" style={{ textAlign: "right" }}>
       <h1>לוח מודעות</h1>
+
+      {/* טאב עם מספרים */}
+      <Tabs
+        value={filterCategory}
+        onChange={handleTabChange}
+        textColor="primary"
+        indicatorColor="primary"
+        sx={{ justifyContent: "flex-end", display: "flex" }}
+      >
+        <Tab label={`כל ההודעות (${counts.all})`} value="all" />
+        <Tab label={`ארועים (${counts.event})`} value="event" />
+        <Tab label={`הודעות   (${counts.announcement})`} value="announcement" />
+      </Tabs>
 
       <div style={{ marginTop: 10, marginBottom: 10 }}>
         <Button variant="contained" onClick={() => setShowForm(true)}>
@@ -124,7 +209,6 @@ export default function Notices() {
         </Button>
       </div>
 
-      {/* מודל MUI לטופס */}
       <Dialog
         open={showForm}
         onClose={() => {
@@ -147,7 +231,7 @@ export default function Notices() {
               fullWidth
               variant="outlined"
               value={formData.title}
-              onChange={handleChange}
+              onChange={handleChangeForm}
               required
               inputProps={{ style: { textAlign: "right" } }}
             />
@@ -161,7 +245,7 @@ export default function Notices() {
               multiline
               rows={4}
               value={formData.content}
-              onChange={handleChange}
+              onChange={handleChangeForm}
               required
               inputProps={{ style: { textAlign: "right" } }}
             />
@@ -174,7 +258,7 @@ export default function Notices() {
               fullWidth
               variant="outlined"
               value={formData.category}
-              onChange={handleChange}
+              onChange={handleChangeForm}
               SelectProps={{ style: { textAlign: "right" } }}
             >
               <MenuItem value="event">אירוע</MenuItem>
@@ -189,7 +273,7 @@ export default function Notices() {
               fullWidth
               variant="outlined"
               value={formData.expiresAt}
-              onChange={handleChange}
+              onChange={handleChangeForm}
               InputLabelProps={{
                 shrink: true,
                 style: { textAlign: "right" }
@@ -215,48 +299,66 @@ export default function Notices() {
         </DialogActions>
       </Dialog>
 
-      {/* רשימת מודעות */}
-      <div style={{ display: "grid", gap: 12 }}>
-        {notices.map((n) => {
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+          gap: 20,
+          padding: 10,
+        }}
+      >
+        {filteredNotices.map((n) => {
           const canManage =
             currentUser &&
             (currentUser.role === "admin" || currentUser._id === n.createdBy);
 
           return (
-            <Card key={n._id} title={n.title} style={{ textAlign: "right" }}>
+            <StickyNoteCard
+              key={n._id}
+              title={n.title}
+              color="#FFFFFF"
+            >
               <div>{n.content}</div>
 
-              <small style={{ color: "#666", marginTop: 6, display: "block", textAlign: "right" }}>
+              <small style={{ color: "#666", marginTop: 6, display: "block" }}>
                 סוג: {n.category === "event" ? "אירוע" : "הודעה"}
               </small>
 
               {n.expiresAt && (
-                <small style={{ color: "#999", display: "block", textAlign: "right" }}>
+                <small style={{ color: "#999", display: "block" }}>
                   פג תוקף ב: {new Date(n.expiresAt).toLocaleDateString()}
+                </small>
+              )}
+
+              {n.createdAt && (
+                <small style={{ color: "#999", display: "block" }}>
+                  נוצר ב: {new Date(n.createdAt).toLocaleDateString()}
                 </small>
               )}
 
               {canManage && (
                 <div style={{ marginTop: 10, textAlign: "right" }}>
-                  <Button
-                    variant="outlined"
+                  <IconButton
+                    aria-label="edit"
                     color="warning"
                     onClick={() => startEdit(n)}
+                    size="small"
                     style={{ marginRight: 8 }}
                   >
-                    ✏️ עדכן
-                  </Button>
+                    <EditIcon />
+                  </IconButton>
 
-                  <Button
-                    variant="outlined"
+                  <IconButton
+                    aria-label="delete"
                     color="error"
                     onClick={() => deleteNotice(n._id)}
+                    size="small"
                   >
-                    🗑️ מחק
-                  </Button>
+                    <DeleteIcon />
+                  </IconButton>
                 </div>
               )}
-            </Card>
+            </StickyNoteCard>
           );
         })}
       </div>
