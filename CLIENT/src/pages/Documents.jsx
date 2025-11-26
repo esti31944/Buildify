@@ -11,6 +11,10 @@ import {
   Divider,
   TextField,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 
 import ReservationModal from "./ReservationModal";
@@ -152,10 +156,6 @@ export default function Rooms() {
             צפה בכולן
           </Button>
         </Box>
-
-        {/* כאן אתה תוכל למפות את ההזמנות שלי */}
-        {/* דוגמה - מומלץ להחליף לפי הנתונים האמיתיים */}
-        {/* לדוגמה, תוכל למפות את ההזמנות בתוך המודל MyReservationsModal */}
       </Paper>
 
       {/* כפתור הוספת חדר למנהלים */}
@@ -170,56 +170,72 @@ export default function Rooms() {
         </Button>
       )}
 
-      {/* טופס הוספה/עריכה */}
+      {/* טופס הוספה/עריכה בתוך דיאלוג */}
       {showForm && (
-        <Paper sx={{ p: 3, mb: 4, borderRadius: 3 }} elevation={3}>
-          <Typography variant="h6" mb={2}>
+        <Dialog
+          open={showForm}
+          onClose={() => {
+            setShowForm(false);
+            setEditingRoomId(null);
+            setFormData({ name: "", description: "" });
+          }}
+          dir="rtl"
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ textAlign: "right" }}>
             {editingRoomId ? "עריכת חדר" : "הוספת חדר חדש"}
-          </Typography>
+          </DialogTitle>
 
-          <form onSubmit={handleSubmit}>
-            <TextField
-              label="שם חדר"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              fullWidth
-              required
-              sx={{ mb: 2 }}
-            />
+          <DialogContent dividers>
+            <form id="room-form" onSubmit={handleSubmit}>
+              <TextField
+                label="שם חדר"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                fullWidth
+                required
+                sx={{ mb: 2 }}
+                inputProps={{ style: { textAlign: "right" } }}
+                autoFocus
+              />
 
-            <TextField
-              label="תיאור"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              fullWidth
-              multiline
-              rows={3}
-              sx={{ mb: 2 }}
-            />
+              <TextField
+                label="תיאור"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                fullWidth
+                multiline
+                rows={3}
+                sx={{ mb: 2 }}
+                inputProps={{ style: { textAlign: "right" } }}
+              />
+            </form>
+          </DialogContent>
 
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <Button
-                variant="contained"
-                type="submit"
-                sx={{ borderRadius: 3, backgroundColor: "#1565c0" }}
-              >
-                שמור
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingRoomId(null);
-                }}
-                sx={{ borderRadius: 3 }}
-              >
-                ביטול
-              </Button>
-            </Box>
-          </form>
-        </Paper>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setShowForm(false);
+                setEditingRoomId(null);
+                setFormData({ name: "", description: "" });
+              }}
+            >
+              ביטול
+            </Button>
+
+            <Button
+              type="submit"
+              form="room-form"
+              variant="contained"
+              sx={{ backgroundColor: "#1565c0" }}
+            >
+              שמור
+            </Button>
+          </DialogActions>
+        </Dialog>
       )}
 
       {/* רשימת חדרים זמינים */}

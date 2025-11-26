@@ -44,8 +44,9 @@ export default function PaymentForm({ open, onClose, onSubmit, form, setForm, ed
                 />
 
                 <FormControl fullWidth>
-                    <InputLabel id="user-select-label">משתמש</InputLabel>
+                    <InputLabel id="user-select-label">משתמשים</InputLabel>
                     <Select
+                        multiple
                         labelId="user-select-label"
                         value={form.userId || ""}
                         label="משתמש"

@@ -18,10 +18,7 @@ export default function AdminActions({ handleOpen }) {
                         borderRadius: "50%", // כפתור עגול
                     }}
 
-        >
-                <AddIcon />
-            </Button>
-        </Tooltip>
-    </Box >
-  );
+            
+        </Box>
+    );
 }
