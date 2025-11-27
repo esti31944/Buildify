@@ -2,7 +2,12 @@ const bcrypt = require("bcryptjs");
 const { UserModel, validUser, validLogin, createToken } = require("../models/usersModel");
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-// פונקציות קונטרולר
+
+const { IssueModel } = require("../models/issueModel");
+const { PaymentModel } = require("../models/paymentModel")
+const { NoticeModel } = require("../models/noticeModel")
+const { ReservationModel } = require("../models/reservationModel");
+const { NotificationModel } = require("../models/notificationModel");
 
 exports.testRoute = (req, res) => {
   res.json({ msg: "Users route works" });
@@ -73,6 +78,32 @@ exports.getUsersList = async (req, res) => {
     res.status(500).json({ msg: "Server error", err });
   }
 };
+// exports.getUsersListManage = async (req, res) => {
+//   try {
+//     const users = await UserModel.find({}, { password: 0 }).sort({ apartmentNumber: 1 });
+
+//     const result = [];
+
+//     for (const u of users) {
+//       const hasRelations =
+//         await IssueModel.exists({ userId: u._id }) ||
+//         await PaymentModel.exists({ userId: u._id }) ||
+//         await NoticeModel.exists({ createdBy: u._id }) ||
+//         await ReservationModel.exists({ userId: u._id }) ||
+//         await NotificationModel.exists({ userId: u._id }) ||
+//         false;
+
+//       result.push({
+//         ...u.toObject(),
+//         canDelete: !hasRelations
+//       });
+//     }
+
+//     res.json(result);
+//   } catch (err) {
+//     res.status(500).json({ msg: "Error loading users" });
+//   }
+// };
 
 exports.getMyInfo = async (req, res) => {
   try {
@@ -94,6 +125,27 @@ exports.updateUserById = async (req, res) => {
     }
 
     const data = { ...req.body };
+
+    if (data.email) {
+      const existingEmail = await UserModel.findOne({
+        email: data.email,
+        _id: { $ne: id } // משתמשים אחרים בלבד
+      });
+      if (existingEmail) {
+        return res.status(400).json({ msg: "Email already exists" });
+      }
+    }
+
+    if (data.apartmentNumber && req.user.role === "admin" && data.role === "tenant") {
+      const conflict = await UserModel.findOne({
+        _id: { $ne: id },               // כל המשתמשים פרט לזה שמעדכנים
+        apartmentNumber: data.apartmentNumber,
+        isActive: true
+      });
+      if (conflict) {
+        return res.status(400).json({ msg: "An active user already exists for this apartment" });
+      }
+    }
 
     if (req.user.role === "tenant") {
       const allowedFields = ["phone", "email", "password"];
@@ -120,11 +172,25 @@ exports.updateUserById = async (req, res) => {
 exports.deleteUserById = async (req, res) => {
   try {
     const { id } = req.params;
+    const hasIssues = await IssueModel.exists({ userId: id });
+    const hasPayments = await PaymentModel.exists({ userId: id });
+    const hasNotices = await NoticeModel.exists({ createdBy: id });
+    const hasReservations = await ReservationModel.exists({ userId: id });
+    const hasNotifications = await NotificationModel.exists({ userId: id });
+
+    if (
+      hasIssues || hasPayments || hasReservations || hasNotices || hasNotifications
+    ) {
+      return res.status(400).json({
+        ok: false,
+        msg: "לא ניתן למחוק דייר שמופיע ברשומות אחרות במערכת"
+      });
+    }
     const deleted = await UserModel.findByIdAndDelete(id);
-    if (!deleted) return res.status(404).json({ msg: "User not found" });
-    res.json({ msg: "User deleted successfully" });
+    if (!deleted) return res.status(404).json({ ok: false, msg: "User not found" });
+    return res.json({ ok: true, msg: "User deleted successfully" });
   } catch (err) {
-    res.status(500).json({ msg: "Server error", err });
+    res.status(500).json({ ok: false, msg: "Server error", err });
   }
 };
 
@@ -136,11 +202,13 @@ exports.toggleActiveStatus = async (req, res) => {
     user.isActive = !user.isActive;
     await user.save();
 
-    res.json({ msg: `User is now ${user.isActive ? "active" : "inactive"}` });
+    res.json(user);
+
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
   }
 };
+
 exports.googleLogin = async (req, res) => {
   try {
     const { token } = req.body;
@@ -152,11 +220,9 @@ exports.googleLogin = async (req, res) => {
     const payload = ticket.getPayload();
     const email = payload.email;
 
-    // מחפשים משתמש קיים לפי אימייל
     const user = await UserModel.findOne({ email });
 
     if (!user) {
-      // אם לא קיים – מחזירים שגיאה
       return res.status(404).json({ msg: "משתמש לא רשום במערכת" });
     }
 
@@ -180,3 +246,32 @@ exports.googleLogin = async (req, res) => {
     res.status(400).json({ msg: "Google login failed", err });
   }
 };
+
+exports.checkEmail = async (req, res) => {
+  const { email, id } = req.body;
+  try {
+      const existing = await UserModel.findOne({ email, _id: { $ne: id } });
+      res.json({ available: !existing });
+  } catch (err) {
+      res.status(500).json({ available: false });
+  }
+};
+
+// exports.canDeleteUser = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const hasRelations =
+//       await IssueModel.exists({ userId: id }) ||
+//       await PaymentModel.exists({ userId: id }) ||
+//       await NoticeModel.exists({ createdBy: id }) ||
+//       await ReservationModel.exists({ userId: id }) ||
+//       await NotificationModel.exists({ userId: id }) ||
+//       false;
+
+//     res.json({ canDelete: !hasRelations });
+//   } catch (err) {
+//     res.status(500).json({ msg: "Server error", err });
+//   }
+// };
+

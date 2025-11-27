@@ -11,6 +11,7 @@ router.post("/register", authAdmin, usersController.registerUser);
 router.post("/login", usersController.loginUser);
 
 router.get("/list", authAdmin, usersController.getUsersList);
+// router.get("/list/manage", authAdmin, usersController.getUsersListManage);
 
 router.get("/myInfo", auth, usersController.getMyInfo);
 
@@ -21,5 +22,9 @@ router.delete("/:id", authAdmin, usersController.deleteUserById);
 router.patch("/toggleActive/:id", authAdmin, usersController.toggleActiveStatus);
 
 router.post("/google-login", usersController.googleLogin);
+
+router.post("/checkEmail",auth, usersController.checkEmail);
+
+// router.get("/canDelete/:id",authAdmin, usersController.canDeleteUser);
 
 module.exports = router;
