@@ -6,6 +6,7 @@ const reservationsR = require("./reservationRoutes");
 const paymentsR = require("./paymentRoutes");
 const noticesR = require("./noticeRoutes");
 const notificationsR = require("./notificationRoutes");
+const express = require("express");
 
 exports.routesInit = (app) => {
   app.use("/", indexR);
@@ -16,5 +17,7 @@ exports.routesInit = (app) => {
   app.use("/payments", paymentsR);
   app.use("/notices", noticesR);
   app.use("/notifications", notificationsR);
+  app.use("/uploads", express.static("uploads"));
+
 
 };
