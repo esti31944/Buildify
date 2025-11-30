@@ -1,5 +1,8 @@
+// controllers>issueController.js
 const { IssueModel, validIssue, validIssueUpdate } = require("../models/issueModel");
 const { authAdmin } = require("../middleware/authMiddleware");
+const { NotificationModel } = require("../models/notificationModel");
+const { UserModel } = require("../models/usersModel");
 
 // בדיקה בסיסית
 const testRoute = (req, res) => {
@@ -17,6 +20,26 @@ const createIssue = async (req, res) => {
   try {
     const issue = new IssueModel(issueData);
     await issue.save();
+
+
+    const admins = await UserModel.find({ role: "admin", isActive: true });
+    if (admins.length > 0) {
+      // שלב 3: יצירת התראות לכל המנהלים
+      const notifications = admins.map(admin => ({
+        userId: admin._id,
+        type: "issue",
+        message: `תקלה חדשה דווחה על ידי ${req.user.fullName}`,
+        isRead: false
+      }));
+      await NotificationModel.insertMany(notifications);
+    }
+    
+    await NotificationModel.create({
+      userId: req.user._id,
+      type: "issue",
+      message: "תקלה חדשה דווחה",
+    });
+
     res.status(201).json(issue);
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
@@ -69,6 +92,12 @@ const updateIssueStatus = async (req, res) => {
     issue.status = nextStatus;
     issue.updatedAt = Date.now();
     await issue.save();
+
+    await NotificationModel.create({
+      userId: issue.userId,
+      type: "issue",
+      message: `סטטוס התקלה '${issue.title}' עודכן ל: ${nextStatus}`,
+    });
 
     res.json({ msg: `Issue status updated to ${issue.status}`, issue });
   } catch (err) {

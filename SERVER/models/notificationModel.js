@@ -6,7 +6,7 @@ const notificationSchema = new mongoose.Schema(
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
     type: {
       type: String,
-      enum: ["payment", "issue", "notice", "room"],
+      enum: ["payment", "issue", "notice", "room","system"],
       required: true,
     },
     message: { type: String, required: true },
@@ -21,7 +21,7 @@ exports.NotificationModel = mongoose.model("notifications", notificationSchema);
 exports.validNotification = (bodyData) => {
   const schema = Joi.object({
     userId: Joi.string().required(),
-    type: Joi.string().valid("payment", "issue", "notice", "room").required(),
+    type: Joi.string().valid("payment", "issue", "notice", "room","system").required(),
     message: Joi.string().min(2).max(300).required(),
     isRead: Joi.boolean().optional(),
   });

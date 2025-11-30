@@ -1,3 +1,4 @@
+// src>components>Sidebar.js
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -11,6 +12,7 @@ import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import PaymentIcon from "@mui/icons-material/Payment";
 import FolderIcon from "@mui/icons-material/Folder";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import EventNoteIcon from "@mui/icons-material/EventNote";
 import PeopleIcon from "@mui/icons-material/People";
 
 const IconWrapper = ({ icon, color }) => (
@@ -33,23 +35,25 @@ export default function Sidebar() {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
 
-  const links =
+    const links =
         user?.role === "admin"
             ? [
                 { to: "/", label: "דף הבית", icon: <HomeIcon />, color: "#1976d2" },
-                { to: "/issues", label: "תקלות", icon: <ReportProblemIcon />, color: "#d32f2f" },
+                { to: "/issues", label: "תקלות", icon: <ReportProblemIcon />, color: "#0097A7" },
                 { to: "/payments", label: "תשלומים", icon: <PaymentIcon />, color: "#388e3c" },
                 { to: "/documents", label: "חדרים", icon: <FolderIcon />, color: "#fbc02d" },
-                { to: "/notices", label: "לוח מודעות", icon: <NotificationsIcon />, color: "#7b1fa2" },
-                { to: "/tenants", label: "ניהול דיירים", icon: <PeopleIcon />, color: "#fb8c00" },
+                { to: "/notices", label: "לוח מודעות", icon: <EventNoteIcon />, color: "#fb8c00" },
+                { to: "/notifications", label: "התראות", icon: <NotificationsIcon />, color: "#d32f2f" },
+                { to: "/tenants", label: "ניהול דיירים", icon: <PeopleIcon />, color: "#7b1fa2" },
             ]
             : [
                 { to: "/", label: "הבית שלי", icon: <HomeIcon />, color: "#1976d2" },
-                { to: "/issues", label: "התקלות שלי", icon: <ReportProblemIcon />, color: "#d32f2f" },
+                { to: "/issues", label: "התקלות שלי", icon: <ReportProblemIcon />, color: "#0097A7" },
                 { to: "/payments", label: "התשלומים שלי", icon: <PaymentIcon />, color: "#388e3c" },
                 { to: "/documents", label: "חדרים", icon: <FolderIcon />, color: "#fbc02d" },
-                { to: "/notices", label: "לוח מודעות", icon: <NotificationsIcon />, color: "#7b1fa2" },
-                { to: "/tenants", label: "שכנים", icon: <PeopleIcon />, color: "#fb8c00" },
+                { to: "/notices", label: "לוח מודעות", icon: <EventNoteIcon />, color: "#fb8c00" },
+                { to: "/notifications", label: "התראות", icon: <NotificationsIcon />, color: "#d32f2f" },
+                { to: "/tenants", label: "שכנים", icon: <PeopleIcon />, color: "#7b1fa2" },
             ];
 
     return (
@@ -97,6 +101,7 @@ export default function Sidebar() {
                             <Box sx={{ width: 16 }} />
                             {l.label}
                         </Box>
+
                     </Button>
                 ))}
             </Box>

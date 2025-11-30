@@ -5,6 +5,8 @@ import paymentsReducer from "../features/Payments/Paymentslice";
 import usersReducer from "../features/users/UserSlice"
 import roomsReducer from "../features/room/RoomSlice"; 
 import noticesReducer from "../features/notice/NoticeSlice";
+import notificationsReducer from "../features/notifications/notificationsSlice";
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -13,6 +15,6 @@ export const store = configureStore({
     users: usersReducer,
     rooms: roomsReducer, 
     notices: noticesReducer,
-
+    notifications: notificationsReducer,
   },
 });

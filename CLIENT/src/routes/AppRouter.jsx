@@ -8,6 +8,7 @@ import Payments from "../pages/Payments";
 import Documents from "../pages/Documents";
 import Notices from "../pages/Notices";
 import Tenants from "../pages/Tenants"
+import Notifications from "../pages/Notifications"
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 
@@ -33,6 +34,7 @@ export default function AppRoutes() {
         <Route path="/documents" element={<Documents />} />
         <Route path="/notices" element={<Notices />} />
         <Route path="/tenants" element={<Tenants />} />
+        <Route path="/notifications" element={<Notifications />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
