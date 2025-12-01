@@ -41,8 +41,6 @@ export const updatePayment = createAsyncThunk(
   }
 );
 
-
-
 // מחיקת תשלום
 export const deletePayment = createAsyncThunk(
   "payments/deletePayment",

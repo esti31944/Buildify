@@ -39,6 +39,9 @@ const notificationsSlice = createSlice({
     loading: false,
     error: null,
   },
+  clearNotifications: (state) => {
+    state.list = [];
+  },
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -63,11 +66,16 @@ const notificationsSlice = createSlice({
       })
 
       // MARK ALL AS READ
-    //   .addCase(markAllAsRead.fulfilled, (state) => {
-    //     state.list = state.list.map((n) => ({ ...n, isRead: true }));
-    //   })
-    ;
+      //   .addCase(markAllAsRead.fulfilled, (state) => {
+      //     state.list = state.list.map((n) => ({ ...n, isRead: true }));
+      //   })
+      ;
   },
 });
 
 export default notificationsSlice.reducer;
+
+export const selectUnreadCount = (state) =>
+  state.notifications.list.filter(n => !n.isRead).length;
+
+export const { clearNotifications } = notificationsSlice.actions;

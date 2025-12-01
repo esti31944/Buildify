@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Dialog,
   DialogTitle,
@@ -10,8 +11,10 @@ import {
   TextField,
   Alert,
 } from "@mui/material";
+import { fetchNotifications } from '../features/notifications/notificationsSlice';
 
 export default function ReservationModal({ roomId, onClose }) {
+  const dispatch = useDispatch()
   const [date, setDate] = useState("");
   const [fromHour, setFromHour] = useState("");
   const [toHour, setToHour] = useState("");
@@ -37,7 +40,7 @@ export default function ReservationModal({ roomId, onClose }) {
 
     if (res.ok) {
       const room = await res.json();
-      console.log("📌 Loaded room:", room);
+      // console.log("Loaded room:", room);
       setOpeningHours(room.openingHours);
     }
   }
@@ -59,7 +62,7 @@ export default function ReservationModal({ roomId, onClose }) {
 
     if (res.ok) {
       const data = await res.json();
-      console.log("📌 Loaded reservations for room and date:", data);
+      // console.log(" Loaded reservations for room and date:", data);
       setReservations(data);
     }
   }
@@ -113,7 +116,7 @@ export default function ReservationModal({ roomId, onClose }) {
       }
     });
 
-    console.log("Busy Hours:", { startHours, endHours, middleHours });
+    // console.log("Busy Hours:", { startHours, endHours, middleHours });
     return { startHours, endHours, middleHours };
   }
 
@@ -167,6 +170,9 @@ export default function ReservationModal({ roomId, onClose }) {
         const err = await res.json();
         throw new Error(err.msg || "שגיאה בהזמנה");
       }
+
+      console.log("lets create notfication after create reservation");
+      await dispatch(fetchNotifications());
 
       alert("ההזמנה נשמרה בהצלחה");
       onClose();

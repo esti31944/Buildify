@@ -2,7 +2,11 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchNotifications, markAsRead } from "../features/notifications/notificationsSlice";
 
-import { Box, Paper, Typography, Button, CircularProgress, Table, TableBody, TableCell, TableHead, TableRow, } from "@mui/material";
+import { Box, Paper, Typography, Button, CircularProgress, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
+import MarkEmailUnreadOutlinedIcon from '@mui/icons-material/MarkEmailUnreadOutlined';
+import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
+import DraftsOutlinedIcon from '@mui/icons-material/DraftsOutlined';
+
 
 export default function Notifications() {
     const dispatch = useDispatch();
@@ -16,24 +20,12 @@ export default function Notifications() {
 
     return (
         <Paper sx={{ p: 3 }}>
-            <Box display="flex" justifyContent="space-between" mb={2}>
-                <Typography variant="h5">התראות</Typography>
-
-                {/* <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => dispatch(markAllAsRead())}
-                >
-                    סמן הכל כנקרא
-                </Button> */}
-            </Box>
-
             <Table sx={{ direction: "rtl", "& td, & th": { textAlign: "center" } }}>
                 <TableHead>
                     <TableRow>
                         <TableCell>סוג</TableCell>
+                        <TableCell>תאריך</TableCell>
                         <TableCell>הודעה</TableCell>
-                        <TableCell>סטטוס</TableCell>
                         <TableCell></TableCell>
                     </TableRow>
                 </TableHead>
@@ -47,19 +39,27 @@ export default function Notifications() {
                             }}
                         >
                             <TableCell>{n.type}</TableCell>
-                            <TableCell>{n.message}</TableCell>
-                            <TableCell>
-                                {n.isRead ? "נקראה" : "חדשה"}
+                            <TableCell>{new Date(n.createdAt).toLocaleString("he-IL", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })}</TableCell>
+                            <TableCell sx={{ textAlign: "right !important" }}>
+                                {n.message}
                             </TableCell>
                             <TableCell>
-                                {!n.isRead && (
-                                    <Button
-                                        size="small"
-                                        variant="outlined"
+                                {!n.isRead ? (
+                                    <Tooltip title="סמן כנקרא">
+                                        <MarkEmailUnreadOutlinedIcon sx={{ color: "#424242", cursor: "pointer" }}
+                                            onClick={() => dispatch(markAsRead(n._id))}
+                                        />
+                                    </Tooltip>
+                                ) : (
+                                    <DraftsOutlinedIcon
                                         onClick={() => dispatch(markAsRead(n._id))}
-                                    >
-                                        סמן כנקרא
-                                    </Button>
+                                    />
                                 )}
                             </TableCell>
                         </TableRow>

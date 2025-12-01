@@ -1,6 +1,7 @@
 // controllers/reservationController.js
 const { ReservationModel, validReservation } = require("../models/reservationModel");
 const { RoomModel } = require("../models/roomModel");
+const { NotificationModel } = require("../models/notificationModel");
 
 // helper: parse "HH:MM" -> minutes from midnight
 function hhmmToMinutes(hhmm) {
@@ -47,6 +48,13 @@ exports.createReservation = async (req, res) => {
     });
 
     await reservation.save();
+
+    await NotificationModel.create({
+      userId: req.user._id,
+      type: "room",
+      message: `הזמנת החדר '${room.name}' נקלטה בהצלחה`,
+    });
+
     res.status(201).json(reservation);
 
   } catch (err) {
@@ -94,7 +102,18 @@ exports.deleteReservation = async (req, res) => {
     if (!removed) return res.status(404).json({ message: "Not found" });
 
     // remove from room.reservations
-    await RoomModel.updateOne({ _id: removed.roomId }, { $pull: { reservations: removed._id } });
+    const room = await RoomModel.findById(removed.roomId);
+
+    await RoomModel.updateOne(
+      { _id: removed.roomId },
+      { $pull: { reservations: removed._id } }
+    );
+
+    await NotificationModel.create({
+      userId: req.user._id,
+      type: "room",
+      message: `הזמנת החדר '${room ? room.name : ""}' בוטלה`,
+    });
 
     return res.json({ message: "deleted" });
   } catch (err) {

@@ -1,5 +1,6 @@
 const { PaymentModel, validPayment, validPaymentUpdate } = require("../models/paymentModel");
 // controllers/paymentController.js
+const { NotificationModel } = require("../models/notificationModel");
 
 // רשימת כל התשלומים מסוג 'monthly' (ועד)
 exports.getAllPayments = async (req, res) => {
@@ -34,6 +35,13 @@ exports.createPayment = async (req, res) => {
   try {
     const payment = new PaymentModel(req.body);
     await payment.save();
+
+    await NotificationModel.create({
+      userId: payment.userId,
+      type: "payment",
+      message: `נוסף לך חוב תשלום חדש: '${payment.title}'`,
+    });
+
     res.status(201).json(payment);
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
@@ -54,7 +62,7 @@ exports.updatePayment = async (req, res) => {
       req.params.id,
       { ...req.body.updatedData, updatedAt: Date.now() },
       { new: true }
-      
+
     );
     if (!payment) {
       return res.status(404).json({ msg: "Payment not found" });
@@ -64,10 +72,10 @@ exports.updatePayment = async (req, res) => {
     res.status(500).json({ msg: "Server error", err });
   }
 };
-exports.updatePaymentStatus = async (req, res) => {
-    console.log("come to upload");
 
-try {
+exports.updatePaymentStatus = async (req, res) => {
+
+  try {
     const payment = await PaymentModel.findById(req.params.id);
     if (!payment) {
       return res.status(404).json({ msg: "Payment not found" });
@@ -103,6 +111,21 @@ try {
 
     await payment.save();
 
+    let notificationMessage = "";
+    if (status === "pending") {
+      notificationMessage = `התשלום '${payment.title}' הועבר לאישור`;
+    } else if (status === "paid") {
+      notificationMessage = `התשלום '${payment.title}' אושר ושולם`;
+    }
+    console.log("for user:",payment.userId);
+    if (notificationMessage) {
+      await NotificationModel.create({
+        userId: payment.userId,
+        type: "payment",
+        message: notificationMessage,
+      });
+    }
+
     res.json({
       msg: `Payment status updated to ${payment.status}`,
       payment
@@ -114,24 +137,24 @@ try {
 };
 
 exports.uploadFile = async (req, res) => {
-  
-    const paymentId = req.params.id;
 
-    if (!req.file) return res.status(400).json({ msg: "No file uploaded" });
+  const paymentId = req.params.id;
 
-    try {
-        const payment = await PaymentModel.findByIdAndUpdate(
-            paymentId,
-            { filePath: req.file.path, updatedAt: Date.now() },
-            { new: true }
-        );
+  if (!req.file) return res.status(400).json({ msg: "No file uploaded" });
 
-        if (!payment) return res.status(404).json({ msg: "Payment not found" });
+  try {
+    const payment = await PaymentModel.findByIdAndUpdate(
+      paymentId,
+      { filePath: req.file.path, updatedAt: Date.now() },
+      { new: true }
+    );
 
-        res.json({ msg: "File updated successfully", payment });
-    } catch (err) {
-        res.status(500).json({ msg: "Server error", err });
-    }
+    if (!payment) return res.status(404).json({ msg: "Payment not found" });
+
+    res.json({ msg: "File updated successfully", payment });
+  } catch (err) {
+    res.status(500).json({ msg: "Server error", err });
+  }
 };
 
 

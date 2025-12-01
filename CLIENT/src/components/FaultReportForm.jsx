@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createIssue, updateIssue, fetchAllIssues, fetchMyIssues } from '../features/issues/issuesSlice';
+import { fetchNotifications } from '../features/notifications/notificationsSlice';
 import '../styles/FaultReportForm.css';
 
 export default function FaultReportForm({ onClose, initialData = null, mode = "create" }) {
@@ -42,6 +43,7 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
         try {
             if (mode === "create") {
                 await dispatch(createIssue(formData)).unwrap();
+                await dispatch(fetchNotifications());
             } else {
                 const { _id, ...dataToUpdate } = formData;
                 await dispatch(updateIssue({ id: initialData._id, data: dataToUpdate })).unwrap();

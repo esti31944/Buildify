@@ -27,6 +27,8 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+import { fetchNotifications } from '../features/notifications/notificationsSlice';
+
 function StickyNoteCard({ title, children, color = "#FFFFFF" }) {
   return (
     <Paper
@@ -137,6 +139,7 @@ export default function Notices() {
       await dispatch(updateNotice({ id: editingId, data: payload }));
     } else {
       await dispatch(createNotice(payload));
+      await dispatch(fetchNotifications());
     }
 
     setFormData({
@@ -164,6 +167,7 @@ export default function Notices() {
   async function deleteNotice(id) {
     if (!window.confirm("האם למחוק את ההודעה?")) return;
     await dispatch(deleteNoticeAction(id));
+    await dispatch(fetchNotifications());
   }
 
   // חישוב מספר הפריטים בכל קטגוריה

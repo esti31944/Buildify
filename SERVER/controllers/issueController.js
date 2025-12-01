@@ -24,11 +24,12 @@ const createIssue = async (req, res) => {
 
     const admins = await UserModel.find({ role: "admin", isActive: true });
     if (admins.length > 0) {
+      const reportingUser = await UserModel.findById(req.user._id);
       // שלב 3: יצירת התראות לכל המנהלים
       const notifications = admins.map(admin => ({
         userId: admin._id,
         type: "issue",
-        message: `תקלה חדשה דווחה על ידי ${req.user.fullName}`,
+        message: `תקלה חדשה דווחה על ידי ${reportingUser.fullName}`,
         isRead: false
       }));
       await NotificationModel.insertMany(notifications);

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import {
   Modal,
   Box,
@@ -12,6 +13,8 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
+
+import { fetchNotifications } from '../features/notifications/notificationsSlice';
 
 const style = {
   position: "absolute",
@@ -28,6 +31,8 @@ const style = {
 };
 
 export default function MyReservationsModal({ onClose }) {
+  const dispatch = useDispatch();
+
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -106,6 +111,10 @@ export default function MyReservationsModal({ onClose }) {
       }
 
       setReservations((prev) => prev.filter((r) => r._id !== id));
+      
+      await dispatch(fetchNotifications());
+
+
     } catch (e) {
       setError(e.message);
     } finally {

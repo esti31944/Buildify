@@ -1,7 +1,8 @@
 // src>components>Sidebar.js
-import React from "react";
+import React,{useEffect} from "react";
 import { NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { fetchNotifications,selectUnreadCount,clearNotifications } from "../features/notifications/notificationsSlice";
 import { logout } from "../features/auth/authSlice";
 import { Box, Paper, Typography, Button, Divider } from "@mui/material";
 import Logo from "../assets/logo_remove.png";
@@ -34,6 +35,12 @@ const IconWrapper = ({ icon, color }) => (
 export default function Sidebar() {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
+
+    useEffect(() => {
+        dispatch(fetchNotifications());
+    }, []);
+
+    const unreadCount = useSelector(selectUnreadCount);
 
     const links =
         user?.role === "admin"
@@ -96,10 +103,37 @@ export default function Sidebar() {
                             "&:hover": { bgcolor: "#f5f5f5" },
                         }}
                     >
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                        {/* <Box sx={{ display: "flex", alignItems: "center" }}>
                             <IconWrapper icon={l.icon} color={l.color} />
                             <Box sx={{ width: 16 }} />
                             {l.label}
+                        </Box> */}
+                        <Box sx={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
+                            {/* אייקון + טקסט */}
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <IconWrapper icon={l.icon} color={l.color} />
+                                <Box sx={{ width: 16 }} />
+                                {l.label}
+                            </Box>
+
+                            {/* באדג' רק להתראות */}
+                            {l.to === "/notifications" && unreadCount > 0 && (
+                                <Box
+                                    sx={{
+                                        bgcolor: "#d32f2f",
+                                        color: "white",
+                                        borderRadius: "8px",
+                                        fontSize: "11px",
+                                        px: 1,
+                                        minWidth: "22px",
+                                        textAlign: "center",
+                                        ml: 1,
+                                        boxShadow: "0 4px 10px rgba(0,0,0,0.06)",
+                                    }}
+                                >
+                                    {unreadCount}
+                                </Box>
+                            )}
                         </Box>
 
                     </Button>
@@ -126,7 +160,10 @@ export default function Sidebar() {
                         borderColor: "#999",
                         "&:hover": { borderColor: "#000", backgroundColor: "#eee" },
                     }}
-                    onClick={() => dispatch(logout())}
+                    onClick={() => {
+                        dispatch(logout());
+                        dispatch(clearNotifications());
+                    }}
                 >
                     התנתק
                 </Button>

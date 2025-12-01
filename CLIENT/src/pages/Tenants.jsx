@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Box, Paper, Typography, CircularProgress, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, Button, IconButton, Modal } from "@mui/material";
+import { Box, Paper, Typography, CircularProgress, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, Button, IconButton, Modal, Tooltip } from "@mui/material";
 import { ToggleOnOutlined, ToggleOffOutlined } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -187,13 +187,14 @@ export default function Tenants() {
               <TableCell>
                 {/* <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}> */}
                 {(user.role === "admin" || user._id === u._id) && (
-                  <IconButton
-                    onClick={() => openEditForm(u)}
-                    title="ערוך פרטי משתמש"
-                    sx={{ opacity: 0.85 }}
-                  >
-                    <EditIcon />
-                  </IconButton>
+                  <Tooltip title="ערוך פרטי משתמש">
+                    <IconButton
+                      onClick={() => openEditForm(u)}
+                      sx={{ opacity: 0.85 }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
                 )}
 
                 {/* *13* */}

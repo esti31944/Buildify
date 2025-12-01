@@ -1,4 +1,5 @@
 const { NoticeModel } = require("../models/noticeModel");
+const { NotificationModel } = require("../models/notificationModel");
 
 // שליפת כל ההודעות
 exports.getAllNotices = async (req, res) => {
@@ -19,11 +20,18 @@ exports.createNotice = async (req, res) => {
       title,
       content,
       category,
-      createdBy: req.user._id, 
+      createdBy: req.user._id,
       expiresAt,
     });
 
     const savedNotice = await newNotice.save();
+
+    await NotificationModel.create({
+      userId: req.user._id,
+      type: "notice",
+      message: "פרסמת הודעה חדשה בלוח המודעות",
+    });
+
     res.status(201).json(savedNotice);
   } catch (err) {
     console.error("Error creating notice:", err);
@@ -70,6 +78,13 @@ exports.deleteNotice = async (req, res) => {
     }
 
     await NoticeModel.findByIdAndDelete(req.params.id);
+
+    await NotificationModel.create({
+      userId: req.user._id,
+      type: "issue",
+      message: "מודעה שפירסמת הוסרה מהלוח",
+    });
+
     res.json({ msg: "Notice deleted successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });

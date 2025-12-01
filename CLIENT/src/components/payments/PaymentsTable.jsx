@@ -11,6 +11,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import InfoIcon from "@mui/icons-material/Info";
 import { useDispatch, useSelector } from "react-redux";
 import { updatePaymentStatus } from "../../features/Payments/Paymentslice";
+import { fetchNotifications } from '../../features/notifications/notificationsSlice';
 
 import * as XLSX from "xlsx";
 import SyncIcon from "@mui/icons-material/Sync";
@@ -25,8 +26,6 @@ import { store } from "../../app/store"
 import { uploadPaymentFile } from "../../features/Payments/Paymentslice";
 import FilePreview from "./FilePreview"
 export default function PaymentsTable({
-
-
     search, setSearch, filteredPayments, loading,
     user, handleOpen, handleDelete
 }) {
@@ -63,6 +62,8 @@ export default function PaymentsTable({
                 id: paymentId,
                 status: "pending"
             })).unwrap();
+            await dispatch(fetchNotifications());
+
 
             // 2. העלאת הקובץ — הקוד המקורי שלך (לא שיניתי)
             await dispatch(uploadPaymentFile({ paymentId, file })).unwrap();
