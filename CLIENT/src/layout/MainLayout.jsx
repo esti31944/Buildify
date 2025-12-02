@@ -30,9 +30,9 @@ export default function MainLayout() {
   return (
     <div className="app-shell" style={{ position: "relative" }}>
       {/* אייקון פתיחה - רק במובייל */}
-      {isMobile && !openSidebar && (
+      {/* {isMobile && !openSidebar && ( */}
         <IconButton
-          onClick={() => setOpenSidebar(true)}
+          onClick={() => setOpenSidebar(!openSidebar)}
           sx={{ position: "fixed", top: 20, right: 20, zIndex: 3000 ,
           backgroundColor: "rgba(255,255,255,0.7)",
           backdropFilter: "blur(6px)",
@@ -43,7 +43,7 @@ export default function MainLayout() {
         >
           <SpaceDashboardOutlinedIcon fontSize="large" />
         </IconButton>
-      )}
+      {/* )} */}
 
       {/* BACKDROP — רק במובייל כשהתפריט פתוח */}
       {isMobile && openSidebar && (
