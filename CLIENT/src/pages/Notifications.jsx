@@ -7,6 +7,12 @@ import MarkEmailUnreadOutlinedIcon from '@mui/icons-material/MarkEmailUnreadOutl
 import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
 import DraftsOutlinedIcon from '@mui/icons-material/DraftsOutlined';
 
+import PaymentIcon from "@mui/icons-material/Payment";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import EventNoteIcon from "@mui/icons-material/EventNote";
+import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+
 
 export default function Notifications() {
     const dispatch = useDispatch();
@@ -17,6 +23,34 @@ export default function Notifications() {
     }, [dispatch]);
 
     if (loading) return <CircularProgress />;
+
+    const typeLabels = {
+        payment: "תשלום",
+        issue: "תקלה",
+        notice: "מודעה",
+        room: "חדר",
+        system: "מערכת",
+    };
+    
+    const getTypeIcon = (type) => {
+        const iconProps = { sx: { color: "#6d6d6d" } };
+    
+        const icons = {
+            payment: <PaymentIcon {...iconProps} />,
+            issue: <ReportProblemIcon {...iconProps} />,
+            notice: <EventNoteIcon {...iconProps} />,
+            room: <MeetingRoomIcon {...iconProps} />,
+            system: <InfoOutlinedIcon {...iconProps} />,
+        };
+
+        return (
+            <Tooltip title={typeLabels[type] || ""}>
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    {icons[type]}
+                </Box>
+            </Tooltip>
+        );
+    };
 
     return (
         <Paper sx={{ p: 3 }}>
@@ -38,7 +72,8 @@ export default function Notifications() {
                                 bgcolor: n.isRead ? "#fff" : "#fff7f7",
                             }}
                         >
-                            <TableCell>{n.type}</TableCell>
+                            {/* <TableCell>{n.type}</TableCell> */}
+                            <TableCell>{getTypeIcon(n.type)}</TableCell>
                             <TableCell>{new Date(n.createdAt).toLocaleString("he-IL", {
                                 year: "numeric",
                                 month: "2-digit",
