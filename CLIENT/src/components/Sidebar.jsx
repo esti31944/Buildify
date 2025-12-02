@@ -1,10 +1,11 @@
 // src>components>Sidebar.js
-import React,{useEffect} from "react";
+import React, { useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchNotifications,selectUnreadCount,clearNotifications } from "../features/notifications/notificationsSlice";
+import { fetchNotifications, selectUnreadCount, clearNotifications } from "../features/notifications/notificationsSlice";
 import { logout } from "../features/auth/authSlice";
-import { Box, Paper, Typography, Button, Divider } from "@mui/material";
+import { Box, Paper, Typography, Button, Divider, IconButton } from "@mui/material";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Logo from "../assets/logo_remove.png";
 
 // אייקונים
@@ -32,7 +33,7 @@ const IconWrapper = ({ icon, color }) => (
     </Box>
 );
 
-export default function Sidebar() {
+export default function Sidebar({ isMobile, onClose }) {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
 
@@ -72,17 +73,29 @@ export default function Sidebar() {
                 borderRadius: 4,
                 bgcolor: "#fff",
                 boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-                minHeight: "calc(100vh - 56px)",
-                position: "sticky",
-                top: 28,
+                height: isMobile ? "100vh" : "calc(100vh - 56px)",
+
+                position: isMobile ? "fixed" : "sticky",
+                top: isMobile ? 0 : 28,
+                right: 0,
+                zIndex: isMobile ? 2000 : 1500,
+
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
+
+                transition: "transform 0.35s ease-in-out",
             }}
         >
 
+            {/* כפתור סגירה במובייל */}
+            {isMobile && (
+                <IconButton onClick={onClose} sx={{ position: "absolute", top: 10, right: 10 }}>
+                    <CloseRoundedIcon />
+                </IconButton>
+            )}
 
-            <img src={Logo} alt="Logo" />
+            <img src={Logo} alt="Logo" style={{ maxWidth: "100%", marginBottom: 20 }} />
 
 
             {/* ניווט */}
@@ -93,6 +106,7 @@ export default function Sidebar() {
                         component={NavLink}
                         to={l.to}
                         fullWidth
+                        onClick={() => isMobile && onClose()}
                         sx={{
                             justifyContent: "flex-start",
                             textTransform: "none",
@@ -163,6 +177,7 @@ export default function Sidebar() {
                     onClick={() => {
                         dispatch(logout());
                         dispatch(clearNotifications());
+                        if (isMobile) onClose();
                     }}
                 >
                     התנתק
