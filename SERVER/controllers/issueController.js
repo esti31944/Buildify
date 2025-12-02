@@ -34,7 +34,7 @@ const createIssue = async (req, res) => {
       }));
       await NotificationModel.insertMany(notifications);
     }
-    
+
     await NotificationModel.create({
       userId: req.user._id,
       type: "issue",
@@ -70,7 +70,8 @@ const updateIssue = async (req, res) => {
       { new: true }
     );
 
-    res.json(updatedIssue);
+    // res.json(updatedIssue);
+    res.json({ issue: updatedIssue });
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
   }
@@ -127,6 +128,23 @@ const getAllIssues = async (req, res) => {
   }
 };
 
+const uploadFile = async (req, res) => {
+  try {
+    const issue = await IssueModel.findById(req.params.id);
+    if (!issue) return res.status(404).json({ message: "תקלה לא נמצאה" });
+
+    if (req.file) {
+      issue.imageUrl = `/uploads/issueIMG/${req.file.filename}`;
+      await issue.save();
+    }
+
+    res.json({ issue });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "שגיאה בהעלאת הקובץ" });
+  }
+};
+
 module.exports = {
   testRoute,
   createIssue,
@@ -134,4 +152,5 @@ module.exports = {
   updateIssueStatus,
   getMyIssues,
   getAllIssues,
+  uploadFile,
 };

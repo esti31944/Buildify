@@ -215,7 +215,7 @@ export default function PaymentsTable({
                                             {/* לחצן לחיצה עבור משתמשים */}
                                             {(user?.role !== "admin" && payment.status === "unpaid") ? (
                                                 <Box>
-
+                                                    
                                                     <input
                                                         type="file"
                                                         ref={fileInputRef}
@@ -226,14 +226,12 @@ export default function PaymentsTable({
                                                     <Tooltip title="העלה קובץ אישור תשלום">
                                                         <IconButton onClick={handleClick}>
                                                             <UploadFileIcon />
-                                                        </IconButton></Tooltip></Box>
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </Box>
                                             ) : (user?.role === "admin" && payment.status === "pending") ? (
                                                 <Box>
                                                     <FilePreview filePath={payment.filePath} />
-
-
-
-
                                                     <Button
                                                         size="small"
                                                         variant="outlined" // או "contained" אם רוצים רקע מלא

@@ -37,8 +37,10 @@ export default function IssueCard({ _id, title, description, imageUrl, createdAt
     <Card sx={{ display: "flex", flexDirection: "row-reverse", borderRadius: 3, boxShadow: 3, overflow: "hidden", mb: 2, height: 180, }}>
       <CardMedia
         component="img"
-        image={imageUrl
-          ? imageUrl
+        image={imageUrl && imageUrl !== ""
+          ? imageUrl.startsWith("http")
+            ? imageUrl
+            : `http://localhost:3001${imageUrl}`
           : "https://images.pexels.com/photos/28216688/pexels-photo-28216688/free-photo-of-autumn-camping.png?auto=compress&cs=tinysrgb&w=600"
         }
         alt={title}
@@ -81,7 +83,7 @@ export default function IssueCard({ _id, title, description, imageUrl, createdAt
               onClick={() => onEdit({ _id, title, description, imageUrl })}
               sx={{ bgcolor: "#f5f5f5", borderRadius: "12px", width: 36, height: 36, "&:hover": { bgcolor: "#e0e0e0" } }}
             >
-              <EditIcon  sx={{ fontSize: 20 }} />
+              <EditIcon sx={{ fontSize: 20 }} />
             </IconButton>
           )}
         </Box>

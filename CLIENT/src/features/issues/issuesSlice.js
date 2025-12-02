@@ -31,6 +31,24 @@ export const updateIssueStatus = createAsyncThunk("issues/updateIssueStatus", as
 }
 );
 
+export const uploadIssueImage = createAsyncThunk(
+  "issues/uploadIssueImage",
+  async ({ issueId, file }, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await axios.put(`/issues/uploadFile/${issueId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      return res.data.issue;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 const issuesSlice = createSlice({
   name: "issues",
   initialState: {
@@ -58,6 +76,14 @@ const issuesSlice = createSlice({
         const updated = action.payload;
         const idx = state.list.findIndex((i) => i._id === updated._id);
         if (idx !== -1) state.list[idx] = updated;
+      })
+      .addCase(uploadIssueImage.fulfilled, (state, action) => {
+        const updated = action.payload;
+        const idx = state.list.findIndex((p) => p._id === updated._id);
+        if (idx !== -1) state.list[idx] = updated;
+      })
+      .addCase(uploadIssueImage.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });

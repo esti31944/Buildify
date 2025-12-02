@@ -9,7 +9,15 @@ const {
   updateIssueStatus,
   getMyIssues,
   getAllIssues,
+  uploadFile,
 } = require("../controllers/issueController");
+
+const multer = require("multer");
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/issueIMG/"),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+});
+const upload = multer({ storage });
 
 // בדיקה בסיסית
 router.get("/", testRoute);
@@ -28,5 +36,7 @@ router.get("/myIssues",auth, getMyIssues);
 
 // רשימת כל התקלות (ועד)
 router.get("/list", authAdmin, getAllIssues);
+
+router.put("/uploadFile/:id",auth, upload.single("file"), uploadFile);
 
 module.exports = router;

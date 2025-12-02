@@ -18,6 +18,6 @@ exports.routesInit = (app) => {
   app.use("/notices", noticesR);
   app.use("/notifications", notificationsR);
   app.use("/uploads", express.static("uploads"));
-
+  app.use("/uploads/issueIMG", express.static("uploads/issueIMG"));
 
 };

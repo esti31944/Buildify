@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createIssue, updateIssue, fetchAllIssues, fetchMyIssues } from '../features/issues/issuesSlice';
+import { createIssue, updateIssue, fetchAllIssues, fetchMyIssues, uploadIssueImage } from '../features/issues/issuesSlice';
 import { fetchNotifications } from '../features/notifications/notificationsSlice';
 import '../styles/FaultReportForm.css';
+import {
+    Box, TextField, IconButton, Typography, Table, TableBody, TableCell,
+    TableHead, TableRow, TableContainer, Paper, Button, Tooltip
+} from "@mui/material";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
 
 export default function FaultReportForm({ onClose, initialData = null, mode = "create" }) {
     const dispatch = useDispatch();
@@ -10,8 +15,26 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
     const [formData, setFormData] = useState(
         initialData || { title: '', description: '', imageUrl: '' });
 
+    const [previewImage, setPreviewImage] = useState(null);
+    const [uploadedNow, setUploadedNow] = useState(false);
+
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (initialData && initialData.imageUrl) {
+            setPreviewImage(initialData.imageUrl);
+        }
+    }, [initialData]);
+
+    useEffect(() => {
+        return () => {
+            if (previewImage && previewImage.startsWith("blob:")) {
+                URL.revokeObjectURL(previewImage);
+            }
+        };
+    }, [previewImage]);
+
 
     const validateForm = (formData) => {
         if (!formData.title.trim() || formData.title.length < 2 || formData.title.length > 200) {
@@ -20,9 +43,9 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
         if (!formData.description.trim() || formData.description.length < 1 || formData.description.length > 1000) {
             return 'תיאור התקלה חייב להיות בין 1 ל-1000 תווים';
         }
-        if (formData.imageUrl && !/^https?:\/\/\S+$/.test(formData.imageUrl)) {
-            return 'כתובת התמונה אינה חוקית';
-        }
+        // if (formData.imageUrl && !/^https?:\/\/\S+$/.test(formData.imageUrl)) {
+        //     return 'כתובת התמונה אינה חוקית';
+        // }
         return null;
     }
 
@@ -42,11 +65,40 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
 
         try {
             if (mode === "create") {
-                await dispatch(createIssue(formData)).unwrap();
+
+                const newIssue = { title: formData.title, description: formData.description, userId: user._id };
+                const issue = await dispatch(createIssue(newIssue)).unwrap();
+
+                if (fileInputRef.current.files[0]) {
+                    await dispatch(uploadIssueImage({
+                        issueId: issue._id,
+                        file: fileInputRef.current.files[0]
+                    })).unwrap();
+                }
+
                 await dispatch(fetchNotifications());
+
             } else {
-                const { _id, ...dataToUpdate } = formData;
-                await dispatch(updateIssue({ id: initialData._id, data: dataToUpdate })).unwrap();
+                const dataToUpdate = {
+                    title: formData.title,
+                    description: formData.description,
+                    // imageUrl: formData.imageUrl || "" 
+                };
+
+                const issueId = formData._id || initialData?._id;
+                
+                let updatedIssue = await dispatch(updateIssue({
+                    id: issueId,
+                    data: dataToUpdate
+                })).unwrap();
+
+                // העלאת קובץ – אם נבחר
+                if (fileInputRef.current?.files[0]) {
+                    updatedIssue = await dispatch(uploadIssueImage({
+                        issueId: updatedIssue._id,
+                        file: fileInputRef.current.files[0]
+                    })).unwrap();
+                }
             }
             if (user.role === "admin") {
                 dispatch(fetchAllIssues());
@@ -70,6 +122,49 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
 
     const handleCancel = () => {
         setFormData({ title: '', description: '', imageUrl: '' });
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // תצוגה מקדימה
+        const localUrl = URL.createObjectURL(file);
+        setPreviewImage(localUrl);
+
+        // מסמן שהמשתמש העלה עכשיו תמונה
+        setUploadedNow(true);
+
+        // שומרים את הקובץ עצמו (לשליחה לשרת)
+        setFormData((prev) => ({
+            ...prev,
+            imageFile: file,
+            imageUrl: "uploaded" // מסמן שיש תמונה, לא מציג כתובת
+        }));
+    };
+
+    const handleRemoveImage = () => {
+        // ביטול תצוגה
+        setPreviewImage(null);
+
+        // מחיקת נתוני תמונה בטופס
+        setFormData(prev => ({
+            ...prev,
+            imageUrl: "",
+            imageFile: null
+        }));
+
+        // ניקוי האינפוט (מאוד חשוב!)
+        if (fileInputRef.current) {
+            fileInputRef.current.value = null;
+        }
+
+        setUploadedNow(false);
+    };
+
+    const fileInputRef = useRef(null);
+    const handleSelectFile = () => {
+        fileInputRef.current.click(); // פותח את חלון הבחירה
     };
 
     return (
@@ -125,19 +220,59 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
                             />
                         </div>
 
-                        <div className="fault-report-field">
-                            <label className="fault-report-label">
-                                כתובת לתמונה <span className="fault-report-optional">(אופציונלי)</span>
-                            </label>
+                        <Box>
                             <input
-                                type="text"
+                                type="file"
                                 name="imageUrl"
-                                value={formData.imageUrl}
-                                onChange={handleChange}
-                                className="fault-report-input"
-                                placeholder="לא נבחר כרגע"
+                                onChange={handleFileChange}
+                                ref={fileInputRef}
+                                style={{ display: "none" }}
+                                accept="image/*"
                             />
-                        </div>
+                            <Tooltip title="העלה תמונה">
+                                <IconButton onClick={handleSelectFile}>
+                                    <UploadFileIcon />
+                                </IconButton>
+                            </Tooltip>
+                            {uploadedNow && (
+                                <Typography sx={{ fontSize: 14, mt: 1 }}>✔ תמונה הועלתה בהצלחה</Typography>
+                            )}
+                            {previewImage && (
+                                <Box
+                                    sx={{
+                                        position: "relative",
+                                        width: 180,
+                                        height: 180,
+                                        borderRadius: 2,
+                                        overflow: "hidden",
+                                        bgcolor: "#eee",
+                                        mb: 2,
+                                    }}
+                                >
+                                    {!initialData?.imageUrl &&(
+                                    <IconButton
+                                        size="small"
+                                        onClick={handleRemoveImage}
+                                        sx={{position: "absolute",top: 4, right: 4,background: "rgba(0,0,0,0.5)",color: "white","&:hover": { background: "rgba(0,0,0,0.7)" },zIndex: 2 }}
+                                    >
+                                        ✕
+                                    </IconButton>
+                                    )}
+                                    <img
+                                        src={
+                                            previewImage.startsWith("blob:")
+                                                ? previewImage
+                                                : previewImage.startsWith("http")
+                                                    ? previewImage
+                                                    : `http://localhost:3001${previewImage}`
+                                        }
+                                        alt="תצוגה מקדימה"
+                                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                    />
+                                </Box>
+                            )}
+
+                        </Box>
 
                         <div className="fault-report-buttons">
                             <button onClick={handleSubmit} className="fault-report-submit-btn">
