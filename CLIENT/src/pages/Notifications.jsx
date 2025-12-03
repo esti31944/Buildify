@@ -40,11 +40,11 @@ export default function Notifications() {
     };
 
     const typeIcons = {
-        payment: <PaymentIcon sx={{ color: "#6d6d6d" }} />,
-        issue: <ReportProblemIcon sx={{ color: "#6d6d6d" }} />,
-        room: <MeetingRoomIcon sx={{ color: "#6d6d6d" }} />,
-        notice: <EventNoteIcon sx={{ color: "#6d6d6d" }} />,
-        system: <InfoOutlinedIcon sx={{ color: "#6d6d6d" }} />,
+        payment: <PaymentIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
+        issue: <ReportProblemIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
+        room: <MeetingRoomIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
+        notice: <EventNoteIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
+        system: <InfoOutlinedIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
     };
 
     const typeLabelsTabs = {
@@ -137,16 +137,16 @@ export default function Notifications() {
                                         />
                                     </Tooltip>
                                 ) : (
-                                    <DraftsOutlinedIcon  sx={{ color: "#9e9e9e"}}
+                                    <DraftsOutlinedIcon sx={{ color: "#9e9e9e" }}
                                         onClick={() => dispatch(markAsRead(n._id))}
                                     />
                                 )}
-                                    <Tooltip title="מחק התראה">
-                                        <DeleteIcon
-                                            sx={{ color: "error.main", cursor: "pointer",opacity:0.8, mr: 4 }}
-                                            onClick={() => dispatch(deleteNotification(n._id))}
-                                        />
-                                    </Tooltip>
+                                <Tooltip title="מחק התראה">
+                                    <DeleteIcon
+                                        sx={{ color: "error.main", cursor: "pointer", opacity: 0.8, mr: 4 }}
+                                        onClick={() => dispatch(deleteNotification(n._id))}
+                                    />
+                                </Tooltip>
                             </TableCell>
                         </TableRow>
                     ))}

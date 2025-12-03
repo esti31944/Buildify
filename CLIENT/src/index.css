@@ -87,7 +87,7 @@ body,
 #root {
   height: 100%;
   margin: 0;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: "Segoe UI", Roboto, sans-serif, Arial !important;
   background: var(--bg);
   color: #111827;
 }
@@ -326,3 +326,25 @@ body,
     flex-direction: column;
   }
 }
+
+
+/* קובץ index.css או App.css */
+/* * {
+  font-family: 'Assistant', Arial, sans-serif !important;
+} */
+
+
+.MuiTypography-root,
+.MuiTableCell-root,
+.MuiButton-root,
+.MuiTab-root,
+.MuiTabs-root,
+.MuiTableHead-root,
+.MuiTableSortLabel-root,
+.MuiInputBase-root,
+.MuiInputLabel-root,
+.MuiFormHelperText-root
+ {
+  font-family: inherit !important;
+}
+
