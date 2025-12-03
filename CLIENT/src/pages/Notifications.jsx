@@ -137,13 +137,13 @@ export default function Notifications() {
                                         />
                                     </Tooltip>
                                 ) : (
-                                    <DraftsOutlinedIcon
+                                    <DraftsOutlinedIcon  sx={{ color: "#9e9e9e"}}
                                         onClick={() => dispatch(markAsRead(n._id))}
                                     />
                                 )}
                                     <Tooltip title="מחק התראה">
                                         <DeleteIcon
-                                            sx={{ color: "error.main", cursor: "pointer", ml: 1 }}
+                                            sx={{ color: "error.main", cursor: "pointer",opacity:0.8, mr: 4 }}
                                             onClick={() => dispatch(deleteNotification(n._id))}
                                         />
                                     </Tooltip>
