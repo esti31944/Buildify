@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchNotifications, markAsRead } from "../features/notifications/notificationsSlice";
+import { fetchNotifications, markAsRead, deleteNotification } from "../features/notifications/notificationsSlice";
 
-import { Box, Paper, Typography, Button, CircularProgress, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
+import { Box, Paper, Typography, Button, Tabs, Tab, CircularProgress, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 import MarkEmailUnreadOutlinedIcon from '@mui/icons-material/MarkEmailUnreadOutlined';
 import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
 import DraftsOutlinedIcon from '@mui/icons-material/DraftsOutlined';
@@ -16,7 +18,12 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 export default function Notifications() {
     const dispatch = useDispatch();
+    const { user } = useSelector(state => state.auth);
     const { list, loading } = useSelector((state) => state.notifications);
+
+    const [selectedType, setSelectedType] = React.useState("all");
+
+    const showTypeColumn = selectedType === "all";
 
     useEffect(() => {
         dispatch(fetchNotifications());
@@ -24,29 +31,44 @@ export default function Notifications() {
 
     if (loading) return <CircularProgress />;
 
+    const filteredList = selectedType === "all"
+        ? list
+        : list.filter(n => n.type === selectedType);
+
+    const handleTabChange = (event, newValue) => {
+        setSelectedType(newValue);
+    };
+
+    const typeIcons = {
+        payment: <PaymentIcon sx={{ color: "#6d6d6d" }} />,
+        issue: <ReportProblemIcon sx={{ color: "#6d6d6d" }} />,
+        room: <MeetingRoomIcon sx={{ color: "#6d6d6d" }} />,
+        notice: <EventNoteIcon sx={{ color: "#6d6d6d" }} />,
+        system: <InfoOutlinedIcon sx={{ color: "#6d6d6d" }} />,
+    };
+
+    const typeLabelsTabs = {
+        payment: "תשלומים",
+        issue: "תקלות",
+        room: "חדרים",
+        notice: "מודעות",
+        system: "מערכת",
+    };
+
     const typeLabels = {
         payment: "תשלום",
         issue: "תקלה",
-        notice: "מודעה",
         room: "חדר",
+        notice: "מודעה",
         system: "מערכת",
     };
-    
+
     const getTypeIcon = (type) => {
-        const iconProps = { sx: { color: "#6d6d6d" } };
-    
-        const icons = {
-            payment: <PaymentIcon {...iconProps} />,
-            issue: <ReportProblemIcon {...iconProps} />,
-            notice: <EventNoteIcon {...iconProps} />,
-            room: <MeetingRoomIcon {...iconProps} />,
-            system: <InfoOutlinedIcon {...iconProps} />,
-        };
 
         return (
             <Tooltip title={typeLabels[type] || ""}>
                 <Box sx={{ display: "flex", justifyContent: "center" }}>
-                    {icons[type]}
+                    {typeIcons[type]}
                 </Box>
             </Tooltip>
         );
@@ -54,10 +76,34 @@ export default function Notifications() {
 
     return (
         <Paper sx={{ p: 3 }}>
+            <Box sx={{ mb: 2 }}>
+                <Tabs
+                    value={selectedType}
+                    onChange={handleTabChange}
+                    textColor="primary"
+                    indicatorColor="primary"
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    sx={{ minHeight: 40 }}
+                >
+                    <Tab label="הכל" value="all" />
+                    {Object.keys(typeIcons).map((type) => (
+                        <Tab
+                            key={type}
+                            value={type}
+                            icon={typeIcons[type]}
+                            iconPosition="start"
+                            label={typeLabelsTabs[type]}
+                            sx={{ minHeight: 40, paddingY: 0 }}
+                        />
+                    ))}
+                </Tabs>
+            </Box>
+
             <Table sx={{ direction: "rtl", "& td, & th": { textAlign: "center" } }}>
                 <TableHead>
                     <TableRow>
-                        <TableCell>סוג</TableCell>
+                        {showTypeColumn && <TableCell>סוג</TableCell>}
                         <TableCell>תאריך</TableCell>
                         <TableCell>הודעה</TableCell>
                         <TableCell></TableCell>
@@ -65,15 +111,14 @@ export default function Notifications() {
                 </TableHead>
 
                 <TableBody>
-                    {list.map((n) => (
+                    {filteredList.map((n) => (
                         <TableRow
                             key={n._id}
                             sx={{
                                 bgcolor: n.isRead ? "#fff" : "#fff7f7",
                             }}
                         >
-                            {/* <TableCell>{n.type}</TableCell> */}
-                            <TableCell>{getTypeIcon(n.type)}</TableCell>
+                            {showTypeColumn && <TableCell>{getTypeIcon(n.type)}</TableCell>}
                             <TableCell>{new Date(n.createdAt).toLocaleString("he-IL", {
                                 year: "numeric",
                                 month: "2-digit",
@@ -96,6 +141,12 @@ export default function Notifications() {
                                         onClick={() => dispatch(markAsRead(n._id))}
                                     />
                                 )}
+                                    <Tooltip title="מחק התראה">
+                                        <DeleteIcon
+                                            sx={{ color: "error.main", cursor: "pointer", ml: 1 }}
+                                            onClick={() => dispatch(deleteNotification(n._id))}
+                                        />
+                                    </Tooltip>
                             </TableCell>
                         </TableRow>
                     ))}

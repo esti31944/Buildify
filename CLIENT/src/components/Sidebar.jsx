@@ -47,8 +47,8 @@ export default function Sidebar({ isMobile, onClose }) {
         user?.role === "admin"
             ? [
                 { to: "/", label: "דף הבית", icon: <HomeIcon />, color: "#1976d2" },
-                { to: "/issues", label: "תקלות", icon: <ReportProblemIcon />, color: "#0097A7" },
-                { to: "/payments", label: "תשלומים", icon: <PaymentIcon />, color: "#388e3c" },
+                { to: "/payments", label: "תשלומים", icon: <PaymentIcon />, color: "#0097A7" },
+                { to: "/issues", label: "תקלות", icon: <ReportProblemIcon />, color: "#388e3c" },
                 { to: "/documents", label: "חדרים", icon: <MeetingRoomIcon />, color: "#fbc02d" },
                 { to: "/notices", label: "לוח מודעות", icon: <EventNoteIcon />, color: "#fb8c00" },
                 { to: "/notifications", label: "התראות", icon: <NotificationsIcon />, color: "#d32f2f" },
@@ -56,8 +56,8 @@ export default function Sidebar({ isMobile, onClose }) {
             ]
             : [
                 { to: "/", label: "הבית שלי", icon: <HomeIcon />, color: "#1976d2" },
-                { to: "/issues", label: "התקלות שלי", icon: <ReportProblemIcon />, color: "#0097A7" },
-                { to: "/payments", label: "התשלומים שלי", icon: <PaymentIcon />, color: "#388e3c" },
+                { to: "/payments", label: "התשלומים שלי", icon: <PaymentIcon />, color: "#0097A7" },
+                { to: "/issues", label: "התקלות שלי", icon: <ReportProblemIcon />, color: "#388e3c" },
                 { to: "/documents", label: "חדרים", icon: <MeetingRoomIcon />, color: "#fbc02d" },
                 { to: "/notices", label: "לוח מודעות", icon: <EventNoteIcon />, color: "#fb8c00" },
                 { to: "/notifications", label: "התראות", icon: <NotificationsIcon />, color: "#d32f2f" },

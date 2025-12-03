@@ -63,13 +63,23 @@ exports.markNotificationRead = async (req, res) => {
   }
 };
 
-// מחיקת התראה (למנהל בלבד)
+// מחיקת התראה
 exports.deleteNotification = async (req, res) => {
   try {
-    const result = await NotificationModel.findByIdAndDelete(req.params.id);
-    if (!result) return res.status(404).json({ msg: "Notification not found" });
-    res.json({ msg: "Notification deleted", result });
+    const notification = await NotificationModel.findById(req.params.id);
+    if (!notification) {
+      return res.status(404).json({ msg: "Notification not found" });
+    }
+
+    if (req.user.role !== "admin" && notification.userId.toString() !== req.user._id) {
+      return res.status(403).json({ msg: "Access denied - not your notification" });
+    }
+
+    await NotificationModel.findByIdAndDelete(req.params.id);
+
+    res.json({ msg: "Notification deleted successfully" , id: req.params.id });
   } catch (err) {
+    console.error("Delete notification error:", err);
     res.status(500).json({ msg: "Server error", err });
   }
 };

@@ -81,7 +81,7 @@ exports.deleteNotice = async (req, res) => {
 
     await NotificationModel.create({
       userId: req.user._id,
-      type: "issue",
+      type: "notice",
       message: "מודעה שפירסמת הוסרה מהלוח",
     });
 

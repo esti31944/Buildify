@@ -16,7 +16,7 @@ router.post("/", authAdmin, notificationsController.createNotification);
 // סימון התראה כנקראה
 router.put("/read/:id", auth, notificationsController.markNotificationRead);
 
-// מחיקת התראה (למנהל בלבד)
-router.delete("/:id", authAdmin, notificationsController.deleteNotification);
+// מחיקת התראה
+router.delete("/:id", auth, notificationsController.deleteNotification);
 
 module.exports = router;

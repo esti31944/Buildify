@@ -1,6 +1,7 @@
 const { PaymentModel, validPayment, validPaymentUpdate } = require("../models/paymentModel");
 // controllers/paymentController.js
 const { NotificationModel } = require("../models/notificationModel");
+const { UserModel } = require("../models/usersModel");
 
 // רשימת כל התשלומים מסוג 'monthly' (ועד)
 exports.getAllPayments = async (req, res) => {
@@ -117,13 +118,29 @@ exports.updatePaymentStatus = async (req, res) => {
     } else if (status === "paid") {
       notificationMessage = `התשלום '${payment.title}' אושר ושולם`;
     }
-    console.log("for user:",payment.userId);
+
     if (notificationMessage) {
       await NotificationModel.create({
         userId: payment.userId,
         type: "payment",
         message: notificationMessage,
       });
+    }
+
+    if (status === "pending") {
+      const admins = await UserModel.find({ role: "admin", isActive: true });
+      const payingUser = await UserModel.findById(req.user._id);
+
+      if (admins.length > 0) {
+        const notifications = admins.map(admin => ({
+          userId: admin._id,
+          type: "payment",
+          message: `${payingUser.fullName} העביר את תשלום '${payment.title}' וממתין לאישור`,
+          isRead: false
+        }));
+
+        await NotificationModel.insertMany(notifications);
+      }
     }
 
     res.json({

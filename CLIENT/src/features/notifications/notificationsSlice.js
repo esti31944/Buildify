@@ -30,6 +30,15 @@ export const markAsRead = createAsyncThunk(
 //   }
 // );
 
+// מחיקת התראה
+export const deleteNotification = createAsyncThunk(
+  "notifications/deleteNotification",
+  async (id) => {
+    await axios.delete(`/notifications/${id}`);
+    return id; // נחזיר את ה־id כדי שנוכל למחוק מהסטייט
+  }
+);
+
 // --- SLICE --- //
 
 const notificationsSlice = createSlice({
@@ -69,6 +78,10 @@ const notificationsSlice = createSlice({
       //   .addCase(markAllAsRead.fulfilled, (state) => {
       //     state.list = state.list.map((n) => ({ ...n, isRead: true }));
       //   })
+      .addCase(deleteNotification.fulfilled, (state, action) => {
+        const id = action.payload;
+        state.list = state.list.filter((n) => n._id !== id);
+      })
       ;
   },
 });
