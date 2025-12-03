@@ -40,6 +40,21 @@ exports.registerUser = async (req, res) => {
     user.password = await bcrypt.hash(user.password, 10);
     await user.save();
 
+    await NotificationModel.create({
+      userId: user._id,
+      type: "system",
+      message: "Buildify מברכת אותך על הצטרפותך לשרותינו:)",
+      isRead: false
+    });
+
+    await NotificationModel.create({
+      userId: user._id,
+      type: "system",
+      message: "מומלץ להחליף סיסמה לאחר ההרשמה הראשונה",
+      isRead: false
+    });
+    
+
     user.password = "******";
     res.status(201).json(user);
   } catch (err) {
