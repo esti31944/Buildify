@@ -5,6 +5,7 @@ import { Box, Paper, Typography, CircularProgress, Table, TableHead, TableRow, T
 import { ToggleOnOutlined, ToggleOffOutlined } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
 import { fetchAllUsers, createUser, updateUser, toggleUserActive } from "../features/users/UserSlice";
 import UserForm from "../components/UserForm"
 
@@ -106,19 +107,24 @@ export default function Tenants() {
     <Paper sx={{ p: 3, borderRadius: 4 }}>
       <Typography variant="h5" sx={{ mb: 3 }}>ניהול דיירים</Typography>
 
+      {user.role === "admin" && (
+        <Box sx={{width: "100%", display: "flex", justifyContent: "flex-end", mb: 2,pl: 8 }}>
+          <Tooltip title="הוסף משתמש חדש">
+            <IconButton
+              variant="outlined"
+              onClick={openCreateForm}
+              sx={{ display: "flex", alignItems: "center", gap: 1, borderRadius: 3, borderColor: "#1976d2 !important", color: "#1976d2", backgroundColor: "rgba(25, 118, 210, 0.05)", "&:hover": { backgroundColor: "rgba(25, 118, 210, 0.08)" } }}
+            >
+              <AddIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
+
       <Tabs value={tab} onChange={handleTabChange}>
         <Tab label="דיירים" />
         <Tab label="מנהלים" />
       </Tabs>
-
-      {user.role === "admin" && (
-        <Button
-          variant="contained" color="primary" sx={{ my: 2 }}
-          onClick={openCreateForm}
-        >
-          הוסף דייר חדש
-        </Button>
-      )}
 
       {user.role === "admin" && (
         <Box sx={{ my: 2, display: "flex", justifyContent: "flex-start", gap: 1 }}>
