@@ -4,19 +4,24 @@ import AddIcon from "@mui/icons-material/Add";
 
 export default function AdminActions({ handleOpen }) {
     return (
-        <Box display="flex" justifyContent="flex-start" gap={2}>
-            <Button
-                variant="contained"
-                color="primary"
-                startIcon={<AddIcon />}
-                onClick={() => handleOpen()}
-            >
-                תשלום חדש
-            </Button>
+      <Box display="flex" justifyContent="flex-start" gap={2}>
+            <Tooltip title="הוספת תשלום" arrow>
+                <Button
+                    variant="contained"
+                    color= "#94b6d9ff"
+                    onClick={() => handleOpen()}
+                    sx={{
+                        minWidth: 0, 
+                        width: 40,
+                        height: 40,
+                        padding: 0,
+                        borderRadius: "50%", 
+                    }}
 
-            <Button variant="contained" color="secondary" startIcon={<AddIcon />}>
-                הוסף לכולם
+        >
+                <AddIcon />
             </Button>
-        </Box>
+        </Tooltip>
+    </Box >
     );
 }

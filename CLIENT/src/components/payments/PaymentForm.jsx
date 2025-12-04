@@ -1,11 +1,27 @@
+
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, InputLabel, FormControl, Button } from "@mui/material";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { useEffect } from 'react';
 
 export default function PaymentForm({ open, onClose, onSubmit, form, setForm, editMode, users }) {
+
+    const handleUserChange = (e) => {
+        const value = e.target.value;
+
+        if (value.includes("all")) {
+            // אם כבר כל המשתמשים נבחרו, ננקה את הבחירה
+            if (form.userId.length === users.length) {
+                setForm({ ...form, userId: [] });
+            } else {
+                // בחר את כל המשתמשים
+                setForm({ ...form, userId: users.map(u => u._id) });
+            }
+        } else {
+            setForm({ ...form, userId: value });
+        }
+    };
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth>
@@ -24,16 +40,10 @@ export default function PaymentForm({ open, onClose, onSubmit, form, setForm, ed
                         label="חודש ושנה"
                         value={form.month ? dayjs(form.month) : null}
                         onChange={(newValue) => {
-                            setForm({
-                                ...form,
-                                month: newValue ? newValue.format("YYYY-MM") : ""
-                            });
+                            setForm({ ...form, month: newValue ? newValue.format('YYYY-MM') : '' });
                         }}
-                        slotProps={{
-                            textField: { fullWidth: true }
-                        }}
+                        renderInput={(params) => <TextField {...params} />}
                     />
-
                 </LocalizationProvider>
 
                 <TextField
@@ -48,25 +58,23 @@ export default function PaymentForm({ open, onClose, onSubmit, form, setForm, ed
                     <Select
                         multiple
                         labelId="user-select-label"
-                        value={form.userId || ""}
-                        label="משתמש"
-                        onChange={(e) => {
-                            const selectedUser = users.find(u => u._id === e.target.value);
-                            console.log("selectedUser?.fullName ", selectedUser?.fullName);
-
-                            setForm({
-                                ...form,
-                                userId: e.target.value,
-                                fullName: selectedUser?.fullName || ""
-                            });
-
+                        value={form.userId || []}
+                        label="משתמשים"
+                        onChange={handleUserChange}
+                        renderValue={(selected) => {
+                            const selectedNames = users
+                                .filter(u => selected.includes(u._id))
+                                .map(u => u.fullName)
+                                .join(", ");
+                            return selectedNames;
                         }}
-
                     >
-                        <pre style={{ direction: "ltr" }}>
-                            {JSON.stringify(form, null, 2)}
-                        </pre>
-
+                        <MenuItem
+                            value="all"
+                            style={{ fontWeight: "bold", borderBottom: "1px solid #ccc" }}
+                        >
+                            כל המשתמשים
+                        </MenuItem>
 
                         {users?.map((u) => (
                             <MenuItem key={u._id} value={u._id}>
