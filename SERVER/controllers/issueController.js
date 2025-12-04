@@ -3,6 +3,7 @@ const { IssueModel, validIssue, validIssueUpdate } = require("../models/issueMod
 const { authAdmin } = require("../middleware/authMiddleware");
 const { NotificationModel } = require("../models/notificationModel");
 const { UserModel } = require("../models/usersModel");
+// const sendEmail = require("../utils/sendEmail");
 
 // בדיקה בסיסית
 const testRoute = (req, res) => {
@@ -25,7 +26,7 @@ const createIssue = async (req, res) => {
     const admins = await UserModel.find({ role: "admin", isActive: true });
     if (admins.length > 0) {
       const reportingUser = await UserModel.findById(req.user._id);
-      // שלב 3: יצירת התראות לכל המנהלים
+      // יצירת התראות לכל המנהלים
       const notifications = admins.map(admin => ({
         userId: admin._id,
         type: "issue",
@@ -40,6 +41,15 @@ const createIssue = async (req, res) => {
       type: "issue",
       message: "תקלה חדשה דווחה",
     });
+
+    // const user = await UserModel.findById(req.user._id);
+
+    // await sendEmail(
+    //   user.email,
+    //   "הזמנת חדר חדשה",
+    //   `<p>שלום ${user.fullName},</p>
+    //    <p>בוצעה עבורך הזמנה חדשה.</p>`
+    // );
 
     res.status(201).json(issue);
   } catch (err) {

@@ -27,7 +27,7 @@ export default function IssueCard({ _id, title, description, imageUrl, createdAt
     dispatch(updateIssueStatus(_id));
   };
 
-  const canEdit = user?.role === "tenant" && user?._id === userId && status === "new";
+  const canEdit = user?.role === "tenant" && user?._id?.toString() === userId?._id?.toString() && status === "new";
 
   const reporterText = user?.role === "admin"
     ? `דווח ע"י ${reporterName || "משתמש לא ידוע"}`
@@ -49,7 +49,8 @@ export default function IssueCard({ _id, title, description, imageUrl, createdAt
           : "https://images.pexels.com/photos/28216688/pexels-photo-28216688/free-photo-of-autumn-camping.png?auto=compress&cs=tinysrgb&w=600"
         }
         alt={title}
-        sx={{ width: 180, objectFit: "cover", bgcolor: "#eee", }} />
+        sx={{ width: 180, objectFit: "cover", bgcolor: "#eee", }}
+      />
 
       <Box sx={{ display: "flex", flexDirection: "column", p: 2, flexGrow: 1 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
