@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateIssueStatus } from "../features/issues/issuesSlice";
 import "../styles/IssueCard.css"
 
-export default function IssueCard({ _id, title, description, imageUrl, createdAt, userId, status, onEdit }) {
+export default function IssueCard({ _id, title, description, imageUrl, createdAt, userId, reporterName, status, onEdit }) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
 
@@ -29,9 +29,14 @@ export default function IssueCard({ _id, title, description, imageUrl, createdAt
 
   const canEdit = user?.role === "tenant" && user?._id === userId && status === "new";
 
-  const formattedDate = `דווח ב-${new Date(createdAt).toLocaleDateString(
-    "he-IL", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, }
-  )}`;
+  const reporterText = user?.role === "admin"
+    ? `דווח ע"י ${reporterName || "משתמש לא ידוע"}`
+    : null;
+
+  const dateStr = new Date(createdAt).toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, });
+  const formattedDate = user?.role === "admin"
+    ? `ב-${dateStr}`
+    : `דווח ב-${dateStr}`;
 
   return (
     <Card sx={{ display: "flex", flexDirection: "row-reverse", borderRadius: 3, boxShadow: 3, overflow: "hidden", mb: 2, height: 180, }}>
@@ -63,9 +68,14 @@ export default function IssueCard({ _id, title, description, imageUrl, createdAt
         </Typography>
 
         <Box sx={{ mt: "auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Typography sx={{ fontSize: "0.65rem", color: "#777" }}>
-            {formattedDate}
-          </Typography>
+          <Box sx={{ mt: "auto", display: "flex", flexDirection: "column" }}>
+            <Typography sx={{ fontSize: "0.65rem", color: "#777" }}>
+              {reporterText}
+            </Typography>
+            <Typography sx={{ fontSize: "0.65rem", color: "#777" }}>
+              {formattedDate}
+            </Typography>
+          </Box>
 
           {user?.role === "admin" && status !== "fixed" && (
             <Button

@@ -111,7 +111,9 @@ const updateIssueStatus = async (req, res) => {
 const getMyIssues = async (req, res) => {
   const userId = req.user._id;
   try {
-    const issues = await IssueModel.find({ userId }).sort({ createdAt: -1 });
+    const issues = await IssueModel.find({ userId })
+    .sort({ createdAt: -1 })
+    .populate("userId", "fullName");
     res.json(issues);
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
@@ -121,7 +123,9 @@ const getMyIssues = async (req, res) => {
 // רשימת כל התקלות (ועד)
 const getAllIssues = async (req, res) => {
   try {
-    const issues = await IssueModel.find().sort({ createdAt: -1 });
+    const issues = await IssueModel.find()
+    .sort({ createdAt: -1 })
+    .populate("userId", "fullName");
     res.json(issues);
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });

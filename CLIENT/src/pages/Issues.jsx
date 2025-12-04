@@ -67,6 +67,7 @@ export default function Issues() {
                 ).map((item) => (
                     <IssueCard
                         key={item._id} {...item}
+                        reporterName={item.userId.fullName}
                         onEdit={(data) => {
                             setEditIssue(data);
                             setShowForm(true);
