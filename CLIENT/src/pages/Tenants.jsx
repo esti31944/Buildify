@@ -113,7 +113,7 @@ export default function Tenants() {
             <IconButton
               variant="outlined"
               onClick={openCreateForm}
-              sx={{ display: "flex", alignItems: "center", gap: 1, borderRadius: 3, borderColor: "#1976d2 !important", color: "#1976d2", backgroundColor: "rgba(25, 118, 210, 0.05)", "&:hover": { backgroundColor: "rgba(25, 118, 210, 0.08)" } }}
+              sx={{ display: "flex", alignItems: "center", gap: 1, borderRadius: 3, borderColor: "#1976d2 !important", color: "#16acec", backgroundColor: "rgba(25, 118, 210, 0.05)", "&:hover": { backgroundColor: "rgba(25, 118, 210, 0.08)" } }}
             >
               <AddIcon />
             </IconButton>
@@ -172,6 +172,7 @@ export default function Tenants() {
       <Table sx={{ direction: "rtl", "& td, & th": { textAlign: "center" } }}>
         <TableHead>
           <TableRow>
+            <TableCell>#</TableCell>
             <TableCell>שם</TableCell>
             <TableCell>דירה</TableCell>
             <TableCell>אימייל</TableCell>
@@ -184,8 +185,9 @@ export default function Tenants() {
         </TableHead>
 
         <TableBody>
-          {(tab === 0 ? filteredTenants : filteredAdmins).map((u) => (
+          {(tab === 0 ? filteredTenants : filteredAdmins).map((u, index) => (
             <TableRow key={u._id}>
+              <TableCell>{index + 1}</TableCell>
               <TableCell>{u.fullName}</TableCell>
               <TableCell>{u.apartmentNumber}</TableCell>
               <TableCell>{u.email}</TableCell>

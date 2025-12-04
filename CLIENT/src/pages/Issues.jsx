@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import IssueCard from "../components/IssueCard";
 import FaultReportForm from "../components/FaultReportForm"
+import TabLabel from "../components/TabLabel";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchMyIssues, fetchAllIssues } from "../features/issues/issuesSlice";
 import { Box, Button, Tabs, Tab, Typography, Modal, Stack, } from "@mui/material";
@@ -56,9 +57,9 @@ export default function Issues() {
             )}
 
             <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mb: 3 }}>
-                <Tab label={`חדשות (${filtered.new.length})`} />
-                <Tab label={`בטיפול (${filtered.in_progress.length})`} />
-                <Tab label={`טופלו (${filtered.fixed.length})`} />
+                <Tab label={<TabLabel title="חדשות" count={filtered.new.length} />} />
+                <Tab label={<TabLabel title="בטיפול" count={filtered.in_progress.length} />} />
+                <Tab label={<TabLabel title="טופלו" count={filtered.fixed.length} />} />
             </Tabs>
 
             <Stack spacing={2}>
@@ -92,7 +93,7 @@ export default function Issues() {
                     </Button>
 
                     <FaultReportForm
-                        onClose={() =>setShowForm(false)}
+                        onClose={() => setShowForm(false)}
                         initialData={editIssue}
                         mode={editIssue ? "edit" : "create"}
                     />

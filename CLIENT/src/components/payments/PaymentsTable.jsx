@@ -12,6 +12,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { updatePaymentStatus } from "../../features/Payments/Paymentslice";
 import { fetchNotifications } from '../../features/notifications/notificationsSlice';
 
+import TabLabel from "../TabLabel";
+
 import * as XLSX from "xlsx";
 import SyncIcon from "@mui/icons-material/Sync";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -24,6 +26,7 @@ import axios from "axios";
 import { store } from "../../app/store"
 import { uploadPaymentFile } from "../../features/Payments/Paymentslice";
 import FilePreview from "./FilePreview"
+
 export default function PaymentsTable({
     search, setSearch, filteredPayments, loading,
     user, handleOpen, handleDelete
@@ -153,9 +156,9 @@ export default function PaymentsTable({
                 <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                     {/* טאבים בצד שמאל */}
                     <Tabs value={tab} onChange={(e, v) => setTab(v)}>
-                        <Tab label={`לא שולם (${filteredByStatus.unpaid.length})`} />
-                        <Tab label={`בהמתנה (${filteredByStatus.pending.length})`} />
-                        <Tab label={`שולם (${filteredByStatus.paid.length})`} />
+                        <Tab label={<TabLabel title="לא שולם" count={filteredByStatus.unpaid.length}/>} />
+                        <Tab label={<TabLabel title="בהמתנה" count={filteredByStatus.pending.length}/>} />
+                        <Tab label={<TabLabel title="שולם" count={filteredByStatus.paid.length}/>} />
                     </Tabs>
 
                     {/* כפתור יצוא XL בצד ימין */}

@@ -301,6 +301,7 @@ body,
 .btn-primary {
   background: linear-gradient(90deg, var(--accent1-start), var(--accent1-mid));
   color: white;
+  color: #85dafe3c;
 }
 
 .btn-ghost {

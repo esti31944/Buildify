@@ -8,21 +8,9 @@ import {
   deleteNotice as deleteNoticeAction
 } from "../features/notice/NoticeSlice";
 
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  MenuItem,
-  Paper,
-  Box,
-  Typography,
-  IconButton,
-  Tabs,
-  Tab,
-} from "@mui/material";
+import TabLabel from "../components/TabLabel";
+
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, Paper, Box, Typography, IconButton, Tabs, Tab, } from "@mui/material";
 
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -202,9 +190,9 @@ export default function Notices() {
         indicatorColor="primary"
         sx={{ justifyContent: "flex-end", display: "flex" }}
       >
-        <Tab label={`כל ההודעות (${counts.all})`} value="all" />
-        <Tab label={`ארועים (${counts.event})`} value="event" />
-        <Tab label={`הודעות   (${counts.announcement})`} value="announcement" />
+        <Tab label={<TabLabel title="כל ההודעות" count={counts.all} />} value="event" />
+        <Tab label={<TabLabel title="ארועים" count={counts.event} />} value="event" />
+        <Tab label={<TabLabel title="הודעות" count={counts.announcement} />} value="event" />
       </Tabs>
 
       <div style={{ marginTop: 10, marginBottom: 10 }}>

@@ -2,6 +2,14 @@
 import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
+    palette: {
+        primary: {
+            main: "#16acec",
+        },
+        secondary: {
+            main: "#16acec",
+        },
+    },
     typography: {
         fontFamily: "'Assistant', sans-serif, Arial",
     },
