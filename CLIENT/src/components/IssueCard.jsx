@@ -27,7 +27,13 @@ export default function IssueCard({ _id, title, description, imageUrl, createdAt
     dispatch(updateIssueStatus(_id));
   };
 
-  const canEdit = user?.role === "tenant" && user?._id === userId && status === "new";
+  const canEdit = user?.role === "tenant" && user?._id === userId._id && status === "new";
+  // console.log("user?.role: ", user?.role);
+  // console.log("user?._id: ",user?._id);
+  // console.log("status: ",status);
+  // console.log("userId: ",userId);
+  // console.log("canEdit:", canEdit);
+
 
   const reporterText = user?.role === "admin"
     ? `דווח ע"י ${reporterName || "משתמש לא ידוע"}`

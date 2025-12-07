@@ -6,6 +6,7 @@ import { ToggleOnOutlined, ToggleOffOutlined } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import TabLabel from "../components/TabLabel";
 import { fetchAllUsers, createUser, updateUser, toggleUserActive } from "../features/users/UserSlice";
 import UserForm from "../components/UserForm"
 
@@ -122,8 +123,8 @@ export default function Tenants() {
       )}
 
       <Tabs value={tab} onChange={handleTabChange}>
-        <Tab label="דיירים" />
-        <Tab label="מנהלים" />
+        <Tab label={<TabLabel title="דיירים" count={filteredTenants.length} />} />
+        <Tab label={<TabLabel title="מנהלים" count={filteredAdmins.length} />} />
       </Tabs>
 
       {user.role === "admin" && (

@@ -1,11 +1,15 @@
 
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, InputLabel, FormControl, Button } from "@mui/material";
+import React, { useState } from "react";
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, InputLabel, FormControl, Button, IconButton } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 
 export default function PaymentForm({ open, onClose, onSubmit, form, setForm, editMode, users }) {
+
+    const [selectOpen, setSelectOpen] = useState(false);
 
     const handleUserChange = (e) => {
         const value = e.target.value;
@@ -61,6 +65,9 @@ export default function PaymentForm({ open, onClose, onSubmit, form, setForm, ed
                         value={form.userId || []}
                         label="משתמשים"
                         onChange={handleUserChange}
+                        open={selectOpen}
+                        onOpen={() => setSelectOpen(true)}
+                        onClose={() => setSelectOpen(false)}
                         renderValue={(selected) => {
                             const selectedNames = users
                                 .filter(u => selected.includes(u._id))
@@ -68,7 +75,28 @@ export default function PaymentForm({ open, onClose, onSubmit, form, setForm, ed
                                 .join(", ");
                             return selectedNames;
                         }}
+                        MenuProps={{
+                            PaperProps: { sx: { maxHeight: 400, width: 300 } }
+                        }}
                     >
+
+                        <MenuItem
+                            onClick={(e) => {
+                                e.stopPropagation();   // מונע בחירה של ערך
+                                setSelectOpen(false);  // סוגר בקונטרול אמיתי
+                            }}
+                            sx={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                borderBottom: "1px solid #ddd",
+                                pointerEvents: "auto"
+                            }}
+                        >
+                            <IconButton size="small" edge="end" aria-label="close">
+                                <CloseIcon fontSize="small" />
+                            </IconButton>
+                        </MenuItem>
+
                         <MenuItem
                             value="all"
                             style={{ fontWeight: "bold", borderBottom: "1px solid #ccc" }}

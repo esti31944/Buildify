@@ -86,7 +86,7 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
                 };
 
                 const issueId = formData._id || initialData?._id;
-                
+
                 let updatedIssue = await dispatch(updateIssue({
                     id: issueId,
                     data: dataToUpdate
@@ -121,7 +121,16 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
     };
 
     const handleCancel = () => {
-        setFormData({ title: '', description: '', imageUrl: '' });
+        if (mode === "edit" || mode === "update") {
+            setFormData(initialData || { title: '', description: '', imageUrl: '' });
+            setPreviewImage(initialData?.imageUrl || null);
+            setUploadedNow(false);
+        }
+        else {
+            setFormData({ title: '', description: '', imageUrl: '' });
+            setPreviewImage(null);
+            setUploadedNow(false);
+        }
     };
 
     const handleFileChange = (e) => {
@@ -249,14 +258,14 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
                                         mb: 2,
                                     }}
                                 >
-                                    {!initialData?.imageUrl &&(
-                                    <IconButton
-                                        size="small"
-                                        onClick={handleRemoveImage}
-                                        sx={{position: "absolute",top: 4, right: 4,background: "rgba(0,0,0,0.5)",color: "white","&:hover": { background: "rgba(0,0,0,0.7)" },zIndex: 2 }}
-                                    >
-                                        ✕
-                                    </IconButton>
+                                    {!initialData?.imageUrl && (
+                                        <IconButton
+                                            size="small"
+                                            onClick={handleRemoveImage}
+                                            sx={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.5)", color: "white", "&:hover": { background: "rgba(0,0,0,0.7)" }, zIndex: 2 }}
+                                        >
+                                            ✕
+                                        </IconButton>
                                     )}
                                     <img
                                         src={
@@ -281,7 +290,7 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
                             <button onClick={handleCancel}
                                 className="fault-report-cancel-btn"
                             >
-                                רוקן שדות
+                                {mode === "create" ? "רוקן שדות" : "בטל שינויים"}
                             </button>
                         </div>
                     </div>

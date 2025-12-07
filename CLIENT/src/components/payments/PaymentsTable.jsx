@@ -156,26 +156,30 @@ export default function PaymentsTable({
                 <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                     {/* טאבים בצד שמאל */}
                     <Tabs value={tab} onChange={(e, v) => setTab(v)}>
-                        <Tab label={<TabLabel title="לא שולם" count={filteredByStatus.unpaid.length}/>} />
-                        <Tab label={<TabLabel title="בהמתנה" count={filteredByStatus.pending.length}/>} />
-                        <Tab label={<TabLabel title="שולם" count={filteredByStatus.paid.length}/>} />
+                        <Tab label={<TabLabel title="לא שולם" count={filteredByStatus.unpaid.length} />} />
+                        <Tab label={<TabLabel title="בהמתנה" count={filteredByStatus.pending.length} />} />
+                        <Tab label={<TabLabel title="שולם" count={filteredByStatus.paid.length} />} />
                     </Tabs>
 
                     {/* כפתור יצוא XL בצד ימין */}
-                    <IconButton
-                        onClick={exportToExcel}
-                        sx={{
-                            padding: 0,
-                            width: 30,
-                            height: 30,
-                        }}
-                    >
-                        <img
-                            src={xl}
-                            alt="xl"
-                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                        />
-                    </IconButton>
+                    <Tooltip title="excel יצא לקובץ">
+                        <IconButton
+                            onClick={exportToExcel}
+                            sx={{
+                                padding: 0,
+                                width: 30,
+                                height: 30,
+                                ml:3,
+                                my:3,
+                            }}
+                        >
+                            <img
+                                src={xl}
+                                alt="xl"
+                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                            />
+                        </IconButton>
+                    </Tooltip>
                 </Box>
 
 
@@ -185,6 +189,7 @@ export default function PaymentsTable({
                     <Table sx={{ direction: "rtl", "& td, & th": { textAlign: "center" } }}>
                         <TableHead>
                             <TableRow>
+                                <TableCell>#</TableCell>
                                 {user?.role === "admin" && <TableCell>ניהול</TableCell>}
                                 {user?.role === "admin" && <TableCell>שם הדייר</TableCell>}
                                 <TableCell>תיאור</TableCell>
@@ -215,9 +220,10 @@ export default function PaymentsTable({
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                paymentsToShow.map((payment) => (
+                                paymentsToShow.map((payment, index) => (
                                     <TableRow key={payment._id}>
 
+                                        <TableCell>{index + 1}</TableCell>
                                         {user?.role === "admin" && (
                                             <TableCell>
                                                 <IconButton
@@ -309,7 +315,7 @@ export default function PaymentsTable({
                                             )}
                                         </TableCell>
 
-                                     
+
 
                                         {tab === 2 && (
                                             <TableCell>

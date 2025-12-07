@@ -14,6 +14,16 @@ const theme = createTheme({
         fontFamily: "'Assistant', sans-serif, Arial",
     },
     components: {
+        MuiButton: {
+            styleOverrides: {
+                containedPrimary: {
+                    backgroundColor: "rgba(22, 172, 236, 0.25)",
+                    "&:hover": {
+                        backgroundColor: "rgba(22, 172, 236, 0.35)",
+                    },
+                },
+            },
+        },
         MuiInputBase: {
             styleOverrides: {
                 input: {
