@@ -45,7 +45,7 @@ export default function PaymentsNEW() {
                 title: payment.title,
                 month: payment.month,
                 amount: payment.amount,
-                userId: payment.userId,
+                userId: Array.isArray(payment.userId) ? payment.userId : [payment.userId],
                 _id: payment._id,
             });
         } else {
@@ -54,7 +54,7 @@ export default function PaymentsNEW() {
                 title: "",
                 month: "",
                 amount: "",
-                userId: "",
+                userId: [],
             });
         }
         setOpen(true);
@@ -86,7 +86,7 @@ export default function PaymentsNEW() {
         }
         handleClose();
     };
-        // מחיקה
+    // מחיקה
     const handleDelete = (id) => {
         dispatch(deletePayment(id)).then(() => {
             dispatch(fetchAllPayments());
@@ -130,9 +130,15 @@ export default function PaymentsNEW() {
 
     return (
         <Box p={2}>
-            <Typography variant="h4" fontWeight="bold" mb={2}>
+            <Typography
+                variant="h4"
+                fontWeight="bold"
+                mb={2}
+                textAlign="center"
+            >
                 ניהול תשלומים
             </Typography>
+
 
             {/* כרטיסים רק לדיירים */}
             {user?.role !== "admin" && (

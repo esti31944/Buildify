@@ -61,25 +61,32 @@ export default function Issues() {
                 <Tab label={<TabLabel title="בטיפול" count={filtered.in_progress.length} />} />
                 <Tab label={<TabLabel title="טופלו" count={filtered.fixed.length} />} />
             </Tabs>
+            <Box
+                sx={{
+                    backgroundColor: "#ffffff",
+                    borderRadius: 4,
+                    p: 3,
+                    boxShadow: "0 2px 10px rgba(0,0,0,0.15)",
+                }}
+            >
+                <Stack spacing={2}>
+                    {(tab === 0 ? filtered.new :
+                        tab === 1 ? filtered.in_progress : filtered.fixed
+                    ).map((item) => (
+                        <IssueCard
+                            key={item._id} {...item}
+                            reporterName={item.userId.fullName}
+                            onEdit={(data) => {
+                                setEditIssue(data);
+                                setShowForm(true);
+                            }}
+                        />
+                    ))}
 
-            <Stack spacing={2}>
-                {(tab === 0 ? filtered.new :
-                    tab === 1 ? filtered.in_progress : filtered.fixed
-                ).map((item) => (
-                    <IssueCard
-                        key={item._id} {...item}
-                        reporterName={item.userId.fullName}
-                        onEdit={(data) => {
-                            setEditIssue(data);
-                            setShowForm(true);
-                        }}
-                    />
-                ))}
-
-                {(tab === 0 && filtered.new.length === 0) && <p>אין תקלות חדשות</p>}
-                {(tab === 1 && filtered.in_progress.length === 0) && <p>אין תקלות בטיפול</p>}
-                {(tab === 2 && filtered.fixed.length === 0) && <p>אין תקלות שטופלו</p>}
-            </Stack>
+                    {(tab === 0 && filtered.new.length === 0) && <p>אין תקלות חדשות</p>}
+                    {(tab === 1 && filtered.in_progress.length === 0) && <p>אין תקלות בטיפול</p>}
+                    {(tab === 2 && filtered.fixed.length === 0) && <p>אין תקלות שטופלו</p>}
+                </Stack></Box>
 
             <Modal open={showForm} onClose={() => setShowForm(false)}>
                 <Box
