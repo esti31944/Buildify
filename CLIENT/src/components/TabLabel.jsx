@@ -6,7 +6,7 @@ export default function TabLabel({ title, count }) {
             <span>{title}</span>
             {count > 0 && (
                 <Typography sx={{ ml: 0.5, mr: 0.5, fontSize: 12, color: "text.secondary" }}>
-                    {count}
+                   ( {count})
                 </Typography>
             )}
         </Box>
