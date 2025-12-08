@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import EventIcon from '@mui/icons-material/Event';
+import AnnouncementIcon from '@mui/icons-material/Announcement';
 
 import {
   fetchNotices,
@@ -10,58 +12,73 @@ import {
 
 import TabLabel from "../components/TabLabel";
 
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, Paper, Box, Typography, IconButton, Tabs, Tab, } from "@mui/material";
+import { Dialog, DialogTitle, Tooltip, DialogContent, DialogActions, Button, TextField, MenuItem, Paper, Box, Typography, IconButton, Tabs, Tab, } from "@mui/material";
 
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import { fetchNotifications } from '../features/notifications/notificationsSlice';
+import AddIcon from '@mui/icons-material/Add';
 
-function StickyNoteCard({ title, children, color = "#FFFFFF" }) {
+function StickyNoteCard({ title, children, type }) {
+  const stylesByType = {
+    event: {
+      bg: "linear-gradient(145deg,#e3f2fd,#bbdefb)",
+      border: "#90caf9",
+      corner: "#64b5f6",
+      tag: "#1976d2"
+    },
+    announcement: {
+      bg: "linear-gradient(145deg,#fffde7,#fff9c4)",
+      border: "#fff59d",
+      corner: "#ffee58",
+      tag: "#fbc02d"
+    },
+  };
+
+  const style = stylesByType[type] || stylesByType.announcement;
+
   return (
     <Paper
-      elevation={3}
       sx={{
-        p: 2,
-        background: color,
-        borderRadius: "8px",
-        boxShadow: "0 4px 6px rgba(0,0,0,0.15)",
-        transform: "rotate(-1.5deg)",
-        transition: "0.2s",
+        p: 2.5,
+        background: style.bg,
+        borderRadius: "10px",
+        border: `1px solid ${style.border}`,
+        boxShadow: "0 6px 12px rgba(0,0,0,0.12)",
         position: "relative",
-        ":hover": {
-          transform: "rotate(0deg)",
-          boxShadow: "0 6px 10px rgba(0,0,0,0.22)",
-        },
         textAlign: "right",
-        overflowWrap: "break-word",
-        wordBreak: "break-word",
+        transition: "transform 0.25s ease, box-shadow 0.25s ease",
+        "&:hover": {
+          transform: "translateY(-6px)",
+          boxShadow: "0 12px 24px rgba(0,0,0,0.18)"
+        }
       }}
       dir="rtl"
     >
-      <div
-        style={{
+
+      {/* תיוג קטגוריה */}
+      <Box
+        sx={{
           position: "absolute",
-          top: -10,
-          right: 10,
-          fontSize: "24px",
-          transform: "rotate(15deg)",
-          pointerEvents: "none",
+          top: 6,
+          left: 6,
+         
         }}
       >
-        📌
-      </div>
+        {type === "event" ? <EventIcon fontSize="small" /> : <AnnouncementIcon fontSize="small" />}
+      </Box>
 
-      <Typography variant="h6" sx={{ mb: 1, fontWeight: "bold" }}>
+      <Typography variant="h6" fontWeight="bold" mb={1}>
         {title}
       </Typography>
 
-      <Box sx={{ fontSize: "15px", overflowWrap: "break-word" }}>
-        {children}
-      </Box>
+      <Box fontSize="15px">{children}</Box>
     </Paper>
   );
 }
+
+
 
 function parseJwt(token) {
   try {
@@ -69,6 +86,19 @@ function parseJwt(token) {
   } catch {
     return null;
   }
+}
+function CustomTabLabel({ title, count, type }) {
+  const Icon = type === "event" ? EventIcon : AnnouncementIcon;
+
+  return (
+    <Box display="flex" alignItems="center" gap={0.5}>
+      <Icon fontSize="small" />
+      <Typography variant="body2">{title}</Typography>
+      <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+        ({count})
+      </Typography>
+    </Box>
+  );
 }
 
 export default function Notices() {
@@ -179,28 +209,45 @@ export default function Notices() {
   }
 
   return (
-    <div dir="rtl" style={{ textAlign: "right" }}>
-      <h1>לוח מודעות</h1>
-
-      {/* טאב עם מספרים */}
+    
+    <Box dir="rtl" sx={{ p: { xs: 2, md: 4 }, backgroundColor: "#f7f9fc", minHeight: "100vh" }}>
+      <Typography variant="h4" fontWeight="bold" mb={3} textAlign="center">
+        לוח מודעות
+      </Typography>
+<Box
+  sx={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    mb: 2
+  }}
+>
       <Tabs
         value={filterCategory}
         onChange={handleTabChange}
-        textColor="primary"
-        indicatorColor="primary"
-        sx={{ justifyContent: "flex-end", display: "flex" }}
-      >
-        <Tab label={<TabLabel title="כל ההודעות" count={counts.all} />} value="event" />
-        <Tab label={<TabLabel title="ארועים" count={counts.event} />} value="event" />
-        <Tab label={<TabLabel title="הודעות" count={counts.announcement} />} value="event" />
+        sx={{
+          alignItems: "flex-start",
+          mb: 2,
+          ".MuiTabs-flexContainer": {
+            justifyContent: "flex-start",
+          },
+        }}
+      ><Tab label={<CustomTabLabel title="כל ההודעות" count={counts.all} type="announcement" />} value="all" />
+        <Tab label={<CustomTabLabel title="אירועים" count={counts.event} type="event" />} value="event" />
+        <Tab label={<CustomTabLabel title="הודעות" count={counts.announcement} type="announcement" />} value="announcement" />
+
       </Tabs>
 
-      <div style={{ marginTop: 10, marginBottom: 10 }}>
-        <Button variant="contained" onClick={() => setShowForm(true)}>
-          ➕ הוסף מודעה
-        </Button>
-      </div>
-
+        <Tooltip title=" הוסף הודעה חדשה">
+          <IconButton
+            variant="outlined"
+            onClick={() => setShowForm(true)}
+            sx={{ display: "flex", alignItems: "center", gap: 1, borderRadius: 3, borderColor: "#1976d2 !important", color: "#16acec", backgroundColor: "rgba(25, 118, 210, 0.05)", "&:hover": { backgroundColor: "rgba(25, 118, 210, 0.08)" } }}
+          >
+            <AddIcon />
+          </IconButton>
+        </Tooltip>
+</Box>
       <Dialog
         open={showForm}
         onClose={() => {
@@ -290,13 +337,11 @@ export default function Notices() {
           </Button>
         </DialogActions>
       </Dialog>
-
-      <div
-        style={{
+      <Box
+        sx={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-          gap: 20,
-          padding: 10,
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gap: 3,
         }}
       >
         {filteredNotices.map((n) => {
@@ -308,52 +353,53 @@ export default function Notices() {
             <StickyNoteCard
               key={n._id}
               title={n.title}
-              color="#FFFFFF"
+              type={n.category}
             >
-              <div>{n.content}</div>
+              <Typography variant="body2" mb={1}>
+                {n.content}
+              </Typography>
 
-              <small style={{ color: "#666", marginTop: 6, display: "block" }}>
+              <Typography variant="caption" color="text.secondary" display="block">
                 סוג: {n.category === "event" ? "אירוע" : "הודעה"}
-              </small>
+              </Typography>
 
               {n.expiresAt && (
-                <small style={{ color: "#999", display: "block" }}>
-                  פג תוקף ב: {new Date(n.expiresAt).toLocaleDateString()}
-                </small>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  פג תוקף: {new Date(n.expiresAt).toLocaleDateString()}
+                </Typography>
               )}
 
               {n.createdAt && (
-                <small style={{ color: "#999", display: "block" }}>
-                  נוצר ב: {new Date(n.createdAt).toLocaleDateString()}
-                </small>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  נוצר: {new Date(n.createdAt).toLocaleDateString()}
+                </Typography>
               )}
 
               {canManage && (
-                <div style={{ marginTop: 10, textAlign: "right" }}>
+                <Box mt={2} textAlign="right">
                   <IconButton
-                    aria-label="edit"
                     color="warning"
                     onClick={() => startEdit(n)}
                     size="small"
-                    style={{ marginRight: 8 }}
+                    sx={{ mr: 1 }}
                   >
                     <EditIcon />
                   </IconButton>
 
                   <IconButton
-                    aria-label="delete"
                     color="error"
                     onClick={() => deleteNotice(n._id)}
                     size="small"
                   >
                     <DeleteIcon />
                   </IconButton>
-                </div>
+                </Box>
               )}
             </StickyNoteCard>
           );
         })}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
+
 }

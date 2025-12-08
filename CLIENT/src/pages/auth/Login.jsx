@@ -15,7 +15,6 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showGoogle, setShowGoogle] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -113,22 +112,8 @@ export default function Login() {
         <Typography variant="h5" align="center" sx={{ fontWeight:700, mb:1, color:'#000' }}>חברים בוועד</Typography>
         <Typography variant="body2" align="center" sx={{ mb:3, color:'#555' }}>היכנסי כדי להמשיך</Typography>
 
-        <Button
-          variant="outlined"
-          fullWidth
-          sx={{
-            py:1.5,
-            borderRadius:3,
-            borderColor:'#444',
-            color:'#222',
-            '&:hover': { borderColor:'#000', backgroundColor:'#f0f0f0' }
-          }}
-          onClick={() => setShowGoogle(true)}
-        >
-          התחברות באמצעות גוגל
-        </Button>
+       
 
-        {showGoogle && (
           <Box
             sx={{
               mt:2,
@@ -146,7 +131,7 @@ export default function Login() {
               ux_mode="popup"
             />
           </Box>
-        )}
+        {/* )} */}
 
         <Divider sx={{ mb:3, mt:3, color:'#777' }}>או</Divider>
 
@@ -202,26 +187,11 @@ export default function Login() {
               py:1.5,
               mb:2,
               borderRadius:3,
-              backgroundColor:'#000',
-              '&:hover': { backgroundColor:'#333' }
+              backgroundColor:'#565656ff',
+              '&:hover': { backgroundColor:'#969595ff' }
             }}
           >
             התחבר
-          </Button>
-
-          <Button
-            variant="text"
-            fullWidth
-            component={RouterLink}
-            to="/register"
-            sx={{
-              py:1.5,
-              textTransform:'none',
-              color:'#222',
-              '&:hover': { color:'#000', backgroundColor:'#eee' }
-            }}
-          >
-            הרשם
           </Button>
         </form>
 

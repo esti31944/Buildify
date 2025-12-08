@@ -10,7 +10,6 @@ import Notices from "../pages/Notices";
 import Tenants from "../pages/Tenants"
 import Notifications from "../pages/Notifications"
 import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Register";
 
 export default function AppRoutes() {
   const user = useSelector((state) => state.auth.user);
@@ -19,7 +18,6 @@ export default function AppRoutes() {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
