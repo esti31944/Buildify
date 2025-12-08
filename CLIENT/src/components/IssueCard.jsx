@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent, CardMedia, Box, Typography, Chip, Button, IconButton } from "@mui/material";
+import { Card, CardContent, CardMedia, Divider, Box, Typography, Chip, Button, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { useDispatch, useSelector } from "react-redux";
 import { updateIssueStatus } from "../features/issues/issuesSlice";
@@ -74,11 +74,14 @@ export default function IssueCard({ _id, title, description, imageUrl, createdAt
         </Typography>
 
         <Box sx={{ mt: "auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+
           <Box sx={{ mt: "auto", display: "flex", flexDirection: "column" }}>
-            <Typography sx={{ fontSize: "0.65rem", color: "#777" }}>
+            <Divider sx={{ borderColor: "#d9d6d6ff" }} />
+
+            <Typography sx={{ fontSize: "0.7rem", color: "#777" }}>
               {reporterText}
             </Typography>
-            <Typography sx={{ fontSize: "0.65rem", color: "#777" }}>
+            <Typography sx={{ fontSize: "0.7rem", color: "#777" }}>
               {formattedDate}
             </Typography>
           </Box>

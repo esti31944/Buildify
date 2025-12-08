@@ -1,27 +1,16 @@
-// components/payments/AdminActions.jsx
-import { Box, Button, Tooltip } from "@mui/material";
+import { Box, Button, Tooltip,IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
 export default function AdminActions({ handleOpen }) {
     return (
-      <Box display="flex" justifyContent="flex-start" gap={2}>
-            <Tooltip title="הוספת תשלום" arrow>
-                <Button
-                    variant="contained"
-                    color= "#94b6d9ff"
-                    onClick={() => handleOpen()}
-                    sx={{
-                        minWidth: 0, 
-                        width: 40,
-                        height: 40,
-                        padding: 0,
-                        borderRadius: "50%", 
-                    }}
-
-        >
-                <AddIcon />
-            </Button>
+            <Tooltip title="הוספת תשלום">
+          <IconButton
+            variant="outlined"
+             onClick={() => handleOpen()}
+            sx={{ display: "flex", alignItems: "center", gap: 1, borderRadius: 3, borderColor: "#1976d2 !important", color: "#16acec", backgroundColor: "rgba(25, 118, 210, 0.05)", "&:hover": { backgroundColor: "rgba(25, 118, 210, 0.08)" } }}
+          >
+            <AddIcon />
+          </IconButton>
         </Tooltip>
-    </Box >
     );
 }

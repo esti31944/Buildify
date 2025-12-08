@@ -12,7 +12,7 @@ import {
 
 import TabLabel from "../components/TabLabel";
 
-import { Dialog, DialogTitle, Tooltip, DialogContent, DialogActions, Button, TextField, MenuItem, Paper, Box, Typography, IconButton, Tabs, Tab, } from "@mui/material";
+import { Dialog, Divider, DialogTitle, Tooltip, DialogContent, DialogActions, Button, TextField, MenuItem, Paper, Box, Typography, IconButton, Tabs, Tab, } from "@mui/material";
 
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -23,10 +23,10 @@ import AddIcon from '@mui/icons-material/Add';
 function StickyNoteCard({ title, children, type }) {
   const stylesByType = {
     event: {
-      bg: "linear-gradient(145deg,#e3f2fd,#bbdefb)",
-      border: "#90caf9",
-      corner: "#64b5f6",
-      tag: "#1976d2"
+      bg: "linear-gradient(145deg,#fffde7,#fff9c4)",
+      border: "#fff59d",
+      corner: "#ffee58",
+      tag: "#fbc02d"
     },
     announcement: {
       bg: "linear-gradient(145deg,#fffde7,#fff9c4)",
@@ -63,7 +63,7 @@ function StickyNoteCard({ title, children, type }) {
           position: "absolute",
           top: 6,
           left: 6,
-         
+
         }}
       >
         {type === "event" ? <EventIcon fontSize="small" /> : <AnnouncementIcon fontSize="small" />}
@@ -209,34 +209,34 @@ export default function Notices() {
   }
 
   return (
-    
+
     <Box dir="rtl" sx={{ p: { xs: 2, md: 4 }, backgroundColor: "#f7f9fc", minHeight: "100vh" }}>
       <Typography variant="h4" fontWeight="bold" mb={3} textAlign="center">
         לוח מודעות
       </Typography>
-<Box
-  sx={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    mb: 2
-  }}
->
-      <Tabs
-        value={filterCategory}
-        onChange={handleTabChange}
+      <Box
         sx={{
-          alignItems: "flex-start",
-          mb: 2,
-          ".MuiTabs-flexContainer": {
-            justifyContent: "flex-start",
-          },
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2
         }}
-      ><Tab label={<CustomTabLabel title="כל ההודעות" count={counts.all} type="announcement" />} value="all" />
-        <Tab label={<CustomTabLabel title="אירועים" count={counts.event} type="event" />} value="event" />
-        <Tab label={<CustomTabLabel title="הודעות" count={counts.announcement} type="announcement" />} value="announcement" />
+      >
+        <Tabs
+          value={filterCategory}
+          onChange={handleTabChange}
+          sx={{
+            alignItems: "flex-start",
+            mb: 2,
+            ".MuiTabs-flexContainer": {
+              justifyContent: "flex-start",
+            },
+          }}
+        ><Tab label={<CustomTabLabel title="כל ההודעות" count={counts.all} type="announcement" />} value="all" />
+          <Tab label={<CustomTabLabel title="אירועים" count={counts.event} type="event" />} value="event" />
+          <Tab label={<CustomTabLabel title="הודעות" count={counts.announcement} type="announcement" />} value="announcement" />
 
-      </Tabs>
+        </Tabs>
 
         <Tooltip title=" הוסף הודעה חדשה">
           <IconButton
@@ -247,7 +247,7 @@ export default function Notices() {
             <AddIcon />
           </IconButton>
         </Tooltip>
-</Box>
+      </Box>
       <Dialog
         open={showForm}
         onClose={() => {
@@ -339,65 +339,83 @@ export default function Notices() {
       </Dialog>
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-          gap: 3,
+          backgroundColor: "#ffffff",
+          borderRadius: 4,
+          p: 3,
+          boxShadow: "0 2px 10px rgba(0,0,0,0.15)",
         }}
       >
-        {filteredNotices.map((n) => {
-          const canManage =
-            currentUser &&
-            (currentUser.role === "admin" || currentUser._id === n.createdBy);
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: 3,
+          }}
+        >
+          {filteredNotices.map((n) => {
+            const canManage =
+              currentUser &&
+              (currentUser.role === "admin" || currentUser._id === n.createdBy);
 
-          return (
-            <StickyNoteCard
-              key={n._id}
-              title={n.title}
-              type={n.category}
-            >
-              <Typography variant="body2" mb={1}>
-                {n.content}
-              </Typography>
+            return (
 
-              <Typography variant="caption" color="text.secondary" display="block">
-                סוג: {n.category === "event" ? "אירוע" : "הודעה"}
-              </Typography>
+              <StickyNoteCard title={n.title} type={n.category} sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                <Paper
+                  sx={{ display: "flex", flexDirection: "column", height: 250, p: 2 }}
+                  key={n._id}
+                >
+                  <Box sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                    <Typography variant="body2" mb={1}>
+                      {n.content}
+                    </Typography>
 
-              {n.expiresAt && (
-                <Typography variant="caption" color="text.secondary" display="block">
-                  פג תוקף: {new Date(n.expiresAt).toLocaleDateString()}
-                </Typography>
-              )}
+                    <Box sx={{ mt: "auto" }}>
+                      <Divider sx={{ borderColor: "#d9d6d6ff" }} />
+                      <Typography variant="caption" color="text.secondary" display="block">
+                        סוג: {n.category === "event" ? "אירוע" : "הודעה"}
+                      </Typography>
 
-              {n.createdAt && (
-                <Typography variant="caption" color="text.secondary" display="block">
-                  נוצר: {new Date(n.createdAt).toLocaleDateString()}
-                </Typography>
-              )}
+                      {n.expiresAt && (
+                        <Typography variant="caption" color="text.secondary" display="block">
+                          פג תוקף: {new Date(n.expiresAt).toLocaleDateString()}
+                        </Typography>
+                      )}
 
-              {canManage && (
-                <Box mt={2} textAlign="right">
-                  <IconButton
-                    color="warning"
-                    onClick={() => startEdit(n)}
-                    size="small"
-                    sx={{ mr: 1 }}
-                  >
-                    <EditIcon />
-                  </IconButton>
+                      {n.createdAt && (
+                        <Typography variant="caption" color="text.secondary" display="block">
+                          נוצר: {new Date(n.createdAt).toLocaleDateString()}
+                        </Typography>
+                      )}
 
-                  <IconButton
-                    color="error"
-                    onClick={() => deleteNotice(n._id)}
-                    size="small"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-              )}
-            </StickyNoteCard>
-          );
-        })}
+                      {canManage && (
+                        <Box mt={1} textAlign="right">
+                          <IconButton
+                            color="warning"
+                            onClick={() => startEdit(n)}
+                            size="small"
+                            sx={{ mr: 1 }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+
+                          <IconButton
+                            color="error"
+                            onClick={() => deleteNotice(n._id)}
+                            size="small"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+                </Paper>
+              </StickyNoteCard>
+
+            );
+          })}
+
+        </Box>
       </Box>
     </Box>
   );
