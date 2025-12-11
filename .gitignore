@@ -13,6 +13,7 @@ dist/
 .env
 CLIENT/.env
 SERVER/.env
+/SERVER/uploads
 
 # קבצי לוג
 *.log
@@ -24,6 +25,7 @@ logs/
 # תיקיות של IDE
 .vscode/
 .idea/
+
 
 # קבצים זמניים
 *.local
