@@ -9,21 +9,22 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Logo from "../assets/logo_remove.png";
 
 // אייקונים
-import HomeIcon from "@mui/icons-material/Home";
-import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import PaymentIcon from "@mui/icons-material/Payment";
-import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import EventNoteIcon from "@mui/icons-material/EventNote";
-import PeopleIcon from "@mui/icons-material/People";
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
+import MeetingRoomOutlinedIcon from '@mui/icons-material/MeetingRoomOutlined';
+import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 
-const IconWrapper = ({ icon, color }) => (
+const IconWrapper = ({ icon, color,bgOpacity = "13" }) => (
     <Box
         sx={{
             width: 32,
             height: 32,
-            borderRadius: "50%",
-            bgcolor: color + "33",
+            borderRadius: "30%",
+            bgcolor: color + bgOpacity,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -46,22 +47,22 @@ export default function Sidebar({ isMobile, onClose }) {
     const links =
         user?.role === "admin"
             ? [
-                { to: "/", label: "דף הבית", icon: <HomeIcon />, color: "#1976d2" },
+                { to: "/", label: "דף הבית", icon: <HomeOutlinedIcon />, color: "#1976d2" },
                 { to: "/payments", label: "תשלומים", icon: <PaymentIcon />, color: "#0097A7" },
-                { to: "/issues", label: "תקלות", icon: <ReportProblemIcon />, color: "#388e3c" },
-                { to: "/documents", label: "חדרים", icon: <MeetingRoomIcon />, color: "#fbc02d" },
-                { to: "/notices", label: "לוח מודעות", icon: <EventNoteIcon />, color: "#fb8c00" },
-                { to: "/notifications", label: "התראות", icon: <NotificationsIcon />, color: "#d32f2f" },
-                { to: "/tenants", label: "ניהול דיירים", icon: <PeopleIcon />, color: "#7b1fa2" },
+                { to: "/issues", label: "תקלות", icon: <ErrorOutlineOutlinedIcon />, color: "#388e3c" },
+                { to: "/documents", label: "חדרים", icon: <MeetingRoomOutlinedIcon />, color: "#fbc02d" },
+                { to: "/notices", label: "לוח מודעות", icon: <ChatBubbleOutlineOutlinedIcon />, color: "#fb8c00" },
+                { to: "/notifications", label: "התראות", icon: <NotificationsNoneOutlinedIcon />, color: "#d32f2f" },
+                { to: "/tenants", label: "ניהול דיירים", icon: <GroupOutlinedIcon />, color: "#7b1fa2" },
             ]
             : [
-                { to: "/", label: "הבית שלי", icon: <HomeIcon />, color: "#1976d2" },
+                { to: "/", label: "דף הבית", icon: <HomeOutlinedIcon />, color: "#1976d2" },
                 { to: "/payments", label: "התשלומים שלי", icon: <PaymentIcon />, color: "#0097A7" },
-                { to: "/issues", label: "התקלות שלי", icon: <ReportProblemIcon />, color: "#388e3c" },
-                { to: "/documents", label: "חדרים", icon: <MeetingRoomIcon />, color: "#fbc02d" },
-                { to: "/notices", label: "לוח מודעות", icon: <EventNoteIcon />, color: "#fb8c00" },
-                { to: "/notifications", label: "התראות", icon: <NotificationsIcon />, color: "#d32f2f" },
-                { to: "/tenants", label: "שכנים", icon: <PeopleIcon />, color: "#7b1fa2" },
+                { to: "/issues", label: "התקלות שלי", icon: <ErrorOutlineOutlinedIcon />, color: "#388e3c" },
+                { to: "/documents", label: "חדרים", icon: <MeetingRoomOutlinedIcon />, color: "#fbc02d" },
+                { to: "/notices", label: "לוח מודעות", icon: <ChatBubbleOutlineOutlinedIcon />, color: "#fb8c00" },
+                { to: "/notifications", label: "התראות", icon: <NotificationsNoneOutlinedIcon />, color: "#d32f2f" },
+                { to: "/tenants", label: "שכנים", icon: <GroupOutlinedIcon />, color: "#7b1fa2" },
             ];
 
     return (

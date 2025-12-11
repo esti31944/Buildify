@@ -27,7 +27,7 @@ import HomeWorkIcon from "@mui/icons-material/HomeWork";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import MeetingRoomOutlinedIcon from '@mui/icons-material/MeetingRoomOutlined';
 
 import {
   fetchRooms,
@@ -220,16 +220,23 @@ export default function Rooms() {
           </DialogActions>
         </Dialog>
       )}
+{/* 
+      <Typography
+         variant="h6"
+         sx={{
+           fontWeight: "bold",
+           mb: 1,
+           textAlign: "center"
+         }}      >
+        חדרים זמינים         <MeetingRoomIcon /> */}
 
+      {/* רשימת חדרים */}
       <Typography
         variant="h6"
-        sx={{
-          fontWeight: "bold",
-          mb: 1,
-          textAlign: "center"
-        }}      >
-       חדרים זמינים         <MeetingRoomIcon />
-
+        sx={{ mb: 2, display: "flex", gap: 1, alignItems: "center" }}
+      >
+        <MeetingRoomOutlinedIcon />
+        חדרים זמינים
       </Typography>
 
 

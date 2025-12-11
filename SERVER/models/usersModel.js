@@ -24,9 +24,25 @@ exports.UserModel = mongoose.model("users", userSchema);
 
 // פונקציה ליצירת טוקן JWT
 
-exports.createToken = (user_id, role) => {
-  const token = jwt.sign({ _id: user_id, role }, process.env.JWT_SECRET, { expiresIn: "24h" });
-  return token;
+// exports.createToken = (user_id, role) => {
+//   const token = jwt.sign({ _id: user_id, role }, process.env.JWT_SECRET, { expiresIn: "24h" });
+//   return token;
+// };
+exports.createToken = (user) => {
+    const token = jwt.sign(
+        {
+            _id: user._id,
+            role: user.role,
+            fullName: user.fullName,
+            email: user.email,
+            apartmentNumber: user.apartmentNumber,
+            phone: user.phone
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "24h" }
+    );
+
+    return token;
 };
 
 

@@ -8,6 +8,8 @@ router.post("/", auth, reservationsController.createReservation);
 
 router.get("/list", auth, reservationsController.getReservationsList);
 
+router.get("/myReservations", auth, reservationsController.getMyReservations);
+
 router.get("/:id", reservationsController.getReservationById);
 
 router.delete("/:id", auth, reservationsController.deleteReservation);

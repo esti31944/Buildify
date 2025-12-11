@@ -95,6 +95,22 @@ exports.getReservationById = async (req, res) => {
   }
 };
 
+exports.getMyReservations = async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    const reservations = await ReservationModel.find({ userId })
+      .sort({ date: 1, "timeSlot.from": 1 })
+      .populate("roomId", "name"); // כדי להציג שם חדר בצורה נוחה
+
+    res.json(reservations);
+  } catch (err) {
+    console.error("getMyReservations error:", err);
+    res.status(500).json({ msg: "Server error", err });
+  }
+};
+
+
 exports.deleteReservation = async (req, res) => {
   try {
     const id = req.params.id;
