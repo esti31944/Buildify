@@ -220,7 +220,7 @@ export default function Rooms() {
           </DialogActions>
         </Dialog>
       )}
-{/* 
+      {/* 
       <Typography
          variant="h6"
          sx={{
@@ -233,7 +233,12 @@ export default function Rooms() {
       {/* רשימת חדרים */}
       <Typography
         variant="h6"
-        sx={{ mb: 2, display: "flex", gap: 1, alignItems: "center" }}
+        // sx={{ mb: 2, display: "flex", gap: 1, alignItems: "center" }}
+        sx={{
+          fontWeight: "bold",
+          mb: 1,
+          textAlign: "center"
+        }}
       >
         <MeetingRoomOutlinedIcon />
         חדרים זמינים
@@ -315,7 +320,7 @@ export default function Rooms() {
                 )}
               </CardContent>
 
-            <Divider sx={{ borderColor: "#d9d6d6ff" }} />
+              <Divider sx={{ borderColor: "#d9d6d6ff" }} />
 
               <CardActions sx={{ justifyContent: "flex-end", pt: 1.5 }}>
                 <Button
