@@ -16,19 +16,25 @@ export default function TopCardBox({
         <Card
             onClick={link ? () => navigate(link) : undefined}
             sx={{
+                width: "100%",
+                minWidth: 270,
+                minHeight: "130px",
                 p: 1.8,
                 border: "1px solid hsl(0 0% 89.8%)",
                 borderRadius: "14px",
                 transition: "0.2s",
-                minHeight: "130px",
-                minWidth: "250px",
-                width: "100%",
+                // minHeight: "130px",
+                // minWidth: "250px",
+                // width: "100%",
                 background: "#fff",
                 boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
                 cursor: link ? "pointer" : "default",
                 "&:hover": link
                     ? { boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }
                     : {},
+                display: "flex",
+                flexDirection: "column",
+                boxSizing: "border-box",
             }}
         >
             <Box display="flex" justifyContent="space-between" alignItems="center">

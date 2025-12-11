@@ -220,15 +220,6 @@ export default function Rooms() {
           </DialogActions>
         </Dialog>
       )}
-      {/* 
-      <Typography
-         variant="h6"
-         sx={{
-           fontWeight: "bold",
-           mb: 1,
-           textAlign: "center"
-         }}      >
-        חדרים זמינים         <MeetingRoomIcon /> */}
 
       {/* רשימת חדרים */}
       <Typography
