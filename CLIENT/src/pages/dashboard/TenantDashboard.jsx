@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Box, Grid, Typography, Chip, CircularProgress, IconButton } from "@mui/material";
+import { Box, Grid, Typography, Chip, CircularProgress, IconButton, Divider } from "@mui/material";
 import PaymentIcon from "@mui/icons-material/Payment";
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import MeetingRoomOutlinedIcon from '@mui/icons-material/MeetingRoomOutlined';
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 
 import MuiCardBox from "../../components/MuiCardBox";
 import TopCardBox from "../../components/dashboard/TopCardBox"
@@ -89,71 +92,44 @@ export default function TenantDashboard() {
   const line2 = [announcementsText, eventsText].filter(Boolean).join(" · ");
   const noticesSubtitleText = `${line1}${line2 ? `\n${line2}` : ""}`;
 
-  // תגים בעברית + צבע
-  const getStatusChip = (type, value) => {
+
+  const getStatusText = (type, value) => {
     const map = {
       issue: {
-        new: { label: "חדש", color: "primary" },
-        in_progress: { label: "בטיפול", color: "warning" },
-        fixed: { label: "טופל", color: "success" },
+        new: { label: "חדש", color: "rgb(255, 148, 81)" },
+        in_progress: { label: "בטיפול", color: "rgb(81, 73, 234)" },
+        fixed: { label: "טופל", color: "rgb(76, 174, 147)" },
       },
       payment: {
-        unpaid: { label: "טרם שולם", color: "error" },
-        pending: { label: "בהמתנה", color: "warning" },
-        paid: { label: "שולם", color: "success" },
+        unpaid: { label: "טרם שולם", color: "rgb(255, 148, 81)" },
+        pending: { label: "בהמתנה", color: "rgb(81, 73, 234)" },
+        paid: { label: "שולם", color: "rgb(76, 174, 147)" },
       },
-      reservationToday: {
-        today: { label: "היום", color: "info" },
-      }
     };
 
     return map[type][value];
   };
 
-      // סטטוסים עם צבע טקסט
-      const getStatusText = (type, value) => {
-        const map = {
-          issue: {
-            new: { label: "חדש", color: "rgb(255, 148, 81)" },
-            in_progress: { label: "בטיפול", color: "rgb(81, 73, 234)" },
-            fixed: { label: "טופל", color: "rgb(76, 174, 147)" },
-          },
-          payment: {
-            unpaid: { label: "טרם שולם", color: "rgb(255, 148, 81)" },
-            pending: { label: "בהמתנה", color: "rgb(81, 73, 234)" },
-            paid: { label: "שולם", color: "rgb(76, 174, 147)" },
-          },
-        };
-  
-        return map[type][value];
-      };
+  const typeLabelsNotifications = {
+    payment: "תשלום",
+    issue: "תקלה",
+    notice: "הודעה",
+    room: "חדר",
+    system: "מערכת",
+  };
+
+  const typeIconsNotifications = {
+    payment: <PaymentIcon sx={{ fontSize: 15, ml: 1 }} />,
+    issue: <ErrorOutlineOutlinedIcon sx={{ fontSize: 15, ml: 1 }} />,
+    notice: <ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 15, ml: 1 }} />,
+    room: <MeetingRoomOutlinedIcon sx={{ fontSize: 15, ml: 1 }} />,
+    system: <WarningAmberOutlinedIcon sx={{ fontSize: 15, ml: 1 }} />,
+  };
+
 
   return (
-    // <div>
-    //   <h1 style={{ marginBottom:12 }}>ברוך הבא/ה, דייר</h1>
 
-    //   <div className="cards-row">
-    //     <Card title="תשלומים שלי" subtitle="יתרה: 1,250 ₪">
-    //       <div>תשלום אחרון: 2025-10 • סכום: 850 ₪</div>
-    //     </Card>
-
-    //     <Card title="תקלות שדווחו" subtitle="תקלה אחרונה: מעלית">
-    //       <div>3 תקלות בדיווח שלי (1 פתוחה, 2 מטופלות)</div>
-    //     </Card>
-
-    //     <Card title="חדרים משותפים" subtitle="הזמנה קרובה">
-    //       <div>חדר אירועים • 2025-11-07 • 18:00-20:00</div>
-    //     </Card>
-    //   </div>
-
-    //   <section style={{ marginTop:20 }}>
-    //     <h2>התראות אחרונות</h2>
-    //     <div style={{ display:"grid", gap:12, gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", marginTop:10 }}>
-    //       <div className="card"><strong>הודעה:</strong> יש כיבוי מים מתוכנן ביום ראשון</div>
-    //       <div className="card"><strong>תחזוקה:</strong> בריכה סגורה לתחזוקה בשעה 09:00</div>
-    //     </div>
-    //   </section>
-    // </div>
+    // <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
     <Box p={2}>
 
       {/* כותרת */}
@@ -161,9 +137,11 @@ export default function TenantDashboard() {
         שלום, {user?.fullName || ""}!
       </Typography>
 
+      {/* הכרטיסים העליונים: מובייל: 12 (1 בשורה), טאבלט: 6 (2 בשורה), מסך גדול: 3 (4 בשורה) */}
       {/* הכרטיסים העליונים */}
       <Grid container spacing={2} justifyContent="center">
-        <Grid item xs={12} sm={6} md={3} lg={3} sx={{ display: "flex" }}>
+      {/* <Grid item xs={12} sm={6} md={6} lg={3} sx={{ display: "flex" }}> */}
+        <Grid item xs={12} sm={6} lg={3} sx={{ display: "flex" }}>
           <TopCardBox
             icon={<PaymentIcon />}
             color="#0097A7"
@@ -177,7 +155,7 @@ export default function TenantDashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3} lg={3} sx={{ display: "flex" }}>
+        <Grid item xs={12} sm={6} lg={3} sx={{ display: "flex" }}>
           <TopCardBox
             icon={<ErrorOutlineOutlinedIcon />}
             color="#388e3c"
@@ -191,7 +169,7 @@ export default function TenantDashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3} lg={3} sx={{ display: "flex" }}>
+        <Grid item xs={12} sm={6} lg={3} sx={{ display: "flex" }}>
           <TopCardBox
             icon={<MeetingRoomOutlinedIcon />}
             color="#fbc02d"
@@ -205,7 +183,7 @@ export default function TenantDashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3} lg={3} sx={{ display: "flex" }}>
+        <Grid item xs={12} sm={6} lg={3} sx={{ display: "flex" }}>
           <TopCardBox
             icon={<ChatBubbleOutlineOutlinedIcon />}
             color="#fb8c00"
@@ -217,10 +195,15 @@ export default function TenantDashboard() {
       </Grid>
 
       {/* רשימות תחתונות */}
+
+      {/* <Grid container spacing={2} justifyContent="center" sx={{ mt: 2,  backgroundColor: "#ffffff",borderRadius: 4,p: 3,boxShadow: "0 2px 10px rgba(0,0,0,0.15)"}}> */}
       <Grid container spacing={2} justifyContent="center" sx={{ mt: 2 }}>
 
         {/* תשלומים */}
-        <Grid item xs={12} md={12} lg={6} sx={{ display: "flex" }}>
+        {/* <Grid item xs={12} md={6} lg={6} sx={{ display: "flex", order: { xs: 1, md: 1 } }}> */}
+        
+        {/* <Grid item xs={12} md={6} sx={{ display: "flex", order: { xs: 1, md: 1 } }}> */}
+        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
           <BottomCardBox
             title="תשלומים אחרונים"
             icon={<PaymentIcon />}
@@ -237,23 +220,13 @@ export default function TenantDashboard() {
                 }}
               >
 
-                {/* {(() => {
-                  const chip = getStatusChip("payment", pay.status);
-                  return <Chip label={chip.label} color={chip.color} size="small" />;
-                })()} */}
-
                 <Typography sx={{ fontWeight: 600, mt: 1 }}>
                   {pay.title}
                 </Typography>
 
-                {/* <Typography sx={{ fontWeight: 350, mt: 1 }}> */}
                 <Typography color="text.secondary" fontSize="0.85rem" sx={{ display: "flex", gap: 0.5 }}>
                   {pay.amount} ₪
                   <span>•</span>
-                  {/* {(() => {
-                    const chip = getStatusChip("payment", pay.status);
-                    return chip.label;
-                  })()} */}
                   <Typography color={getStatusText("payment", pay.status).color} fontSize="0.85rem">
                     {getStatusText("payment", pay.status).label}
                   </Typography>
@@ -265,7 +238,8 @@ export default function TenantDashboard() {
         </Grid>
 
         {/* תקלות */}
-        <Grid item xs={12} md={12} lg={6} sx={{ display: "flex" }}>
+        {/* <Grid item xs={12} md={6} sx={{ display: "flex", order: { xs: 2, md: 2 } }}> */}
+        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
           <BottomCardBox
             title="תקלות אחרונות"
             icon={<ErrorOutlineOutlinedIcon />}
@@ -282,42 +256,37 @@ export default function TenantDashboard() {
                 }}
               >
 
-                {/* <Chip
-                  label={getStatusChip("issue", issue.status).label}
-                  color={getStatusChip("issue", issue.status).color}
-                  size="small"
-                /> */}
-
                 <Typography sx={{ fontWeight: 600, mt: 1 }}>
                   {issue.title}
                 </Typography>
 
-                {/* <Typography sx={{ display: "flex", gap: 0.5 }}> */}
-                <Typography sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", }}>
-                  <Typography color="text.secondary" fontSize="0.85rem">
-                    {new Date(issue.createdAt).toLocaleDateString("he-IL")}
-                  </Typography>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", }}>
 
-                  {/* <Typography color="text.secondary" fontSize="0.85rem">
-                    {(() => {
-                      const chip = getStatusChip("issue", issue.status);
-                      return chip.label;
-                    })()}
-                  </Typography> */}
+                  <Box sx={{ display: "flex", gap: 0.5, }}>
+                    <Typography color="text.secondary" fontSize="0.75rem">
+                      {"דווח בתאריך"}
+                    </Typography>
+                    <Typography color="text.secondary" fontSize="0.85rem">
+                      {`${new Date(issue.createdAt).toLocaleDateString("he-IL")}`}
+                    </Typography>
+                  </Box>
 
                   <Typography color={getStatusText("issue", issue.status).color} fontSize="0.85rem">
                     {getStatusText("issue", issue.status).label}
                   </Typography>
 
-                </Typography>
+                </Box>
 
               </Box>
             ))}
           </BottomCardBox>
         </Grid>
 
+        {/* שורה שנייה (מסך גדול/טאבלט): מודעות (6/12), הזמנות (6/12) */}
+        {/* מובייל: הזמנות 12 (סדר 3), מודעות 12 (סדר 4) */}
         {/* הזמנות */}
-        <Grid item xs={12} md={12} lg={6} sx={{ display: "flex" }}>
+        {/* <Grid item xs={12} md={6} sx={{ display: "flex", order: { xs: 3, md: 4 } }}> */}
+        <Grid item xs={12} md={6} sx={{ display: "flex"}}>
           <BottomCardBox
             title="הזמנות אחרונות"
             icon={<MeetingRoomOutlinedIcon />}
@@ -355,9 +324,11 @@ export default function TenantDashboard() {
                   {isTodayReservation(order.date) && (
                     <Chip
                       label="היום"
-                      color="info"
                       size="small"
-                      sx={{ ml: 1, fontSize: "0.7rem", height: "20px" }}
+                      sx={{
+                        ml: 1, fontSize: "0.7rem", height: "20px",
+                        borderRadius:"6px", backgroundColor: "#E0F7FA", color: "#007C91", border: "1px solid #B2EBF2",
+                      }}
                     />
                   )}
 
@@ -368,7 +339,8 @@ export default function TenantDashboard() {
         </Grid>
 
         {/* מודעות */}
-        <Grid item xs={12} md={12} lg={6} sx={{ display: "flex" }}>
+        {/* <Grid item xs={12} md={6} sx={{ display: "flex", order: { xs: 4, md: 3 } }}> */}
+        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
           <BottomCardBox
             title="מודעות אחרונות"
             icon={<ChatBubbleOutlineOutlinedIcon />}
@@ -387,25 +359,27 @@ export default function TenantDashboard() {
                 <Typography sx={{ fontWeight: 600 }}>
                   {notice.title}
                 </Typography>
-                <Typography sx={{ display: "flex", gap: 0.5, alignItems: "flex-end", }}>
+                <Box sx={{ display: "flex", gap: 0.5, }}>
                   <Typography color="text.secondary" fontSize="0.75rem">
                     {"פורסם בתאריך"}
                   </Typography>
                   <Typography color="text.secondary" fontSize="0.85rem">
                     {`${new Date(notice.createdAt).toLocaleDateString("he-IL")}`}
                   </Typography>
-                </Typography>
+                </Box>
 
               </Box>
             ))}
           </BottomCardBox>
         </Grid>
 
+        {/* שורה שלישית (מלאה): התראות. מובייל: התראות 12 (סדר 5) */}
         {/* התראות */}
-        <Grid item xs={12} md={12} lg={6} sx={{ display: "flex" }}>
+        {/* <Grid item xs={12} md={12} lg={12} sx={{ display: "flex", order: { xs: 5, md: 5 } }}> */}
+        <Grid item xs={12} sx={{ display: "flex" }}>
           <BottomCardBox
             title="התראות אחרונות"
-            icon={<ErrorOutlineOutlinedIcon />}
+            icon={<NotificationsNoneOutlinedIcon />}
             link="/notifications">
             {notifications.slice(0, 2).map(n => (
               <Box
@@ -417,10 +391,26 @@ export default function TenantDashboard() {
                   borderRadius: "12px",
                 }}
               >
-                <Typography><strong>{n.type}</strong> — {n.content}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {new Date(n.date).toLocaleDateString("he-IL")}
+
+                <Typography sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {typeIconsNotifications[n.type]}
+                  <Typography sx={{ fontWeight: 600 }}>{typeLabelsNotifications[n.type]}</Typography>
                 </Typography>
+
+                <Typography sx={{ fontSize: 12 }}>{n.message}</Typography>
+
+                <Box mt={2}>
+                  <Divider sx={{ width: "70%", borderColor: "#d9d6d6ff" }} />
+                  <Box sx={{ display: "flex", gap: 0.5, }}>
+                    <Typography color="text.secondary" fontSize="0.75rem">
+                      {"התקבלה בתאריך"}
+                    </Typography>
+                    <Typography color="text.secondary" fontSize="0.85rem">
+                      {`${new Date(n.createdAt).toLocaleDateString("he-IL")}`}
+                    </Typography>
+                  </Box>
+                </Box>
+
               </Box>
             ))}
           </BottomCardBox>

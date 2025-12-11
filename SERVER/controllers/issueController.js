@@ -38,7 +38,7 @@ const createIssue = async (req, res) => {
     await NotificationModel.create({
       userId: req.user._id,
       type: "issue",
-      message: "תקלה חדשה דווחה",
+      message: `התקלה '${issue.title}' נקלטה במערכת`,
     });
 
     res.status(201).json(issue);
@@ -95,10 +95,16 @@ const updateIssueStatus = async (req, res) => {
     issue.updatedAt = Date.now();
     await issue.save();
 
+    const statusMessages = {
+      new: `התקלה '${issue.title}' נקלטה במערכת`,
+      in_progress: `התקלה '${issue.title}' הועברה לטיפול`,
+      fixed: `התקלה '${issue.title}' טופלה`,
+    };
+
     await NotificationModel.create({
       userId: issue.userId,
       type: "issue",
-      message: `סטטוס התקלה '${issue.title}' עודכן ל: ${nextStatus}`,
+      message: statusMessages[nextStatus],
     });
 
     res.json({ msg: `Issue status updated to ${issue.status}`, issue });
