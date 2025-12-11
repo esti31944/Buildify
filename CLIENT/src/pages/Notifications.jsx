@@ -11,11 +11,12 @@ import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined
 import DraftsOutlinedIcon from '@mui/icons-material/DraftsOutlined';
 
 import PaymentIcon from "@mui/icons-material/Payment";
-import ReportProblemIcon from "@mui/icons-material/ReportProblem";
-import EventNoteIcon from "@mui/icons-material/EventNote";
-import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
+import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import MeetingRoomOutlinedIcon from '@mui/icons-material/MeetingRoomOutlined';
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import NotificationsOffOutlinedIcon from "@mui/icons-material/NotificationsOffOutlined";
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 
 
 export default function Notifications() {
@@ -43,10 +44,11 @@ export default function Notifications() {
 
     const typeIcons = {
         payment: <PaymentIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
-        issue: <ReportProblemIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
-        room: <MeetingRoomIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
-        notice: <EventNoteIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
-        system: <InfoOutlinedIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
+        issue: <ErrorOutlineOutlinedIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
+        room: <MeetingRoomOutlinedIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
+        notice: <ChatBubbleOutlineOutlinedIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
+        // system: <InfoOutlinedIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
+        system: <WarningAmberOutlinedIcon sx={{ color: "#6d6d6d", ml: 1 }} />,
     };
 
     const typeLabelsTabs = {
@@ -164,7 +166,7 @@ export default function Notifications() {
                                     )}
                                     <Tooltip title="מחק התראה">
                                         <DeleteIcon
-                                            sx={{ color: "error.main", cursor: "pointer", opacity: 0.8, mr: 4 }}
+                                            sx={{ color: "#424242", cursor: "pointer", opacity: 0.8, mr: 4 }}
                                             onClick={() => dispatch(deleteNotification(n._id))}
                                         />
                                     </Tooltip>

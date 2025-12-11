@@ -20,7 +20,7 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !pw) {
-      alert('אנא מלאי את כל השדות');
+      alert('אנא מלא את כל השדות');
       return;
     }
 

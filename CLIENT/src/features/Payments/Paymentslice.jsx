@@ -18,8 +18,6 @@ export const fetchMyPayments = createAsyncThunk(
   "payments/fetchMyPayments",
   async () => {
     const res = await axios.get("/payments/myPayments");
-    console.log(res.data, "hi");
-
     return res.data;
   }
 );

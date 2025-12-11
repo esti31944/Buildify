@@ -237,6 +237,9 @@ body,
 
 .badge.open {
   background: #fff7ed;
+  color: rgb(255, 148, 81);
+  color: rgb(81, 73, 234);
+  color: rgb(76, 174, 147);
   color: #b45309;
   border: 1px solid #fde3c8;
 }

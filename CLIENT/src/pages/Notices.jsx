@@ -182,7 +182,6 @@ export default function Notices() {
     <div dir="rtl" style={{ textAlign: "right" }}>
       <h1>לוח מודעות</h1>
 
-      {/* טאב עם מספרים */}
       <Tabs
         value={filterCategory}
         onChange={handleTabChange}

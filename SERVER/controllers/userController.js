@@ -78,7 +78,9 @@ exports.loginUser = async (req, res) => {
     const validPass = await bcrypt.compare(req.body.password, user.password);
     if (!validPass) return res.status(401).json({ msg: "Email or password incorrect" });
 
-    const token = createToken(user._id, user.role);
+    // const token = createToken(user._id, user.role);
+    const token = createToken(user);
+
     res.json({ token });
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
@@ -242,7 +244,8 @@ exports.googleLogin = async (req, res) => {
     }
 
     // אם המשתמש קיים – יוצרים JWT
-    const jwtToken = createToken(user._id, user.role);
+    // const jwtToken = createToken(user._id, user.role);
+    const jwtToken = createToken(user);
 
     // אפשר גם לשלוח את פרטי המשתמש יחד עם הטוקן
     const userData = {
