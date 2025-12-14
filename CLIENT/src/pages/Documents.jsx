@@ -169,57 +169,75 @@ export default function Rooms() {
             setEditingRoomId(null);
             setFormData({ name: "", description: "" });
           }}
-          maxWidth="sm"
           fullWidth
-          dir="rtl"
+          sx={{ direction: "rtl" }}
         >
-          <DialogTitle sx={{ textAlign: "right" }}>
-            {editingRoomId ? "עריכת חדר" : "הוספת חדר חדש"}
-          </DialogTitle>
-
-          <DialogContent dividers>
-            <form id="room-form" onSubmit={handleSubmit}>
-              <TextField
-                label="שם חדר"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                fullWidth
-                required
-                sx={{ mb: 2 }}
-                inputProps={{ style: { textAlign: "right" } }}
-              />
-
-              <TextField
-                label="תיאור"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                fullWidth
-                multiline
-                rows={3}
-                sx={{ mb: 2 }}
-                inputProps={{ style: { textAlign: "right" } }}
-              />
-            </form>
-          </DialogContent>
-
-          <DialogActions>
-            <Button
-              onClick={() => {
-                setShowForm(false);
-                setEditingRoomId(null);
-                setFormData({ name: "", description: "" });
-              }}
+          <Box className="fault-report-card" sx={{ p: 2 }}>
+            {/* Header */}
+            <Box
+              className="fault-report-header"
+              sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}
             >
-              ביטול
-            </Button>
-            <Button type="submit" form="room-form" variant="contained">
-              שמור
-            </Button>
-          </DialogActions>
+              <Box className="fault-report-icon-wrapper">
+                <MeetingRoomOutlinedIcon />
+              </Box>
+
+              <Typography className="fault-report-title" sx={{ fontSize: 22 }}>
+                {editingRoomId ? "עריכת חדר" : "הוספת חדר חדש"}
+              </Typography>
+            </Box>
+
+            {/* Content */}
+            <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <div className="fault-report-field">
+                <label className="fault-report-label">שם חדר</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="fault-report-input"
+                  placeholder="הזן שם חדר"
+                />
+              </div>
+
+              <div className="fault-report-field">
+                <label className="fault-report-label">תיאור</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={3}
+                  className="fault-report-input"
+                  placeholder="תיאור החדר (אופציונלי)"
+                />
+              </div>
+            </DialogContent>
+
+            {/* Actions */}
+            <DialogActions sx={{ justifyContent: "space-between", px: 2 }}>
+              <button
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingRoomId(null);
+                  setFormData({ name: "", description: "" });
+                }}
+                className="fault-report-cancel-btn"
+              >
+                ביטול
+              </button>
+
+              <button
+                onClick={handleSubmit}
+                className="fault-report-submit-btn"
+              >
+                שמור
+              </button>
+            </DialogActions>
+          </Box>
         </Dialog>
       )}
+
       {/* 
       <Typography
          variant="h6"
