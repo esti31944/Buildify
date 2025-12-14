@@ -180,7 +180,7 @@ export default function MyReservationsModal({ onClose }) {
                 }
               >
                 <ListItemText
-                  primary={`חדר: ${resv.roomId.name || resv.roomId}`}
+                  primary={`חדר: ${resv.roomId?.name || resv.roomId}`}
                   secondary={
                     <>
                       <div>{`תאריך: ${new Date(
