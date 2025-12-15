@@ -254,89 +254,99 @@ export default function Notices() {
           setShowForm(false);
           setEditingId(null);
         }}
-        dir="rtl"
+        fullWidth
+        sx={{ direction: "rtl" }}
       >
-        <DialogTitle style={{ textAlign: "right" }}>
-          {editingId ? "עדכון מודעה" : "הוספת מודעה חדשה"}
-        </DialogTitle>
-
-        <DialogContent dividers>
-          <form id="notice-form" onSubmit={handleSubmit} style={{ minWidth: 400 }}>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="כותרת *"
-              name="title"
-              fullWidth
-              variant="outlined"
-              value={formData.title}
-              onChange={handleChangeForm}
-              required
-              inputProps={{ style: { textAlign: "right" } }}
-            />
-
-            <TextField
-              margin="dense"
-              label="תוכן *"
-              name="content"
-              fullWidth
-              variant="outlined"
-              multiline
-              rows={4}
-              value={formData.content}
-              onChange={handleChangeForm}
-              required
-              inputProps={{ style: { textAlign: "right" } }}
-            />
-
-            <TextField
-              margin="dense"
-              label="סוג הודעה"
-              name="category"
-              select
-              fullWidth
-              variant="outlined"
-              value={formData.category}
-              onChange={handleChangeForm}
-              SelectProps={{ style: { textAlign: "right" } }}
-            >
-              <MenuItem value="event">אירוע</MenuItem>
-              <MenuItem value="announcement">הודעה</MenuItem>
-            </TextField>
-
-            <TextField
-              margin="dense"
-              label="תאריך תפוגה (אופציונלי)"
-              name="expiresAt"
-              type="date"
-              fullWidth
-              variant="outlined"
-              value={formData.expiresAt}
-              onChange={handleChangeForm}
-              InputLabelProps={{
-                shrink: true,
-                style: { textAlign: "right" }
-              }}
-              inputProps={{ style: { textAlign: "right" } }}
-            />
-          </form>
-        </DialogContent>
-
-        <DialogActions>
-          <Button
-            onClick={() => {
-              setShowForm(false);
-              setEditingId(null);
-            }}
+        <Box className="fault-report-card" sx={{ p: 2 }}>
+          {/* Header */}
+          <Box
+            className="fault-report-header"
+            sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}
           >
-            ביטול
-          </Button>
+            <Box className="fault-report-icon-wrapper">
+              <AnnouncementIcon />
+            </Box>
 
-          <Button type="submit" form="notice-form" variant="contained">
-            שמור
-          </Button>
-        </DialogActions>
+            <Typography className="fault-report-title">
+              {editingId ? "עדכון מודעה" : "הוספת מודעה חדשה"}
+            </Typography>
+          </Box>
+
+          {/* Content */}
+          <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <div className="fault-report-field">
+              <label className="fault-report-label">כותרת</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChangeForm}
+                className="fault-report-input"
+                placeholder="הזן כותרת"
+              />
+            </div>
+
+            <div className="fault-report-field">
+              <label className="fault-report-label">תוכן</label>
+              <textarea
+                name="content"
+                value={formData.content}
+                onChange={handleChangeForm}
+                rows={4}
+                className="fault-report-input"
+                placeholder="הזן תוכן מודעה"
+              />
+            </div>
+
+            <div className="fault-report-field">
+              <label className="fault-report-label">סוג הודעה</label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChangeForm}
+                className="fault-report-input"
+              >
+                <option value="announcement">הודעה</option>
+                <option value="event">אירוע</option>
+              </select>
+            </div>
+
+            <div className="fault-report-field">
+              <label className="fault-report-label">תאריך תפוגה (אופציונלי)</label>
+              <input
+                type="date"
+                name="expiresAt"
+                value={formData.expiresAt}
+                onChange={handleChangeForm}
+                className="fault-report-input"
+              />
+            </div>
+          </DialogContent>
+
+          {/* Actions */}
+          <DialogActions sx={{ justifyContent: "space-between", px: 2 }}>
+            <button
+              onClick={() => {
+                setShowForm(false);
+                setEditingId(null);
+              }}
+              className="fault-report-cancel-btn"
+            >
+              ביטול
+            </button>
+
+            <button
+              type="submit"
+              form="notice-form"
+              className="fault-report-submit-btn"
+              onClick={handleSubmit}
+            >
+              שמור
+            </button>
+          </DialogActions>
+        </Box>
       </Dialog>
+
       <Box
         sx={{
           backgroundColor: "#ffffff",
