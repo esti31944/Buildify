@@ -59,7 +59,6 @@ export default function MyReservationsModal({ onClose }) {
     async function fetchReservations() {
       try {
         const res = await fetch(
-          // `http://localhost:3001/reservations/list?userId=${userId}`,
           `${import.meta.env.VITE_API_URL}/reservations/list?userId=${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -101,7 +100,6 @@ export default function MyReservationsModal({ onClose }) {
     }
     setDeletingId(id);
     try {
-      // const res = await fetch(`http://localhost:3001/reservations/${id}`, {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/reservations/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   Dialog,
   DialogTitle,
@@ -15,9 +15,12 @@ import { fetchNotifications } from '../features/notifications/notificationsSlice
 
 export default function ReservationModal({ roomId, onClose }) {
   const dispatch = useDispatch()
+
+
   const [date, setDate] = useState("");
   const [fromHour, setFromHour] = useState("");
   const [toHour, setToHour] = useState("");
+
 
   const [openingHours, setOpeningHours] = useState(null);
   const [reservations, setReservations] = useState([]);
@@ -58,7 +61,6 @@ export default function ReservationModal({ roomId, onClose }) {
 
     const res = await fetch(
       `${import.meta.env.VITE_API_URL}/reservations/list?roomId=${roomId}&date=${date}`,
-      //`http://localhost:3001/reservations/list?roomId=${roomId}&date=${date}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -157,7 +159,6 @@ export default function ReservationModal({ roomId, onClose }) {
     const token = localStorage.getItem("token");
 
     try {
-      // const res = await fetch(`http://localhost:3001/reservations`, {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/reservations`, {
         method: "POST",
         headers: {
