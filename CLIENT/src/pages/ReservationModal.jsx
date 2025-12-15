@@ -9,6 +9,7 @@ import {
   Box,
   MenuItem,
   TextField,
+  Snackbar,
   Alert,
 } from "@mui/material";
 import { fetchNotifications } from '../features/notifications/notificationsSlice';
@@ -25,6 +26,9 @@ export default function ReservationModal({ roomId, onClose }) {
 
   const [fromOpen, setFromOpen] = useState(false);
   const [toOpen, setToOpen] = useState(false);
+
+  const [openAlert, setOpenAlert] = useState(false);
+  const [formVisible, setFormVisible] = useState(true);
 
   useEffect(() => {
     loadRoom();
@@ -177,142 +181,166 @@ export default function ReservationModal({ roomId, onClose }) {
       console.log("lets create notfication after create reservation");
       await dispatch(fetchNotifications());
 
-      alert("ההזמנה נשמרה בהצלחה");
-      onClose();
+      // alert("ההזמנה נשמרה בהצלחה");
+      setFormVisible(false); // מסתיר את הטופס
+      setOpenAlert(true);
+      // setTimeout(() => {
+      //   onClose(); // סוגר את הדיאלוג אחרי 3 שניות
+      // }, 3000);
+
+      // onClose();
     } catch (err) {
       setError(err.message);
     }
   }
 
+  const handleCloseAlert = (event, reason) => {
+    if (reason === "clickaway") return;
+    setOpenAlert(false);
+    onClose();
+  };
+
   const hours = openingHours ? generateHours(openingHours) : [];
   const { startHours, endHours, middleHours } = getBusyHoursByType();
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>הזמנת חדר</DialogTitle>
+    <>
+      <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+        {formVisible && (
+          <>
 
-      <DialogContent sx={{ mt: 2 }}>
-        {error && <Alert severity="error">{error}</Alert>}
+            <DialogTitle>הזמנת חדר</DialogTitle>
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
-          <TextField
-            label="תאריך"
-            type="date"
-            value={date}
-            InputLabelProps={{ shrink: true }}
-            onChange={(e) => setDate(e.target.value)}
-          />
+            <DialogContent sx={{ mt: 2 }}>
+              {error && <Alert severity="error">{error}</Alert>}
 
-          <TextField
-            select
-            label="שעת התחלה"
-            value={fromHour}
-            onChange={(e) => setFromHour(e.target.value)}
-            SelectProps={{
-              open: fromOpen,
-              onOpen: () => setFromOpen(true),
-              onClose: () => setFromOpen(false),
-              MenuProps: { PaperProps: { sx: { maxHeight: 400 } } },
-            }}
-          >
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
+                <TextField
+                  label="תאריך"
+                  type="date"
+                  value={date}
+                  InputLabelProps={{ shrink: true }}
+                  onChange={(e) => setDate(e.target.value)}
+                />
 
-            <MenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                setFromOpen(false);
-              }}
-              sx={{ display: "flex", justifyContent: "flex-end", borderBottom: "1px solid #ddd" }}
-            >
-              ✖ סגור
-            </MenuItem>
-
-            {hours.map((h) => {
-              let disabled = false;
-              let sx = {};
-
-              if (startHours.includes(h) || middleHours.includes(h)) {
-                disabled = true;
-                if (startHours.includes(h)) sx = { borderBottom: "3px solid red" };
-                else if (middleHours.includes(h)) sx = { backgroundColor: "#ddd" };
-              }
-
-              return (
-                <MenuItem
-                  key={h}
-                  value={h}
-                  disabled={disabled}
-                  sx={{
-                    ...sx,
-                    backgroundColor: disabled ? "#f0f0f0" : "inherit",
-                    color: disabled ? "#999" : "inherit",
+                <TextField
+                  select
+                  label="שעת התחלה"
+                  value={fromHour}
+                  onChange={(e) => setFromHour(e.target.value)}
+                  SelectProps={{
+                    open: fromOpen,
+                    onOpen: () => setFromOpen(true),
+                    onClose: () => setFromOpen(false),
+                    MenuProps: { PaperProps: { sx: { maxHeight: 400 } } },
                   }}
                 >
-                  {h}
-                </MenuItem>
-              );
-            })}
-          </TextField>
 
-          <TextField
-            select
-            label="שעת סיום"
-            value={toHour}
-            onChange={(e) => setToHour(e.target.value)}
-            SelectProps={{
-              open: toOpen,
-              onOpen: () => setToOpen(true),
-              onClose: () => setToOpen(false),
-              MenuProps: { PaperProps: { sx: { maxHeight: 400 } } },
-            }}
-          >
+                  <MenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFromOpen(false);
+                    }}
+                    sx={{ display: "flex", justifyContent: "flex-end", borderBottom: "1px solid #ddd" }}
+                  >
+                    ✖ סגור
+                  </MenuItem>
 
-            <MenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                setToOpen(false);
-              }}
-              sx={{ display: "flex", justifyContent: "flex-end", borderBottom: "1px solid #ddd" }}
-            >
-              ✖ סגור
-            </MenuItem>
+                  {hours.map((h) => {
+                    let disabled = false;
+                    let sx = {};
 
-            {hours.map((h) => {
-              let disabled = false;
-              let sx = {};
+                    if (startHours.includes(h) || middleHours.includes(h)) {
+                      disabled = true;
+                      if (startHours.includes(h)) sx = { borderBottom: "3px solid red" };
+                      else if (middleHours.includes(h)) sx = { backgroundColor: "#ddd" };
+                    }
 
-              if (endHours.includes(h)) {
-                disabled = true;
-                sx = { borderTop: "3px solid blue" };
-              } else if (middleHours.includes(h)) {
-                disabled = true;
-                sx = { backgroundColor: "#ddd" };
-              }
+                    return (
+                      <MenuItem
+                        key={h}
+                        value={h}
+                        disabled={disabled}
+                        sx={{
+                          ...sx,
+                          backgroundColor: disabled ? "#f0f0f0" : "inherit",
+                          color: disabled ? "#999" : "inherit",
+                        }}
+                      >
+                        {h}
+                      </MenuItem>
+                    );
+                  })}
+                </TextField>
 
-              return (
-                <MenuItem
-                  key={h}
-                  value={h}
-                  disabled={disabled}
-                  sx={{
-                    ...sx,
-                    backgroundColor: disabled ? "#f0f0f0" : "inherit",
-                    color: disabled ? "#999" : "inherit",
+                <TextField
+                  select
+                  label="שעת סיום"
+                  value={toHour}
+                  onChange={(e) => setToHour(e.target.value)}
+                  SelectProps={{
+                    open: toOpen,
+                    onOpen: () => setToOpen(true),
+                    onClose: () => setToOpen(false),
+                    MenuProps: { PaperProps: { sx: { maxHeight: 400 } } },
                   }}
                 >
-                  {h}
-                </MenuItem>
-              );
-            })}
-          </TextField>
-        </Box>
-      </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose}>ביטול</Button>
-        <Button variant="contained" onClick={handleSubmit}>
-          אשר הזמנה
-        </Button>
-      </DialogActions>
-    </Dialog>
+                  <MenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setToOpen(false);
+                    }}
+                    sx={{ display: "flex", justifyContent: "flex-end", borderBottom: "1px solid #ddd" }}
+                  >
+                    ✖ סגור
+                  </MenuItem>
+
+                  {hours.map((h) => {
+                    let disabled = false;
+                    let sx = {};
+
+                    if (endHours.includes(h)) {
+                      disabled = true;
+                      sx = { borderTop: "3px solid blue" };
+                    } else if (middleHours.includes(h)) {
+                      disabled = true;
+                      sx = { backgroundColor: "#ddd" };
+                    }
+
+                    return (
+                      <MenuItem
+                        key={h}
+                        value={h}
+                        disabled={disabled}
+                        sx={{
+                          ...sx,
+                          backgroundColor: disabled ? "#f0f0f0" : "inherit",
+                          color: disabled ? "#999" : "inherit",
+                        }}
+                      >
+                        {h}
+                      </MenuItem>
+                    );
+                  })}
+                </TextField>
+              </Box>
+            </DialogContent>
+
+            <DialogActions>
+              <Button onClick={onClose}>ביטול</Button>
+              <Button variant="contained" onClick={handleSubmit}>
+                אשר הזמנה
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
+      <Snackbar open={openAlert} autoHideDuration={3000} onClose={handleCloseAlert}>
+        <Alert onClose={handleCloseAlert} severity="success" sx={{ width: "100%" }}>
+          ההזמנה נשמרה בהצלחה!
+        </Alert>
+      </Snackbar>
+    </>
   );
 }
