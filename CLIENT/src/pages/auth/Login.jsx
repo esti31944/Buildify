@@ -24,7 +24,8 @@ export default function Login() {
     }
 
     try {
-      const res = await axios.post('http://localhost:3001/users/login', {
+      // const res = await axios.post('http://localhost:3001/users/login', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/users/login`, {
         email,
         password: pw
       });
@@ -48,7 +49,8 @@ export default function Login() {
 
   const handleGoogleLoginSuccess = async (credentialResponse) => {
     try {
-      const res = await axios.post('http://localhost:3001/users/google-login', {
+      // const res = await axios.post('http://localhost:3001/users/google-login', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/users/google-login`, {
         token: credentialResponse.credential,
       });
 

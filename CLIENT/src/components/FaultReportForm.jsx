@@ -273,7 +273,8 @@ export default function FaultReportForm({ onClose, initialData = null, mode = "c
                                                 ? previewImage
                                                 : previewImage.startsWith("http")
                                                     ? previewImage
-                                                    : `http://localhost:3001${previewImage}`
+                                                    // : `http://localhost:3001${previewImage}`
+                                                    : `${import.meta.env.VITE_API_URL}${previewImage}`
                                         }
                                         alt="תצוגה מקדימה"
                                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
