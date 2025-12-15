@@ -38,7 +38,7 @@ export default function ReservationModal({ roomId, onClose }) {
   async function loadRoom() {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`http://localhost:3001/rooms/${roomId}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/rooms/${roomId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -56,7 +56,7 @@ export default function ReservationModal({ roomId, onClose }) {
 
     const token = localStorage.getItem("token");
     const res = await fetch(
-      `http://localhost:3001/reservations/list?roomId=${roomId}&date=${date}`,
+      `${import.meta.env.VITE_API_URL}/reservations/list?roomId=${roomId}&date=${date}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
