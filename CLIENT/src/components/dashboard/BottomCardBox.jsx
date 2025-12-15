@@ -20,14 +20,20 @@ export default function BottomCardBox({
     return (
         <Card
             sx={{
+                width: "100%",
+                minHeight: "125px",
+                minWidth: 557,
                 p: 2,
                 border: "1px solid hsl(0 0% 89.8%)",
                 borderRadius: "14px",
-                minHeight: "125px",
-                width: "100%",
-                width: "300px",
+                // minHeight: "125px",
+                // width: "100%",
+                // width: "300px",
                 background: "#fff",
                 boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
+                display: "flex",
+                flexDirection: "column",
+                boxSizing: "border-box",
             }}
         >
             {/* כותרת + אייקון + ניווט */}

@@ -149,7 +149,7 @@ export default function Rooms() {
 
       {/* הוספת חדר – למנהלים */}
       {isAdmin && !showForm && (
-        <Tooltip title="הוספת תשלום">
+        <Tooltip title="הוספת חדר">
           <IconButton
             variant="outlined"
             onClick={() => setShowForm(true)}
@@ -238,20 +238,9 @@ export default function Rooms() {
         </Dialog>
       )}
 
-      {/* 
-      <Typography
-         variant="h6"
-         sx={{
-           fontWeight: "bold",
-           mb: 1,
-           textAlign: "center"
-         }}      >
-        חדרים זמינים         <MeetingRoomIcon /> */}
-
       {/* רשימת חדרים */}
       <Typography
         variant="h6"
-        // sx={{ mb: 2, display: "flex", gap: 1, alignItems: "center" }}
         sx={{
           fontWeight: "bold",
           mb: 1,
@@ -327,11 +316,15 @@ export default function Rooms() {
 
                 {isAdmin && (
                   <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    <IconButton size="small">
+                    <IconButton size="small" onClick={() => startEdit(room)}>
                       <EditIcon fontSize="small" sx={{ color: "#444" }} />
                     </IconButton>
 
-                    <IconButton color="error" size="small">
+                    <IconButton
+                      color="error"
+                      size="small"
+                      onClick={() => handleDelete(room._id)}
+                    >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Box>
