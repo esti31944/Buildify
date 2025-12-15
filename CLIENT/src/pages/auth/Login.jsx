@@ -7,7 +7,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import Logo from "../../assets/logo_icon_remove.png";
+import Logo from "../../assets/logo_Icon_remove.png";
 
 export default function Login() {
   const navigate = useNavigate();
