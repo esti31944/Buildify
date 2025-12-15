@@ -67,7 +67,7 @@ export default function MainLayout() {
       )}
       <div className="content-area">
         <Header />
-        <main style={{ marginTop: 12 }}>
+        <main style={{ marginTop: 8 }}>
           <Outlet />
         </main>
       </div>

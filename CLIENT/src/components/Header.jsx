@@ -9,6 +9,9 @@ export default function Header() {
     <Paper
       elevation={4}
       sx={{
+        position: "sticky",
+        top: 0,
+        zIndex: 1200,
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
@@ -17,6 +20,8 @@ export default function Header() {
         borderRadius: 3,
         bgcolor: "#fff",
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        backdropFilter: "blur(8px)",
+        backgroundColor: "rgba(255,255,255,0.95)",
       }}
     >
       <Box>

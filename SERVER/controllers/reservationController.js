@@ -74,6 +74,7 @@ exports.getReservationsList = async (req, res) => {
   try {
     const list = await ReservationModel.find(filter)
       .populate("roomId", "name")  // כאן עושים populate לשם החדר בלבד
+      .populate("userId", "fullName apartmentNumber")
       .sort({ date: 1, "timeSlot.from": 1 });
 
     return res.json(list);
@@ -101,7 +102,7 @@ exports.getMyReservations = async (req, res) => {
   try {
     const reservations = await ReservationModel.find({ userId })
       .sort({ date: 1, "timeSlot.from": 1 })
-      .populate("roomId", "name"); // כדי להציג שם חדר בצורה נוחה
+      .populate("roomId", "name") // כדי להציג שם חדר בצורה נוחה
 
     res.json(reservations);
   } catch (err) {
