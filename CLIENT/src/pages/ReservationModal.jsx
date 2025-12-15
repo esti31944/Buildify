@@ -180,8 +180,15 @@ export default function ReservationModal({ roomId, onClose }) {
 
       await dispatch(fetchNotifications());
 
-      alert("ההזמנה נשמרה בהצלחה");
-      onClose();
+      // alert("ההזמנה נשמרה בהצלחה");
+      setFormVisible(false); // מסתיר את הטופס
+      setOpenAlert(true);
+      // setTimeout(() => {
+      //   onClose(); // סוגר את הדיאלוג אחרי 3 שניות
+      // }, 3000);
+
+      // onClose();
+
     } catch (err) {
       setError(err.message);
     }
@@ -203,122 +210,71 @@ export default function ReservationModal({ roomId, onClose }) {
           <>
 
             <DialogTitle>הזמנת חדר</DialogTitle>
-
             <DialogContent sx={{ mt: 2 }}>
               {error && <Alert severity="error">{error}</Alert>}
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
-          <TextField
-            label="תאריך"
-            type="date"
-            value={date}
-            InputLabelProps={{ shrink: true }}
-            onChange={(e) => setDate(e.target.value)}
-          />
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
+                <TextField
+                  label="תאריך"
+                  type="date"
+                  value={date}
+                  InputLabelProps={{ shrink: true }}
+                  onChange={(e) => setDate(e.target.value)}
+                />
 
-          <TextField
-            select
-            label="שעת התחלה"
-            value={fromHour}
-            onChange={(e) => setFromHour(e.target.value)}
-            SelectProps={{
-              open: fromOpen,
-              onOpen: () => setFromOpen(true),
-              onClose: () => setFromOpen(false),
-              MenuProps: { PaperProps: { sx: { maxHeight: 400 } } },
-            }}
-          >
-
-            <MenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                setFromOpen(false);
-              }}
-              sx={{ display: "flex", justifyContent: "flex-end", borderBottom: "1px solid #ddd" }}
-            >
-              ✖ סגור
-            </MenuItem>
-
-            {hours.map((h) => {
-              let disabled = false;
-              let sx = {};
-
-              if (startHours.includes(h) || middleHours.includes(h)) {
-                disabled = true;
-                if (startHours.includes(h)) sx = { borderBottom: "3px solid red" };
-                else if (middleHours.includes(h)) sx = { backgroundColor: "#ddd" };
-              }
-
-              return (
-                <MenuItem
-                  key={h}
-                  value={h}
-                  disabled={disabled}
-                  sx={{
-                    ...sx,
-                    backgroundColor: disabled ? "#f0f0f0" : "inherit",
-                    color: disabled ? "#999" : "inherit",
+                <TextField
+                  select
+                  label="שעת התחלה"
+                  value={fromHour}
+                  onChange={(e) => setFromHour(e.target.value)}
+                  SelectProps={{
+                    open: fromOpen,
+                    onOpen: () => setFromOpen(true),
+                    onClose: () => setFromOpen(false),
+                    MenuProps: { PaperProps: { sx: { maxHeight: 400 } } },
                   }}
                 >
-                  {h}
-                </MenuItem>
-              );
-            })}
-          </TextField>
 
-          <TextField
-            select
-            label="שעת סיום"
-            value={toHour}
-            onChange={(e) => setToHour(e.target.value)}
-            SelectProps={{
-              open: toOpen,
-              onOpen: () => setToOpen(true),
-              onClose: () => setToOpen(false),
-              MenuProps: { PaperProps: { sx: { maxHeight: 400 } } },
-            }}
-          >
+                  <MenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setToOpen(false);
+                    }}
+                    sx={{ display: "flex", justifyContent: "flex-end", borderBottom: "1px solid #ddd" }}
+                  >
+                    ✖ סגור
+                  </MenuItem>
 
-            <MenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                setToOpen(false);
-              }}
-              sx={{ display: "flex", justifyContent: "flex-end", borderBottom: "1px solid #ddd" }}
-            >
-              ✖ סגור
-            </MenuItem>
+                  {hours.map((h) => {
+                    let disabled = false;
+                    let sx = {};
 
-            {hours.map((h) => {
-              let disabled = false;
-              let sx = {};
+                    if (endHours.includes(h)) {
+                      disabled = true;
+                      sx = { borderTop: "3px solid blue" };
+                    } else if (middleHours.includes(h)) {
+                      disabled = true;
+                      sx = { backgroundColor: "#ddd" };
+                    }
 
-              if (endHours.includes(h)) {
-                disabled = true;
-                sx = { borderTop: "3px solid blue" };
-              } else if (middleHours.includes(h)) {
-                disabled = true;
-                sx = { backgroundColor: "#ddd" };
-              }
-
-              return (
-                <MenuItem
-                  key={h}
-                  value={h}
-                  disabled={disabled}
-                  sx={{
-                    ...sx,
-                    backgroundColor: disabled ? "#f0f0f0" : "inherit",
-                    color: disabled ? "#999" : "inherit",
-                  }}
-                >
-                  {h}
-                </MenuItem>
-              );
-            })}
-          </TextField>
-        </Box>
-      </DialogContent>
+                    return (
+                      <MenuItem
+                        key={h}
+                        value={h}
+                        disabled={disabled}
+                        sx={{
+                          ...sx,
+                          backgroundColor: disabled ? "#f0f0f0" : "inherit",
+                          color: disabled ? "#999" : "inherit",
+                        }}
+                      >
+                        {h}
+                      </MenuItem>
+                    );
+                  })}
+                </TextField>
+              </Box>
+            </DialogContent>
 
             <DialogActions>
               <Button onClick={onClose}>ביטול</Button>
