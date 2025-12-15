@@ -51,7 +51,8 @@ export default function IssueCard({ _id, title, description, imageUrl, createdAt
         image={imageUrl && imageUrl !== ""
           ? imageUrl.startsWith("http")
             ? imageUrl
-            : `http://localhost:3001${imageUrl}`
+            // : `http://localhost:3001${imageUrl}`
+            : `${import.meta.env.VITE_API_URL}${imageUrl}`
           : "https://images.pexels.com/photos/28216688/pexels-photo-28216688/free-photo-of-autumn-camping.png?auto=compress&cs=tinysrgb&w=600"
         }
         alt={title}

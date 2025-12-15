@@ -100,7 +100,7 @@ export default function PaymentForm({ open, onClose, onSubmit, form, setForm, ed
                         <FormControl fullWidth>
                             <Select
                                 multiple
-                                value={form.userId || []}
+                                value={Array.isArray(form.userId) ? form.userId : []}
                                 onChange={handleUserChange}
                                 open={selectOpen}
                                 onOpen={() => setSelectOpen(true)}

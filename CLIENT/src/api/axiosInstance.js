@@ -3,7 +3,7 @@ import axios from "axios";
 import {store} from "../app/store";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:3001",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 axiosInstance.interceptors.request.use((config) => {

@@ -4,6 +4,9 @@ import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
 import DownloadIcon from '@mui/icons-material/Download';
 
 export default function FilePreview({ filePath }) {
+  
+  const API_URL = import.meta.env.VITE_API_URL;
+  
   const [hover, setHover] = useState(false);
   const ext = filePath?.split(".").pop().toLowerCase();
 
@@ -49,7 +52,8 @@ export default function FilePreview({ filePath }) {
   // פונקציית הורדה
   const handleDownload = () => {
     const link = document.createElement("a");
-    link.href = `http://localhost:3001/${filePath}`;
+    // link.href = `http://localhost:3001/${filePath}`;
+    link.href = `${API_URL}/${filePath}`;
     link.download = filePath.split("/").pop();
     document.body.appendChild(link);
     link.click();
@@ -59,7 +63,8 @@ export default function FilePreview({ filePath }) {
   return (
     <div style={containerStyle} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
   {["jpg","jpeg","png","gif","webp"].includes(ext) ? (
-    <img src={`http://localhost:3001/${filePath}`} alt="file" style={{ maxWidth:"100%", maxHeight:"100%" }} />
+    // <img src={`http://localhost:3001/${filePath}`} alt="file" style={{ maxWidth:"100%", maxHeight:"100%" }} />
+    <img src={`${API_URL}/${filePath}`} alt="file" style={{ maxWidth:"100%", maxHeight:"100%" }} />
   ) : (
     <InsertDriveFileIcon style={{ fontSize:40, color:"#999" }} />
   )}
@@ -67,7 +72,8 @@ export default function FilePreview({ filePath }) {
   {/* overlay */}
   {hover && (
     <a
-      href={`http://localhost:3001/${filePath}`}
+      // href={`http://localhost:3001/${filePath}`}
+      href={`${API_URL}/${filePath}`}
       target="_blank"
       rel="noopener noreferrer"
       style={{

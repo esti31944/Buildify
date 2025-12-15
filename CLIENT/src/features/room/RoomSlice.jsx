@@ -1,19 +1,26 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axiosInstance from "../../api/axiosInstance";
 
 // טעינת חדרים מהשרת
 export const fetchRooms = createAsyncThunk(
   "rooms/fetchRooms",
   async (_, thunkAPI) => {
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://localhost:3001/rooms/list", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("בעיה בטעינת חדרים");
-      const data = await res.json();
-      return data;
+      // const res = await fetch("http://localhost:3001/rooms/list", {
+      // const res = await fetch("http://localhost:3001/rooms/list", {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
+      // if (!res.ok) throw new Error("בעיה בטעינת חדרים");
+      // const data = await res.json();
+      // return data;
+      const res = await axiosInstance.get("/rooms/list");
+      return res.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      // return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || error.message
+      );
     }
   }
 );
@@ -24,19 +31,24 @@ export const addRoom = createAsyncThunk(
   async (formData, thunkAPI) => {
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://localhost:3001/rooms", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-      if (!res.ok) throw new Error("שגיאה בשמירת חדר");
-      const saved = await res.json();
-      return saved;
+      // const res = await fetch("http://localhost:3001/rooms", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify(formData),
+      // });
+      // if (!res.ok) throw new Error("שגיאה בשמירת חדר");
+      // const saved = await res.json();
+      // return saved;
+      const res = await axiosInstance.post("/rooms", formData);
+      return res.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      // return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || error.message
+      );
     }
   }
 );
@@ -47,19 +59,24 @@ export const updateRoom = createAsyncThunk(
   async ({ id, formData }, thunkAPI) => {
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`http://localhost:3001/rooms/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-      if (!res.ok) throw new Error("שגיאה בעדכון חדר");
-      const saved = await res.json();
-      return saved;
+      // const res = await fetch(`http://localhost:3001/rooms/${id}`, {
+      //   method: "PUT",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify(formData),
+      // });
+      // if (!res.ok) throw new Error("שגיאה בעדכון חדר");
+      // const saved = await res.json();
+      // return saved;
+      const res = await axiosInstance.put(`/rooms/${id}`, formData);
+      return res.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      // return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || error.message
+      );
     }
   }
 );
@@ -70,14 +87,19 @@ export const deleteRoom = createAsyncThunk(
   async (id, thunkAPI) => {
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`http://localhost:3001/rooms/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("שגיאה במחיקת חדר");
+      // const res = await fetch(`http://localhost:3001/rooms/${id}`, {
+      //   method: "DELETE",
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
+      // if (!res.ok) throw new Error("שגיאה במחיקת חדר");
+      // return id;
+      await axiosInstance.delete(`/rooms/${id}`);
       return id;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      // return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || error.message
+      );
     }
   }
 );

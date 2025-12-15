@@ -7,7 +7,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import Logo from "../../assets/logo_icon_remove.png";
+import Logo from "../../assets/logo_Icon_remove.png";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -24,7 +24,8 @@ export default function Login() {
     }
 
     try {
-      const res = await axios.post('http://localhost:3001/users/login', {
+      // const res = await axios.post('http://localhost:3001/users/login', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/users/login`, {
         email,
         password: pw
       });
@@ -48,7 +49,8 @@ export default function Login() {
 
   const handleGoogleLoginSuccess = async (credentialResponse) => {
     try {
-      const res = await axios.post('http://localhost:3001/users/google-login', {
+      // const res = await axios.post('http://localhost:3001/users/google-login', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/users/google-login`, {
         token: credentialResponse.credential,
       });
 
