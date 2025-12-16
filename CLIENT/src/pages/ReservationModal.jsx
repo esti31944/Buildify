@@ -265,7 +265,7 @@ export default function ReservationModal({ roomId, onClose }) {
               }}
               sx={{ display: "flex", justifyContent: "flex-end", borderBottom: "1px solid #ddd" }}
             >
-              ✖ ססגור
+              ✖ סגור
             </MenuItem>
 
             {hours.map((h) => {
