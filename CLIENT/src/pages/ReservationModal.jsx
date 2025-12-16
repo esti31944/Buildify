@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Dialog,
   DialogTitle,
@@ -214,7 +214,23 @@ export default function ReservationModal({ roomId, onClose }) {
             label="שעת התחלה"
             value={fromHour}
             onChange={(e) => setFromHour(e.target.value)}
+            SelectProps={{
+              open: fromOpen,
+              onOpen: () => setFromOpen(true),
+              onClose: () => setFromOpen(false),
+              MenuProps: { PaperProps: { sx: { maxHeight: 400 } } },
+            }}
           >
+            <MenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                setFromOpen(false);
+              }}
+              sx={{ display: "flex", justifyContent: "flex-end", borderBottom: "1px solid #ddd" }}
+            >
+              ✖ סגור
+            </MenuItem>
+
             {hours.map((h) => {
               let disabled =
                 isPastHour(h) ||
@@ -235,7 +251,23 @@ export default function ReservationModal({ roomId, onClose }) {
             label="שעת סיום"
             value={toHour}
             onChange={(e) => setToHour(e.target.value)}
+            SelectProps={{
+              open: toOpen,
+              onOpen: () => setToOpen(true),
+              onClose: () => setToOpen(false),
+              MenuProps: { PaperProps: { sx: { maxHeight: 400 } } },
+            }}
           >
+            <MenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                setToOpen(false);
+              }}
+              sx={{ display: "flex", justifyContent: "flex-end", borderBottom: "1px solid #ddd" }}
+            >
+              ✖ סגור
+            </MenuItem>
+
             {hours.map((h) => {
               let disabled =
                 isPastHour(h) ||
