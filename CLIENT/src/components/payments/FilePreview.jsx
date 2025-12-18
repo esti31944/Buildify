@@ -4,9 +4,9 @@ import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
 import DownloadIcon from '@mui/icons-material/Download';
 
 export default function FilePreview({ filePath }) {
-  
+
   const API_URL = import.meta.env.VITE_API_URL;
-  
+
   const [hover, setHover] = useState(false);
   const ext = filePath?.split(".").pop().toLowerCase();
 
@@ -53,7 +53,7 @@ export default function FilePreview({ filePath }) {
   const handleDownload = () => {
     const link = document.createElement("a");
     // link.href = `http://localhost:3001/${filePath}`;
-    link.href = `${API_URL}/${filePath}`;
+    link.href = `${filePath}`;
     link.download = filePath.split("/").pop();
     document.body.appendChild(link);
     link.click();
@@ -62,38 +62,38 @@ export default function FilePreview({ filePath }) {
 
   return (
     <div style={containerStyle} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
-  {["jpg","jpeg","png","gif","webp"].includes(ext) ? (
-    // <img src={`http://localhost:3001/${filePath}`} alt="file" style={{ maxWidth:"100%", maxHeight:"100%" }} />
-    <img src={`${API_URL}/${filePath}`} alt="file" style={{ maxWidth:"100%", maxHeight:"100%" }} />
-  ) : (
-    <InsertDriveFileIcon style={{ fontSize:40, color:"#999" }} />
-  )}
+      {["jpg", "jpeg", "png", "gif", "webp"].includes(ext) ? (
+        // <img src={`http://localhost:3001/${filePath}`} alt="file" style={{ maxWidth:"100%", maxHeight:"100%" }} />
+        <img src={`${filePath}`} alt="file" style={{ maxWidth: "100%", maxHeight: "100%" }} />
+      ) : (
+        <InsertDriveFileIcon style={{ fontSize: 40, color: "#999" }} />
+      )}
 
-  {/* overlay */}
-  {hover && (
-    <a
-      // href={`http://localhost:3001/${filePath}`}
-      href={`${API_URL}/${filePath}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        position: "absolute",
-        top:0,
-        left:0,
-        width:"100%",
-        height:"100%",
-        display:"flex",
-        alignItems:"center",
-        justifyContent:"center",
-        backgroundColor:"rgba(0,0,0,0.3)",
-        color:"#fff",
-        borderRadius:6,
-      }}
-    >
-      <DownloadIcon style={{ fontSize:30 }} />
-    </a>
-  )}
-</div>
+      {/* overlay */}
+      {hover && (
+        <a
+          // href={`http://localhost:3001/${filePath}`}
+          href={`${filePath}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.3)",
+            color: "#fff",
+            borderRadius: 6,
+          }}
+        >
+          <DownloadIcon style={{ fontSize: 30 }} />
+        </a>
+      )}
+    </div>
 
   );
 }

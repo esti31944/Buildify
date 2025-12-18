@@ -19,5 +19,6 @@ exports.routesInit = (app) => {
   app.use("/notifications", notificationsR);
   app.use("/uploads", express.static("uploads"));
   app.use("/uploads/issueIMG", express.static("uploads/issueIMG"));
+  app.use("/uploads/paymentIMG", express.static("uploads/paymentIMG"));
 
 };

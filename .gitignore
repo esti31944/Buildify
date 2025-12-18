@@ -13,7 +13,6 @@ dist/
 .env
 CLIENT/.env
 SERVER/.env
-/SERVER/uploads
 
 # קבצי לוג
 *.log

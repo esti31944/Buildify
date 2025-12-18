@@ -162,7 +162,7 @@ exports.uploadFile = async (req, res) => {
   try {
     const payment = await PaymentModel.findByIdAndUpdate(
       paymentId,
-      { filePath: req.file.path, updatedAt: Date.now() },
+      { filePath: `/uploads/paymentIMG/${req.file.filename}`, updatedAt: Date.now() },
       { new: true }
     );
 

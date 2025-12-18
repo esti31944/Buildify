@@ -153,7 +153,6 @@ export default function PaymentsTable({
         const file = e.target.files[0];
         if (!file) return;
 
-        // הוספתי רק את זה:
         // const confirmChange = window.confirm("האם אתה בטוח שהתשלום הועבר?");
         // if (!confirmChange) return;
         openConfirm({
@@ -362,8 +361,9 @@ export default function PaymentsTable({
                                                 )}
 
                                                 {(user?.role === "admin" && payment.status === "pending") && (
+
                                                     <Box>
-                                                        <FilePreview filePath={payment.filePath} />
+                                                        <FilePreview filePath={`${import.meta.env.VITE_API_URL}${payment.filePath}`} />
                                                         <Button
                                                             size="small"
                                                             variant="outlined"

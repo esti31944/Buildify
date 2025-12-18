@@ -12,12 +12,7 @@ const {
   uploadFile,
 } = require("../controllers/issueController");
 
-const multer = require("multer");
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/issueIMG/"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
-});
-const upload = multer({ storage });
+const {uploadIssue} = require("../routes/upload");
 
 // בדיקה בסיסית
 router.get("/", testRoute);
@@ -37,6 +32,6 @@ router.get("/myIssues",auth, getMyIssues);
 // רשימת כל התקלות (ועד)
 router.get("/list", authAdmin, getAllIssues);
 
-router.put("/uploadFile/:id",auth, upload.single("file"), uploadFile);
+router.put("/uploadFile/:id",auth, uploadIssue.single("file"), uploadFile);
 
 module.exports = router;

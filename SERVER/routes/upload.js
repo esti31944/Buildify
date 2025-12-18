@@ -1,26 +1,35 @@
-// const express = require("express");
-// const { auth } = require("google-auth-library");
-// const multer = require("multer");
-// const path = require("path");
-// const router = express.Router();
+const express = require("express");
+const { auth } = require("google-auth-library");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+const router = express.Router();
 
-// // הגדרת תיקיית היעד לשמירת הקבצים
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "uploads/"); // כאן נשמר הקובץ בפרויקט שלך
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + path.extname(file.originalname)); // שם ייחודי
-//   }
-// });
+const issuesPath = path.join(__dirname, "../uploads/issueIMG");
+const paymentsPath = path.join(__dirname, "../uploads/paymentIMG");
 
-// const upload = multer({ storage });
+if (!fs.existsSync(paymentsPath)) {
+    fs.mkdirSync(paymentsPath, { recursive: true });
+}
 
-// // Route להעלאה
-// router.post("/upload", upload.single("file"), (req, res) => {
-//   res.json({ filePath: req.file.path }); // מחזיר נתיב הקובץ
-// });
+[issuesPath, paymentsPath].forEach((p) => {
+    if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
+});
 
+const issueStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, issuesPath),
+    filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+});
 
+const paymentStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, paymentsPath),
+    filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+});
 
-// module.exports = router;
+const uploadIssue = multer({ storage: issueStorage });
+const uploadPayment = multer({ storage: paymentStorage });
+
+module.exports = {
+    uploadIssue,
+    uploadPayment,
+};
