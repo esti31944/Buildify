@@ -194,7 +194,7 @@ export default function AdminDashboard() {
           <TopCardBox
             icon={<PaymentIcon />}
             color="#0097A7"
-            title="התשלומים שלי"
+            title={isAdmin ? "תשלומים" : "התשלומים שלי"}
             link="/payments"
             subtitle={paymentsSubtitle}
           />
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
           <TopCardBox
             icon={<ErrorOutlineOutlinedIcon />}
             color="#388e3c"
-            title="דווח על תקלה"
+            title={isAdmin ? "תקלות" : "דווח על תקלה"}
             link="/issues"
             subtitle={issuesSubtitle}
           />
@@ -214,7 +214,7 @@ export default function AdminDashboard() {
           <TopCardBox
             icon={<MeetingRoomOutlinedIcon />}
             color="#fbc02d"
-            title="הזמן חדר"
+            title={isAdmin ? "חדרים והזמנות" : "הזמן חדר"}
             link="/documents"
             subtitle={
               reservationsCount !== 0

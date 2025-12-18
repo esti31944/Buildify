@@ -1,6 +1,8 @@
 import {
     Box, TextField, IconButton, Typography, Table, TableBody, TableCell,
-    TableHead, TableRow, TableContainer, Paper, Button, Tooltip, Tabs, Tab
+    TableHead, TableRow, TableContainer, Paper, Button, Tooltip, Tabs, Tab,
+    Snackbar, Alert,
+    Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import SearchIcon from "@mui/icons-material/Search";
@@ -103,6 +105,42 @@ export default function PaymentsTable({
     const showPaidColumn = filteredPayments.some(p => p.status === "paid");
     const fileInputRef = useRef(null);
 
+    const [confirmDialog, setConfirmDialog] = useState({
+        open: false,
+        title: "",
+        description: "",
+        onConfirm: null,
+    });
+
+    const openConfirm = ({ title, description, onConfirm }) => {
+        setConfirmDialog({
+            open: true,
+            title,
+            description,
+            onConfirm,
+        });
+    };
+
+    const closeConfirm = () => {
+        setConfirmDialog(prev => ({ ...prev, open: false }));
+    };
+
+
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "success", // success | error | warning | info
+    });
+
+    const showSnackbar = (message, severity = "success") => {
+        setSnackbar({ open: true, message, severity });
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbar(prev => ({ ...prev, open: false }));
+    };
+
+
     const handleClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click(); // פותח את חלון הבחירה
@@ -116,224 +154,332 @@ export default function PaymentsTable({
         if (!file) return;
 
         // הוספתי רק את זה:
-        const confirmChange = window.confirm("האם אתה בטוח שהתשלום הועבר?");
-        if (!confirmChange) return;
+        // const confirmChange = window.confirm("האם אתה בטוח שהתשלום הועבר?");
+        // if (!confirmChange) return;
+        openConfirm({
+            title: "אישור העלאת תשלום",
+            description: "?האם אתה בטוח שהתשלום הועבר",
+            onConfirm: async () => {
+                let statusUpdated = false;
+                // try {
+                //     await dispatch(updatePaymentStatus({
+                //         id: paymentId,
+                //         status: "pending"
+                //     })).unwrap();
 
-        try {
-            // 1. עדכון סטטוס כמו בכפתור הראשון
-            await dispatch(updatePaymentStatus({
-                id: paymentId,
-                status: "pending"
-            })).unwrap();
-            await dispatch(fetchNotifications());
+                //     await dispatch(fetchNotifications());
+                //     await dispatch(uploadPaymentFile({ paymentId, file })).unwrap();
+
+                //     showSnackbar("סטטוס עודכן והקובץ נשמר בהצלחה!", "success");
+                // } catch (err) {
+                //     showSnackbar("שגיאה בהעלאת הקובץ או בעדכון הסטטוס", "error");
+                // }
+                try {
+                    // 1. עדכון סטטוס כמו בכפתור הראשון
+                    await dispatch(updatePaymentStatus({
+                        id: paymentId,
+                        status: "pending"
+                    })).unwrap();
+
+                    statusUpdated = true;
+                    showSnackbar("הסטטוס עודכן, מעלה קובץ…", "info");
+
+                    await dispatch(fetchNotifications());
 
 
-            // 2. העלאת הקובץ — הקוד המקורי שלך (לא שיניתי)
-            await dispatch(uploadPaymentFile({ paymentId, file })).unwrap();
+                    // 2. העלאת הקובץ — הקוד המקורי שלך (לא שיניתי)
+                    await dispatch(uploadPaymentFile({ paymentId, file })).unwrap();
 
-            alert("סטטוס עודכן והקובץ נשמר בהצלחה!");
-        } catch (error) {
-            console.error("שגיאה בהעלאה או בעדכון:", error);
-            alert("הייתה בעיה בהעלאת הקובץ או בעדכון הסטטוס");
-        }
+                    // alert("סטטוס עודכן והקובץ נשמר בהצלחה!");
+                    // showSnackbar("סטטוס עודכן והקובץ נשמר בהצלחה!", "success");
+                    showSnackbar("הקובץ הועלה בהצלחה!", "success");
+
+                } catch (error) {
+                    //     // console.error("שגיאה בהעלאה או בעדכון:", error);
+                    //     // alert("הייתה בעיה בהעלאת הקובץ או בעדכון הסטטוס");
+                    //     showSnackbar("שגיאה בהעלאת הקובץ או בעדכון הסטטוס", "error");
+
+                    // }
+                    // closeConfirm();
+                    if (statusUpdated) {
+                        showSnackbar(
+                            "הסטטוס עודכן, אך הייתה שגיאה בהעלאת הקובץ",
+                            "warning"
+                        );
+                    } else {
+                        showSnackbar(
+                            "שגיאה בעדכון הסטטוס",
+                            "error"
+                        );
+                    }
+                } finally {
+                    closeConfirm();
+                }
+            }
+        });
+
+
     };
 
 
 
 
     return (
-        <Box
-            sx={{
-                width: "100%",
-                maxWidth: "1200px",
-                margin: "0 auto",
-                p: { xs: 1, sm: 2, md: 3 }
-            }}
-        >
-            <Paper>
+        <>
+
+            <Box
+                sx={{
+                    width: "100%",
+                    maxWidth: "1200px",
+                    margin: "0 auto",
+                    p: { xs: 1, sm: 2, md: 3 }
+                }}
+            >
+                <Paper>
 
 
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                    {/* טאבים בצד שמאל */}
-                    <Tabs value={tab} onChange={(e, v) => setTab(v)}>
-                        <Tab label={<TabLabel title="לא שולם" count={filteredByStatus.unpaid.length} />} />
-                        <Tab label={<TabLabel title="בהמתנה" count={filteredByStatus.pending.length} />} />
-                        <Tab label={<TabLabel title="שולם" count={filteredByStatus.paid.length} />} />
-                    </Tabs>
+                    <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                        {/* טאבים בצד שמאל */}
+                        <Tabs value={tab} onChange={(e, v) => setTab(v)}>
+                            <Tab label={<TabLabel title="לא שולם" count={filteredByStatus.unpaid.length} />} />
+                            <Tab label={<TabLabel title="בהמתנה" count={filteredByStatus.pending.length} />} />
+                            <Tab label={<TabLabel title="שולם" count={filteredByStatus.paid.length} />} />
+                        </Tabs>
 
-                    {/* כפתור יצוא XL בצד ימין */}
-                    <Tooltip title="excel יצא לקובץ">
-                        <IconButton
-                            onClick={exportToExcel}
-                            sx={{
-                                padding: 0,
-                                width: 30,
-                                height: 30,
-                                ml:3,
-                                my:3,
-                            }}
-                        >
-                            <img
-                                src={xl}
-                                alt="xl"
-                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                            />
-                        </IconButton>
-                    </Tooltip>
-                </Box>
-
-
-
-                <TableContainer>
-
-                    <Table sx={{ direction: "rtl", "& td, & th": { textAlign: "center" } }}>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>#</TableCell>
-                                {user?.role === "admin" && <TableCell>ניהול</TableCell>}
-                                {user?.role === "admin" && <TableCell>שם הדייר</TableCell>}
-                                <TableCell>תיאור</TableCell>
-                                <TableCell>תאריך</TableCell>
-                                <TableCell>סכום</TableCell>
-                                <TableCell>סטטוס</TableCell>
-                                <TableCell>פעולות</TableCell>
-                                {tab === 2 && <TableCell>שולם בתאריך</TableCell>}
-                                {tab === 2 && <TableCell>אמצעי תשלום</TableCell>}
+                        {/* כפתור יצוא XL בצד ימין */}
+                        <Tooltip title="excel יצא לקובץ">
+                            <IconButton
+                                onClick={exportToExcel}
+                                sx={{
+                                    padding: 0,
+                                    width: 30,
+                                    height: 30,
+                                    ml: 3,
+                                    my: 3,
+                                }}
+                            >
+                                <img
+                                    src={xl}
+                                    alt="xl"
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
 
 
-                            </TableRow>
-                        </TableHead>
 
-                        <TableBody>
-                            {loading ? (
+                    <TableContainer>
+
+                        <Table sx={{ direction: "rtl", "& td, & th": { textAlign: "center" } }}>
+                            <TableHead>
                                 <TableRow>
-                                    <TableCell colSpan={8} align="center">
-                                        טוען...
-                                    </TableCell>
+                                    <TableCell>#</TableCell>
+                                    {user?.role === "admin" && <TableCell>ניהול</TableCell>}
+                                    {user?.role === "admin" && <TableCell>שם הדייר</TableCell>}
+                                    <TableCell>תיאור</TableCell>
+                                    <TableCell>תאריך</TableCell>
+                                    <TableCell>סכום</TableCell>
+                                    <TableCell>סטטוס</TableCell>
+                                    <TableCell>פעולות</TableCell>
+                                    {tab === 2 && <TableCell>שולם בתאריך</TableCell>}
+                                    {tab === 2 && <TableCell>אמצעי תשלום</TableCell>}
+
+
                                 </TableRow>
-                            ) : paymentsToShow.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={8} align="center">
-                                        {tab === 0 && "אין תשלומים שלא שולמו"}
-                                        {tab === 1 && "אין תשלומים בהמתנה"}
-                                        {tab === 2 && "אין תשלומים ששולמו"}
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                paymentsToShow.map((payment, index) => (
-                                    <TableRow key={payment._id}>
+                            </TableHead>
 
-                                        <TableCell>{index + 1}</TableCell>
-                                        {user?.role === "admin" && (
-                                            <TableCell>
-                                                <IconButton
-                                                    onClick={() => handleOpen(payment)}
-                                                    disabled={payment.status !== "unpaid"}
-                                                >
-                                                    <EditIcon color={payment.status === "unpaid" ? "warning" : "disabled"} />
-                                                </IconButton>
-                                                <IconButton onClick={() => handleDelete(payment._id)}>
-                                                    <DeleteIcon color="error" />
-                                                </IconButton>
-                                            </TableCell>
-                                        )}
-
-                                        {user?.role === "admin" && (
-                                            <TableCell>{payment.userId?.fullName}</TableCell>
-                                        )}
-
-                                        <TableCell>{payment.title}</TableCell>
-
-                                        <TableCell>
-                                            {new Date(payment.month).toLocaleDateString("he-IL", {
-                                                year: "numeric",
-                                                month: "long"
-                                            })}
+                            <TableBody>
+                                {loading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={8} align="center">
+                                            טוען...
                                         </TableCell>
-
-                                        <TableCell>₪{payment.amount}</TableCell>
-
-                                        <TableCell>{statusMap[payment.status]}</TableCell>
-
-                                        <TableCell>
-                                            {payment.status === "paid" && <CheckCircleIcon color="success" />}
-                                            {payment.status === "pending" && user?.role !== "admin" && <HourglassEmptyIcon color="warning" />}
-                                            {payment.status === "unpaid" && user?.role === "admin" && <CancelIcon color="error" />}
-
-                                            {(user?.role !== "admin" && payment.status === "unpaid") && (
-                                                <Box>
-                                                    <input
-                                                        type="file"
-                                                        ref={fileInputRef}
-                                                        style={{ display: "none" }}
-                                                        onChange={(e) => handleFileChange(e, payment._id)}
-                                                    />
-                                                    <Tooltip title="העלה קובץ אישור תשלום">
-                                                        <IconButton onClick={handleClick}>
-                                                            <UploadFileIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                </Box>
-                                            )}
-
-                                            {(user?.role === "admin" && payment.status === "pending") && (
-                                                <Box>
-                                                    <FilePreview filePath={payment.filePath} />
-                                                    <Button
-                                                        size="small"
-                                                        variant="outlined"
-                                                        startIcon={<CheckIcon />}
-                                                        onClick={async () => {
-                                                            const confirmChange = window.confirm("האם אתה בטוח שהתשלום הועבר?");
-                                                            if (!confirmChange) return;
-
-                                                            try {
-                                                                dispatch(updatePaymentStatus({
-                                                                    id: payment._id,
-                                                                    status: "paid"
-                                                                }));
-                                                                alert("סטטוס עודכן בהצלחה!");
-                                                            } catch (err) {
-                                                                console.error(err);
-                                                                alert("שגיאה בעדכון הסטטוס");
-                                                            }
-                                                        }}
-                                                        sx={{
-                                                            textTransform: "none",
-                                                            fontSize: 12,
-                                                            borderRadius: 2,
-                                                            paddingX: 1.5,
-                                                            paddingY: 0.5,
-                                                            backgroundColor: "rgba(0, 128, 0, 0.05)",
-                                                            color: "green",
-                                                            "&:hover": { backgroundColor: "rgba(0, 128, 0, 0.1)" },
-                                                        }}
-                                                    >
-                                                        אישור
-                                                    </Button>
-                                                </Box>
-                                            )}
-                                        </TableCell>
-
-
-
-                                        {tab === 2 && (
-                                            <TableCell>
-                                                {payment.paymentDate
-                                                    ? new Date(payment.paymentDate).toLocaleDateString("he-IL", { day: "2-digit", month: "long", year: "numeric" })
-                                                    : ""}
-                                            </TableCell>
-                                        )}
-                                        {tab === 2 && <TableCell>{payment.paymentMethod}</TableCell>}
-
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
+                                ) : paymentsToShow.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={8} align="center">
+                                            {tab === 0 && "אין תשלומים שלא שולמו"}
+                                            {tab === 1 && "אין תשלומים בהמתנה"}
+                                            {tab === 2 && "אין תשלומים ששולמו"}
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    paymentsToShow.map((payment, index) => (
+                                        <TableRow key={payment._id}>
+
+                                            <TableCell>{index + 1}</TableCell>
+                                            {user?.role === "admin" && (
+                                                <TableCell>
+                                                    <IconButton
+                                                        onClick={() => handleOpen(payment)}
+                                                        disabled={payment.status !== "unpaid"}
+                                                    >
+                                                        <EditIcon color={payment.status === "unpaid" ? "warning" : "disabled"} />
+                                                    </IconButton>
+                                                    <IconButton onClick={() => handleDelete(payment._id)}>
+                                                        <DeleteIcon color="error" />
+                                                    </IconButton>
+                                                </TableCell>
+                                            )}
+
+                                            {user?.role === "admin" && (
+                                                <TableCell>{payment.userId?.fullName}</TableCell>
+                                            )}
+
+                                            <TableCell>{payment.title}</TableCell>
+
+                                            <TableCell>
+                                                {new Date(payment.month).toLocaleDateString("he-IL", {
+                                                    year: "numeric",
+                                                    month: "long"
+                                                })}
+                                            </TableCell>
+
+                                            <TableCell>₪{payment.amount}</TableCell>
+
+                                            <TableCell>{statusMap[payment.status]}</TableCell>
+
+                                            <TableCell>
+                                                {payment.status === "paid" && <CheckCircleIcon color="success" />}
+                                                {payment.status === "pending" && user?.role !== "admin" && <HourglassEmptyIcon color="warning" />}
+                                                {payment.status === "unpaid" && user?.role === "admin" && <CancelIcon color="error" />}
+
+                                                {(user?.role !== "admin" && payment.status === "unpaid") && (
+                                                    <Box>
+                                                        <input
+                                                            type="file"
+                                                            ref={fileInputRef}
+                                                            style={{ display: "none" }}
+                                                            onChange={(e) => handleFileChange(e, payment._id)}
+                                                        />
+                                                        <Tooltip title="העלה קובץ אישור תשלום">
+                                                            <IconButton onClick={handleClick}>
+                                                                <UploadFileIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </Box>
+                                                )}
+
+                                                {(user?.role === "admin" && payment.status === "pending") && (
+                                                    <Box>
+                                                        <FilePreview filePath={payment.filePath} />
+                                                        <Button
+                                                            size="small"
+                                                            variant="outlined"
+                                                            startIcon={<CheckIcon />}
+                                                            onClick={async () => {
+                                                                // const confirmChange = window.confirm("האם אתה בטוח שהתשלום הועבר?");
+                                                                // if (!confirmChange) return;
+                                                                openConfirm({
+                                                                    title: "אישור תשלום",
+                                                                    description: "האם לאשר את התשלום?",
+                                                                    onConfirm: async () => {
+                                                                        try {
+                                                                            await dispatch(updatePaymentStatus({
+                                                                                id: payment._id,
+                                                                                status: "paid"
+                                                                            })).unwrap();
+
+                                                                            showSnackbar("סטטוס עודכן בהצלחה!", "success");
+                                                                        } catch {
+                                                                            showSnackbar("שגיאה בעדכון הסטטוס", "error");
+                                                                        }
+                                                                        closeConfirm();
+                                                                    }
+                                                                })
+                                                                // try {
+                                                                //     dispatch(updatePaymentStatus({
+                                                                //         id: payment._id,
+                                                                //         status: "paid"
+                                                                //     }));
+                                                                //     // alert("סטטוס עודכן בהצלחה!");
+                                                                //     showSnackbar("סטטוס עודכן בהצלחה!", "success");
+
+                                                                // } catch (err) {
+                                                                //     console.error(err);
+                                                                //     // alert("שגיאה בעדכון הסטטוס");
+                                                                //     showSnackbar("שגיאה בעדכון הסטטוס", "error");
+
+                                                                // }
+                                                            }}
+                                                            sx={{
+                                                                textTransform: "none",
+                                                                fontSize: 12,
+                                                                borderRadius: 2,
+                                                                paddingX: 1.5,
+                                                                paddingY: 0.5,
+                                                                backgroundColor: "rgba(0, 128, 0, 0.05)",
+                                                                color: "green",
+                                                                "&:hover": { backgroundColor: "rgba(0, 128, 0, 0.1)" },
+                                                            }}
+                                                        >
+                                                            אישור
+                                                        </Button>
+                                                    </Box>
+                                                )}
+                                            </TableCell>
 
 
-                    </Table>
-                </TableContainer>
-            </Paper ></Box>
+
+                                            {tab === 2 && (
+                                                <TableCell>
+                                                    {payment.paymentDate
+                                                        ? new Date(payment.paymentDate).toLocaleDateString("he-IL", { day: "2-digit", month: "long", year: "numeric" })
+                                                        : ""}
+                                                </TableCell>
+                                            )}
+                                            {tab === 2 && <TableCell>{payment.paymentMethod}</TableCell>}
+
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+
+
+                        </Table>
+                    </TableContainer>
+                </Paper >
+            </Box>
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={3000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    sx={{ width: "100%" }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
+
+            <Dialog open={confirmDialog.open} onClose={closeConfirm} >
+                <DialogTitle sx={{ textAlign: "right" }}>
+                    {confirmDialog.title}
+                </DialogTitle>
+
+                <DialogContent>
+                    <Typography sx={{ textAlign: "right" }}>
+                        {confirmDialog.description}
+                    </Typography>
+                </DialogContent>
+
+                <DialogActions sx={{ justifyContent: "flex-start" }}>
+                    <Button onClick={closeConfirm}>ביטול</Button>
+                    <Button
+                        onClick={confirmDialog.onConfirm}
+                        variant="contained"
+                        color="primary"
+                    >
+                        אישור
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+
+        </>
     );
 }

@@ -18,7 +18,7 @@ import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNone
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 
-const IconWrapper = ({ icon, color,bgOpacity = "13" }) => (
+const IconWrapper = ({ icon, color, bgOpacity = "13" }) => (
     <Box
         sx={{
             width: 32,
@@ -85,22 +85,39 @@ export default function Sidebar({ isMobile, onClose }) {
                 flexDirection: "column",
                 justifyContent: "space-between",
 
+                overflow: "hidden",
+
                 transition: "transform 0.35s ease-in-out",
             }}
         >
 
             {/* כפתור סגירה במובייל */}
             {isMobile && (
-                <IconButton onClick={onClose} sx={{ position: "absolute", top: 10, right: 10 }}>
+                <IconButton onClick={onClose} sx={{ position: "absolute", top: 10, right: 10, zIndex: 1 }}>
                     <CloseRoundedIcon />
                 </IconButton>
             )}
 
-            <img src={Logo} alt="Logo" style={{ maxWidth: "100%", marginBottom: 20 }} />
-
+            <Box sx={{ flexShrink: 0, mb: 2 }}>
+                <img src={Logo} alt="Logo" style={{ maxWidth: "100%", display: "block" }} />
+            </Box>
 
             {/* ניווט */}
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Box sx={{
+                display: "flex", flexDirection: "column", gap: 1,
+                flex: 1,
+                overflowY: "auto", // גלילה רק בחלק הניווט
+                overflowX: "hidden",
+                pr: 0.5, // רווח קטן לסקרולבר
+                // סטיילינג לסקרולבר (אופציונלי)
+                "&::-webkit-scrollbar": {
+                    width: "6px",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: "rgba(0,0,0,0.2)",
+                    borderRadius: "3px",
+                },
+            }}>
                 {links.map((l) => (
                     <Button
                         key={l.to}
@@ -114,21 +131,20 @@ export default function Sidebar({ isMobile, onClose }) {
                             color: "#000",
                             borderRadius: 2,
                             py: 1,
+                            flexShrink: 0,
                             "&.active": { bgcolor: "#e0e0e0" },
                             "&:hover": { bgcolor: "#f5f5f5" },
                         }}
                     >
-                        {/* <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <IconWrapper icon={l.icon} color={l.color} />
-                            <Box sx={{ width: 16 }} />
-                            {l.label}
-                        </Box> */}
+
                         <Box sx={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
                             {/* אייקון + טקסט */}
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <IconWrapper icon={l.icon} color={l.color} />
                                 <Box sx={{ width: 16 }} />
-                                {l.label}
+                                <Typography sx={{fontSize:12, fontWeight:600}}>
+                                    {l.label}
+                                </Typography>
                             </Box>
 
                             {/* באדג' רק להתראות */}
@@ -155,9 +171,9 @@ export default function Sidebar({ isMobile, onClose }) {
                 ))}
             </Box>
 
-            <Divider sx={{ my: 2, bgcolor: "#ccc" }} />
+            <Divider sx={{ my: 2, bgcolor: "#ccc", flexShrink: 0 }} />
 
-            <Box>
+            <Box sx={{ flexShrink: 0 }}>
                 <Typography sx={{ color: "#000", fontSize: 14, mb: 1 }}>
                     {user?.fullName}
                 </Typography>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import EventIcon from '@mui/icons-material/Event';
 import AnnouncementIcon from '@mui/icons-material/Announcement';
+import EventBusyIcon from "@mui/icons-material/EventBusy";
 
 import {
   fetchNotices,
@@ -12,7 +13,7 @@ import {
 
 import TabLabel from "../components/TabLabel";
 
-import { Dialog, Divider, DialogTitle, Tooltip, DialogContent, DialogActions, Button, TextField, MenuItem, Paper, Box, Typography, IconButton, Tabs, Tab, } from "@mui/material";
+import { Dialog, Divider, DialogTitle, Tooltip, DialogContent, DialogActions, Button, TextField, MenuItem, Paper, Box, Typography, IconButton, Tabs, Tab, Snackbar, Alert } from "@mui/material";
 
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -87,14 +88,19 @@ function parseJwt(token) {
     return null;
   }
 }
-function CustomTabLabel({ title, count, type }) {
-  const Icon = type === "event" ? EventIcon : AnnouncementIcon;
+
+function CustomTabLabel({ title, count, type, faded = false }) {
+  const Icon = type === "event" ? EventIcon : type === "expired" ? EventBusyIcon : AnnouncementIcon;
 
   return (
-    <Box display="flex" alignItems="center" gap={0.5}>
+    <Box display="flex" alignItems="center" gap={0.5}
+      sx={{
+        color: faded ? "text.disabled" : "text.primary",
+      }}
+    >
       <Icon fontSize="small" />
       <Typography variant="body2">{title}</Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+      <Typography variant="caption" color={faded ? "text.disabled" : "text.secondary"} sx={{ ml: 0.5 }}>
         ({count})
       </Typography>
     </Box>
@@ -110,7 +116,7 @@ export default function Notices() {
 
   const [currentUser, setCurrentUser] = useState(null);
 
-  // נשמור את הערך של הטאב הנבחר (all, event, announcement)
+  // נשמור את הערך של הטאב הנבחר (expired, all, event, announcement)
   const [filterCategory, setFilterCategory] = useState("all");
 
   const [showForm, setShowForm] = useState(false);
@@ -122,6 +128,22 @@ export default function Notices() {
   });
 
   const [editingId, setEditingId] = useState(null);
+
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "error" });
+
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
+
+  function confirmDelete(id) {
+    setDeleteDialog({ open: true, id });
+  }
+  async function handleDeleteConfirmed() {
+    if (deleteDialog.id) {
+      await dispatch(deleteNoticeAction(deleteDialog.id));
+      await dispatch(fetchNotifications());
+      setSnackbar({ open: true, message: "המודעה נמחקה", severity: "info" });
+    }
+    setDeleteDialog({ open: false, id: null });
+  }
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -141,7 +163,8 @@ export default function Notices() {
     e.preventDefault();
 
     if (!formData.title.trim() || !formData.content.trim()) {
-      alert("אנא מלא את כל השדות");
+      // alert("אנא מלא את כל השדות");
+      setSnackbar({ open: true, message: "אנא מלא את כל השדות", severity: "error" });
       return;
     }
 
@@ -153,12 +176,23 @@ export default function Notices() {
 
     if (formData.expiresAt) payload.expiresAt = formData.expiresAt;
 
-    if (editingId) {
-      await dispatch(updateNotice({ id: editingId, data: payload }));
-    } else {
-      await dispatch(createNotice(payload));
+    try {
+      if (editingId) {
+        await dispatch(updateNotice({ id: editingId, data: payload })).unwrap();
+        setSnackbar({ open: true, message: "המודעה עודכנה בהצלחה", severity: "success" });
+      } else {
+        await dispatch(createNotice(payload));
+        setSnackbar({ open: true, message: "מודעה חדשה נוצרה בהצלחה", severity: "success" });
+      }
+      await dispatch(fetchNotices());
       await dispatch(fetchNotifications());
+      setFormData({ title: "", content: "", category: "announcement", expiresAt: "" });
+      setEditingId(null);
+      setShowForm(false);
+    } catch (err) {
+      setSnackbar({ open: true, message: "שגיאה בשמירת המודעה", severity: "error" });
     }
+
 
     setFormData({
       title: "",
@@ -183,9 +217,14 @@ export default function Notices() {
   }
 
   async function deleteNotice(id) {
-    if (!window.confirm("האם למחוק את ההודעה?")) return;
-    await dispatch(deleteNoticeAction(id));
-    await dispatch(fetchNotifications());
+    // if (!window.confirm("האם למחוק את ההודעה?")) return;
+    if (deleteDialog.id) {
+      // await dispatch(deleteNoticeAction(id));
+      await dispatch(deleteNoticeAction(deleteDialog.id));
+      setSnackbar({ open: true, message: "המודעה נמחקה", severity: "info" });
+      await dispatch(fetchNotifications());
+    }
+    setDeleteDialog({ open: false, id: null });
   }
 
   // חישוב מספר הפריטים בכל קטגוריה
@@ -193,11 +232,34 @@ export default function Notices() {
     all: notices.length,
     event: notices.filter(n => n.category === "event").length,
     announcement: notices.filter(n => n.category === "announcement").length,
+    expired: notices.filter(n => isExpired(n)).length,
   };
 
+  function isExpired(notice) {
+    if (!notice.expiresAt) return false;
+    return new Date(notice.expiresAt) < new Date();
+  }
+
   const filteredNotices = notices.filter((n) => {
-    if (filterCategory === "all") return true;
-    return n.category === filterCategory;
+    const expired = isExpired(n);
+    if (currentUser?.role !== "admin") {
+      return !expired;
+    }
+    if (filterCategory === "expired") {
+      return expired;
+    }
+    if (filterCategory === "all") {
+      return !expired;
+    }
+    if (filterCategory === "event") {
+      return n.category === "event" && !expired;
+    }
+    if (filterCategory === "announcement") {
+      return n.category === "announcement" && !expired;
+    }
+    return true;
+    // if (filterCategory === "all") return true;
+    // return n.category === filterCategory;
   });
 
   if (loading) return <div dir="rtl">טוען מודעות...</div>;
@@ -232,10 +294,13 @@ export default function Notices() {
               justifyContent: "flex-start",
             },
           }}
-        ><Tab label={<CustomTabLabel title="כל ההודעות" count={counts.all} type="announcement" />} value="all" />
+        >
+          <Tab label={<CustomTabLabel title="כל ההודעות" count={counts.all} type="announcement" />} value="all" />
           <Tab label={<CustomTabLabel title="אירועים" count={counts.event} type="event" />} value="event" />
           <Tab label={<CustomTabLabel title="הודעות" count={counts.announcement} type="announcement" />} value="announcement" />
-
+          {currentUser?.role === "admin" && (
+            <Tab value="expired" label={<CustomTabLabel title="מודעות שפג תוקפן" count={counts.expired} type="expired" faded/>} />
+          )}
         </Tabs>
 
         <Tooltip title=" הוסף הודעה חדשה">
@@ -319,6 +384,7 @@ export default function Notices() {
                 value={formData.expiresAt}
                 onChange={handleChangeForm}
                 className="fault-report-input"
+                min={new Date().toISOString().split("T")[0]}
               />
             </div>
           </DialogContent>
@@ -347,6 +413,37 @@ export default function Notices() {
         </Box>
       </Dialog>
 
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, id: null })}>
+        <DialogTitle sx={{ textAlign: "right" }}>
+          אישור מחיקה
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ textAlign: "right" }}>
+            ?האם אתה בטוח שברצונך למחוק את המודעה
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "flex-start" }}>
+          <Button onClick={() => setDeleteDialog({ open: false, id: null })}>ביטול</Button>
+          <Button color="error" onClick={handleDeleteConfirmed}>מחק</Button>
+        </DialogActions>
+      </Dialog>
+
+
       <Box
         sx={{
           backgroundColor: "#ffffff",
@@ -369,10 +466,10 @@ export default function Notices() {
 
             return (
 
-              <StickyNoteCard title={n.title} type={n.category} sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <StickyNoteCard key={n._id} title={n.title} type={n.category} sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
                 <Paper
                   sx={{ display: "flex", flexDirection: "column", height: 250, p: 2 }}
-                  key={n._id}
+                // key={n._id}
                 >
                   <Box sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
                     <Typography variant="body2" mb={1}>
@@ -410,7 +507,7 @@ export default function Notices() {
 
                           <IconButton
                             color="error"
-                            onClick={() => deleteNotice(n._id)}
+                            onClick={() => confirmDelete(n._id)}
                             size="small"
                           >
                             <DeleteIcon />

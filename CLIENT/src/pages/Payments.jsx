@@ -14,7 +14,7 @@ import PaymentsTable from "../components/payments/PaymentsTable";
 import PaymentForm from "../components/payments/PaymentForm";
 import AdminActions from "../components/payments/AdminActions";
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Snackbar, Alert } from "@mui/material";
 
 export default function PaymentsNEW() {
     const dispatch = useDispatch();
@@ -35,6 +35,12 @@ export default function PaymentsNEW() {
         month: "",
         amount: "",
         userId: "",
+    });
+
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "success",
     });
 
     // פתיחת חלון
@@ -68,9 +74,30 @@ export default function PaymentsNEW() {
     // שמירה (יצירה / עדכון)
     const handleSubmit = async () => {
         if (editMode) {
-            // במקרה של עריכה, נניח שמדובר בתשלום יחיד - אפשר להשאיר כמו שהוא או לשנות לפי הצורך
-            await dispatch(updatePayment({ id: form._id, updatedData: form }));
+            // await dispatch(updatePayment({ id: form._id, updatedData: form }));
+            // dispatch(fetchAllPayments());
+            try {
+                await dispatch(
+                    updatePayment({ id: form._id, updatedData: form })
+                ).unwrap();
+
+                setSnackbar({
+                    open: true,
+                    message: "התשלום עודכן בהצלחה",
+                    severity: "success",
+                });
+            } catch (err) {
+                // setSnackbar({
+                //     open: true,
+                //     message: "שגיאה בעדכון התשלום",
+                //     severity: "error",
+                // });
+                console.error(err);
+            }
+
             dispatch(fetchAllPayments());
+            handleClose();
+            return;
         } else {
             // במקרה של יצירה, נשלח בקשה לכל משתמש בנפרד
             if (Array.isArray(form.userId)) {
@@ -79,18 +106,68 @@ export default function PaymentsNEW() {
                     await dispatch(createPayment(paymentForUser));
                 }
             } else {
+                // alert("לפני שמירת התשלום");
                 // מקרה שבו משתמש יחיד בלבד נבחר
-                await dispatch(createPayment(form));
+                // await dispatch(createPayment(form));
+                // alert("אחרי שמירת התשלום");
+                try {
+                    await dispatch(createPayment(form)).unwrap();
+
+                    setSnackbar({
+                        open: true,
+                        message: "התשלום נוצר בהצלחה",
+                        severity: "success",
+                    });
+                    // const action = await dispatch(createPayment(form));
+
+                    // if (createPayment.fulfilled.match(action)) {
+                    //     setSnackbar({
+                    //         open: true,
+                    //         message: "התשלום נוצר בהצלחה",
+                    //         severity: "success",
+                    //     });
+                    // } else {
+                    //     setSnackbar({
+                    //         open: true,
+                    //         message: action.payload || "שגיאה ביצירת התשלום",
+                    //         severity: "error",
+                    //     });
+                    // }
+
+                } catch {
+                    setSnackbar({
+                        open: true,
+                        message: "שגיאה ביצירת התשלום",
+                        severity: "error",
+                    });
+                }
             }
             dispatch(fetchAllPayments());
         }
         handleClose();
     };
     // מחיקה
-    const handleDelete = (id) => {
-        dispatch(deletePayment(id)).then(() => {
+    const handleDelete = async (id) => {
+        // dispatch(deletePayment(id)).then(() => {
+        //     dispatch(fetchAllPayments());
+        // });
+        try {
+            await dispatch(deletePayment(id)).unwrap();
+
+            setSnackbar({
+                open: true,
+                message: "התשלום נמחק בהצלחה",
+                severity: "success",
+            });
+
             dispatch(fetchAllPayments());
-        });
+        } catch {
+            setSnackbar({
+                open: true,
+                message: "שגיאה במחיקת התשלום",
+                severity: "error",
+            });
+        }
     };
 
     // טען נתונים
@@ -176,6 +253,16 @@ export default function PaymentsNEW() {
                 editMode={editMode}
                 users={users}
             />
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={() => setSnackbar({ ...snackbar, open: false })}
+            >
+                <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }

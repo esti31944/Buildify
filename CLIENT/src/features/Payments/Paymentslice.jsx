@@ -25,9 +25,16 @@ export const fetchMyPayments = createAsyncThunk(
 // יצירת תשלום חדש
 export const createPayment = createAsyncThunk(
   "payments/createPayment",
-  async (newPayment) => {
-    const res = await axios.post("/payments", newPayment);
-    return res.data;
+  async (newPayment, { rejectWithValue }) => {
+    try {
+      const res = await axios.post("/payments", newPayment);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "שגיאה ביצירת תשלום"
+      );
+    }
+
   }
 );
 
@@ -116,8 +123,20 @@ const paymentsSlice = createSlice({
       })
 
       // --- CREATE PAYMENT --- //
+      // .addCase(createPayment.fulfilled, (state, action) => {
+      //   state.list.unshift(action.payload);
+      // })
+      .addCase(createPayment.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(createPayment.fulfilled, (state, action) => {
-        state.list.unshift(action.payload);
+        state.loading = false;
+        state.list.push(action.payload);
+      })
+      .addCase(createPayment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
 
       // --- UPDATE PAYMENT --- //
@@ -138,17 +157,17 @@ const paymentsSlice = createSlice({
         const idx = state.list.findIndex((p) => p._id === updated._id);
         if (idx !== -1) state.list[idx] = updated;
       })
-      
+
       .addCase(uploadPaymentFile.fulfilled, (state, action) => {
         const updated = action.payload;
         const idx = state.list.findIndex((p) => p._id === updated._id);
         if (idx !== -1) state.list[idx] = updated;
       })
-    .addCase(uploadPaymentFile.rejected, (state, action) => {
-      state.error = action.payload;
-    });
+      .addCase(uploadPaymentFile.rejected, (state, action) => {
+        state.error = action.payload;
+      });
 
-},
+  },
 });
 
 export default paymentsSlice.reducer;
