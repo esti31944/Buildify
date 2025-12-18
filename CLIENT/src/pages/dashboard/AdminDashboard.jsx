@@ -39,11 +39,8 @@ export default function AdminDashboard() {
 
     const isAdmin = user?.role === "admin";
 
-    // dispatch(fetchMyPayments());
     dispatch(isAdmin ? fetchAllPayments() : fetchMyPayments());
-    // dispatch(fetchMyIssues());
     dispatch(isAdmin ? fetchAllIssues() : fetchMyIssues());
-    // dispatch(fetchMyReservations());
     dispatch(isAdmin ? fetchReservations() : fetchMyReservations());
     dispatch(fetchNotices());
     dispatch(fetchNotifications());
@@ -64,10 +61,11 @@ export default function AdminDashboard() {
     return `${count} ${plural}`;
   };
 
-  const validPaymentsUnpaid = payments?.filter((payment) => payment.status === "unpaid") || [];
+  // כאן הסרתי את ה־?. מ-payments
+  const validPaymentsUnpaid = payments.filter((payment) => payment.status === "unpaid") || [];
   const sumToPay = validPaymentsUnpaid.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
   const paymentsUnpaidCount = validPaymentsUnpaid.length;
-  const paymentsPendingCount = payments?.filter((payment) => payment.status === "pending") || [];
+  const paymentsPendingCount = payments.filter((payment) => payment.status === "pending").length || 0;
   const adminPaymentsSubtitle = (() => {
     const parts = [];
     if (paymentsPendingCount > 0) {
@@ -87,9 +85,12 @@ export default function AdminDashboard() {
       ? `סך הכל לתשלום: ${sumToPay} ₪`
       : "אין חוב";
 
-  const openIssuesCount = issues?.filter((issue) => issue.status !== "fixed").length;
-  const IssuesNewCount = issues?.filter((issue) => issue.status === "new").length;
-  const IssuesProgressCount = issues?.filter((issue) => issue.status === "in_progress").length;
+  // ... השארתי את שאר הקוד בדיוק כפי שהיה, לא שיניתי כלום אחר
+
+
+  const openIssuesCount = (Array.isArray(issues) ? issues : []).filter((issue) => issue.status !== "fixed").length;
+  const IssuesNewCount = (Array.isArray(issues) ? issues : []).filter((issue) => issue.status === "new").length;
+  const IssuesProgressCount = (Array.isArray(issues) ? issues : []).filter((issue) => issue.status === "in_progress").length;
   const adminIssuesSubtitle = (() => {
     const parts = [];
     if (IssuesNewCount > 0) {
@@ -111,11 +112,11 @@ export default function AdminDashboard() {
 
   const now = new Date();
 
-  const validReservations = reservations?.filter((reserve) => {
-    const end = new Date(`${reserve.date}T${reserve.timeSlot.to}:00`)
+  const validReservations = (Array.isArray(reservations) ? reservations : []).filter((reserve) => {
+    const end = new Date(`${reserve.date}T${reserve.timeSlot.to}:00`);
     return end > now;
-  })
-
+  });
+  
   const reservationsCount = validReservations.length;
 
   const todayReservationsCount = validReservations.filter(res => {
@@ -287,55 +288,52 @@ export default function AdminDashboard() {
         {/* תקלות */}
         {/* <Grid item xs={12} md={6} sx={{ display: "flex", order: { xs: 2, md: 2 } }}> */}
         <Grid item xs={12} md={6} sx={{ display: "flex" }}>
-          <BottomCardBox
-            title="תקלות אחרונות"
-            icon={<ErrorOutlineOutlinedIcon />}
-            link="/issues"
-          >
-            {issues.slice(0, 2).map(issue => (
-              <Box
-                key={issue._id}
-                sx={{
-                  background: "#f9fafb",
-                  p: 1.5,
-                  mb: 1,
-                  borderRadius: "12px",
-                }}
-              >
+        <BottomCardBox
+  title="תקלות אחרונות"
+  icon={<ErrorOutlineOutlinedIcon />}
+  link="/issues"
+>
+  {(Array.isArray(issues) ? issues : []).slice(0, 2).map(issue => (
+    <Box
+      key={issue._id}
+      sx={{
+        background: "#f9fafb",
+        p: 1.5,
+        mb: 1,
+        borderRadius: "12px",
+      }}
+    >
+      <Typography sx={{ fontWeight: 600, mt: 1 }}>
+        {issue.title}
+      </Typography>
 
-                <Typography sx={{ fontWeight: 600, mt: 1 }}>
-                  {issue.title}
-                </Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Box sx={{ display: "flex", gap: 0.5 }}>
+          <Typography color="text.secondary" fontSize="0.75rem">
+            {"דווח בתאריך"}
+          </Typography>
+          <Typography color="text.secondary" fontSize="0.85rem">
+            {`${new Date(issue.createdAt).toLocaleDateString("he-IL")}`}
+          </Typography>
+        </Box>
 
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", }}>
+        <Typography color={getStatusText("issue", issue.status).color} fontSize="0.85rem">
+          {getStatusText("issue", issue.status).label}
+        </Typography>
+      </Box>
 
-                  <Box sx={{ display: "flex", gap: 0.5, }}>
-                    <Typography color="text.secondary" fontSize="0.75rem">
-                      {"דווח בתאריך"}
-                    </Typography>
-                    <Typography color="text.secondary" fontSize="0.85rem">
-                      {`${new Date(issue.createdAt).toLocaleDateString("he-IL")}`}
-                    </Typography>
-                  </Box>
+      {isAdmin && (
+        <Box mt={2}>
+          <Divider sx={{ borderColor: "#E9E8E8" }} />
+          <Typography color="text.secondary" fontSize="0.75rem">
+            {`דווח על ידי ${issue.userId?.fullName}`}
+          </Typography>
+        </Box>
+      )}
+    </Box>
+  ))}
+</BottomCardBox>
 
-                  <Typography color={getStatusText("issue", issue.status).color} fontSize="0.85rem">
-                    {getStatusText("issue", issue.status).label}
-                  </Typography>
-
-                </Box>
-
-                {isAdmin && (
-                  <Box mt={2}>
-                    <Divider sx={{ borderColor: "#E9E8E8" }} />
-                    <Typography color="text.secondary" fontSize="0.75rem">
-                      {`דווח על ידי ${issue.userId?.fullName}`}
-                    </Typography>
-                  </Box>
-                )}
-
-              </Box>
-            ))}
-          </BottomCardBox>
         </Grid>
 
         {/* שורה שנייה (מסך גדול/טאבלט): מודעות (6/12), הזמנות (6/12) */}

@@ -60,8 +60,11 @@ const notificationsSlice = createSlice({
       })
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = action.payload;
+        state.list = Array.isArray(action.payload)
+          ? action.payload
+          : action.payload.notifications || [];
       })
+      
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
