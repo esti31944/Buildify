@@ -1,6 +1,10 @@
 # Node modules
 node_modules/
-/SERVER/uploads
+/SERVER/uploads/*
+!/SERVER/uploads/issueIMG/
+!/SERVER/uploads/issueIMG/**
+!/SERVER/uploads/paymentIMG/
+!/SERVER/uploads/paymentIMG/**
 
 # Logs
 logs
