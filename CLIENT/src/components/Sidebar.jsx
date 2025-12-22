@@ -22,7 +22,7 @@ const IconWrapper = ({ icon, color, bgOpacity = "13" }) => (
     <Box
         sx={{
             width: 32,
-            height: 32,
+            height: 10,
             borderRadius: "30%",
             bgcolor: color + bgOpacity,
             display: "flex",
@@ -105,6 +105,7 @@ export default function Sidebar({ isMobile, onClose }) {
             {/* ניווט */}
             <Box sx={{
                 display: "flex", flexDirection: "column", gap: 1,
+                gap: 0.15,
                 flex: 1,
                 overflowY: "auto", // גלילה רק בחלק הניווט
                 overflowX: "hidden",
