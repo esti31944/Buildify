@@ -227,13 +227,32 @@ export default function Notices() {
     setDeleteDialog({ open: false, id: null });
   }
 
+  const visibleNotices = notices.filter(n => {
+    const expired = isExpired(n);
+    if (currentUser?.role !== "admin") {
+      return !expired;
+    }
+    return true;
+  });
+
   // חישוב מספר הפריטים בכל קטגוריה
+  // const counts = {
+  //   all: notices.length,
+  //   event: notices.filter(n => n.category === "event").length,
+  //   announcement: notices.filter(n => n.category === "announcement").length,
+  //   expired: notices.filter(n => isExpired(n)).length,
+  // };
   const counts = {
-    all: notices.length,
-    event: notices.filter(n => n.category === "event").length,
-    announcement: notices.filter(n => n.category === "announcement").length,
-    expired: notices.filter(n => isExpired(n)).length,
+    all: visibleNotices.filter(n => !isExpired(n)).length,
+    event: visibleNotices.filter(
+      n => n.category === "event" && !isExpired(n)
+    ).length,
+    announcement: visibleNotices.filter(
+      n => n.category === "announcement" && !isExpired(n)
+    ).length,
+    expired: visibleNotices.filter(n => isExpired(n)).length,
   };
+
 
   function isExpired(notice) {
     if (!notice.expiresAt) return false;
@@ -241,25 +260,47 @@ export default function Notices() {
   }
 
   const filteredNotices = notices.filter((n) => {
+    // const expired = isExpired(n);
+    // if (currentUser?.role !== "admin") {
+    //   return !expired;
+    // }
+    // if (filterCategory === "expired") {
+    //   return expired;
+    // }
+    // if (filterCategory === "all") {
+    //   return !expired;
+    // }
+    // if (filterCategory === "event") {
+    //   return n.category === "event" && !expired;
+    // }
+    // if (filterCategory === "announcement") {
+    //   return n.category === "announcement" && !expired;
+    // }
+    // return true;
+    // // if (filterCategory === "all") return true;
+    // // return n.category === filterCategory;
     const expired = isExpired(n);
-    if (currentUser?.role !== "admin") {
-      return !expired;
+
+    // דייר – לא רואה פגי תוקף בכלל
+    if (currentUser?.role !== "admin" && expired) {
+      return false;
     }
-    if (filterCategory === "expired") {
-      return expired;
+
+    // סינון לפי טאבים
+    switch (filterCategory) {
+      case "expired":
+        return expired;
+
+      case "event":
+        return n.category === "event" && !expired;
+
+      case "announcement":
+        return n.category === "announcement" && !expired;
+
+      case "all":
+      default:
+        return !expired;
     }
-    if (filterCategory === "all") {
-      return !expired;
-    }
-    if (filterCategory === "event") {
-      return n.category === "event" && !expired;
-    }
-    if (filterCategory === "announcement") {
-      return n.category === "announcement" && !expired;
-    }
-    return true;
-    // if (filterCategory === "all") return true;
-    // return n.category === filterCategory;
   });
 
   if (loading) return <div dir="rtl">טוען מודעות...</div>;
@@ -295,11 +336,11 @@ export default function Notices() {
             },
           }}
         >
-          <Tab label={<CustomTabLabel title="כל ההודעות" count={counts.all} type="announcement" />} value="all" />
+          <Tab label={<CustomTabLabel title="כל המודעות" count={counts.all} type="announcement" />} value="all" />
           <Tab label={<CustomTabLabel title="אירועים" count={counts.event} type="event" />} value="event" />
           <Tab label={<CustomTabLabel title="הודעות" count={counts.announcement} type="announcement" />} value="announcement" />
           {currentUser?.role === "admin" && (
-            <Tab value="expired" label={<CustomTabLabel title="מודעות שפג תוקפן" count={counts.expired} type="expired" faded/>} />
+            <Tab value="expired" label={<CustomTabLabel title="מודעות שפג תוקפן" count={counts.expired} type="expired" faded />} />
           )}
         </Tabs>
 
