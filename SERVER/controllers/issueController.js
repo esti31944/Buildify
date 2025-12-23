@@ -4,6 +4,16 @@ const { authAdmin } = require("../middleware/authMiddleware");
 const { NotificationModel } = require("../models/notificationModel");
 const { UserModel } = require("../models/usersModel");
 
+const dotenv = require("dotenv");
+dotenv.config();
+
+const cloudinary = require("cloudinary").v2;
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET,
+});
+
 // בדיקה בסיסית
 const testRoute = (req, res) => {
   res.json({ msg: "Issues route works" });
@@ -118,8 +128,8 @@ const getMyIssues = async (req, res) => {
   const userId = req.user._id;
   try {
     const issues = await IssueModel.find({ userId })
-    .sort({ createdAt: -1 })
-    .populate("userId", "fullName");
+      .sort({ createdAt: -1 })
+      .populate("userId", "fullName");
     res.json(issues);
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
@@ -130,8 +140,8 @@ const getMyIssues = async (req, res) => {
 const getAllIssues = async (req, res) => {
   try {
     const issues = await IssueModel.find()
-    .sort({ createdAt: -1 })
-    .populate("userId", "fullName");
+      .sort({ createdAt: -1 })
+      .populate("userId", "fullName");
     res.json(issues);
   } catch (err) {
     res.status(500).json({ msg: "Server error", err });
@@ -141,14 +151,30 @@ const getAllIssues = async (req, res) => {
 const uploadFile = async (req, res) => {
   try {
     const issue = await IssueModel.findById(req.params.id);
-    if (!issue) return res.status(404).json({ message: "תקלה לא נמצאה" });
-
-    if (req.file) {
-      issue.imageUrl = `/uploads/issueIMG/${req.file.filename}`;
-      await issue.save();
+    if (!issue) {
+      return res.status(404).json({ message: "תקלה לא נמצאה" });
     }
 
-    res.json({ issue });
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "issues" },
+      async (error, result) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).json({ message: "שגיאה בהעלאה ל־Cloudinary" });
+        }
+
+        issue.imageUrl = result.secure_url;
+        await issue.save();
+
+        res.json({ issue });
+      }
+    );
+
+    stream.end(req.file.buffer);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "שגיאה בהעלאת הקובץ" });

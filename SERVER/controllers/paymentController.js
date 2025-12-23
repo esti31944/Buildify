@@ -3,6 +3,16 @@ const { PaymentModel, validPayment, validPaymentUpdate } = require("../models/pa
 const { NotificationModel } = require("../models/notificationModel");
 const { UserModel } = require("../models/usersModel");
 
+const dotenv = require("dotenv");
+dotenv.config();
+
+const cloudinary = require("cloudinary").v2;
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET,
+});
+
 // רשימת כל התשלומים מסוג 'monthly' (ועד)
 exports.getAllPayments = async (req, res) => {
   try {
@@ -154,25 +164,42 @@ exports.updatePaymentStatus = async (req, res) => {
 };
 
 exports.uploadFile = async (req, res) => {
-
-  const paymentId = req.params.id;
-
-  if (!req.file) return res.status(400).json({ msg: "No file uploaded" });
-
   try {
-    const payment = await PaymentModel.findByIdAndUpdate(
-      paymentId,
-      { filePath: `/uploads/paymentIMG/${req.file.filename}`, updatedAt: Date.now() },
-      { new: true }
+    const payment = await PaymentModel.findById(req.params.id);
+
+    if (!payment) {
+      return res.status(404).json({ message: "Payment not found" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "payments" },
+      async (error, result) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).json({ message: "שגיאה בהעלאה ל־Cloudinary" });
+        }
+
+        // שימי לב – מומלץ לשנות את שם השדה במודל
+        payment.filePath = result.secure_url;
+        payment.updatedAt = Date.now();
+
+        await payment.save();
+
+        res.json({ payment });
+      }
     );
 
-    if (!payment) return res.status(404).json({ msg: "Payment not found" });
-
-    res.json({ msg: "File updated successfully", payment });
+    stream.end(req.file.buffer);
   } catch (err) {
-    res.status(500).json({ msg: "Server error", err });
+    console.error(err);
+    res.status(500).json({ message: "שגיאה בהעלאת הקובץ" });
   }
 };
+
 
 
 // מחיקת תשלום

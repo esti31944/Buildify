@@ -153,28 +153,13 @@ export default function PaymentsTable({
         const file = e.target.files[0];
         if (!file) return;
 
-        // const confirmChange = window.confirm("האם אתה בטוח שהתשלום הועבר?");
-        // if (!confirmChange) return;
         openConfirm({
             title: "אישור העלאת תשלום",
             description: "?האם אתה בטוח שהתשלום הועבר",
             onConfirm: async () => {
                 let statusUpdated = false;
-                // try {
-                //     await dispatch(updatePaymentStatus({
-                //         id: paymentId,
-                //         status: "pending"
-                //     })).unwrap();
 
-                //     await dispatch(fetchNotifications());
-                //     await dispatch(uploadPaymentFile({ paymentId, file })).unwrap();
-
-                //     showSnackbar("סטטוס עודכן והקובץ נשמר בהצלחה!", "success");
-                // } catch (err) {
-                //     showSnackbar("שגיאה בהעלאת הקובץ או בעדכון הסטטוס", "error");
-                // }
                 try {
-                    // 1. עדכון סטטוס כמו בכפתור הראשון
                     await dispatch(updatePaymentStatus({
                         id: paymentId,
                         status: "pending"
@@ -186,20 +171,11 @@ export default function PaymentsTable({
                     await dispatch(fetchNotifications());
 
 
-                    // 2. העלאת הקובץ — הקוד המקורי שלך (לא שיניתי)
                     await dispatch(uploadPaymentFile({ paymentId, file })).unwrap();
 
-                    // alert("סטטוס עודכן והקובץ נשמר בהצלחה!");
-                    // showSnackbar("סטטוס עודכן והקובץ נשמר בהצלחה!", "success");
                     showSnackbar("הקובץ הועלה בהצלחה!", "success");
 
                 } catch (error) {
-                    //     // console.error("שגיאה בהעלאה או בעדכון:", error);
-                    //     // alert("הייתה בעיה בהעלאת הקובץ או בעדכון הסטטוס");
-                    //     showSnackbar("שגיאה בהעלאת הקובץ או בעדכון הסטטוס", "error");
-
-                    // }
-                    // closeConfirm();
                     if (statusUpdated) {
                         showSnackbar(
                             "הסטטוס עודכן, אך הייתה שגיאה בהעלאת הקובץ",
@@ -348,12 +324,14 @@ export default function PaymentsTable({
                                                     <Box>
                                                         <input
                                                             type="file"
-                                                            ref={fileInputRef}
                                                             style={{ display: "none" }}
+                                                            id={`file-input-${payment._id}`}
                                                             onChange={(e) => handleFileChange(e, payment._id)}
                                                         />
                                                         <Tooltip title="העלה קובץ אישור תשלום">
-                                                            <IconButton onClick={handleClick}>
+                                                            <IconButton
+                                                                onClick={() => document.getElementById(`file-input-${payment._id}`).click()}
+                                                            >
                                                                 <UploadFileIcon />
                                                             </IconButton>
                                                         </Tooltip>
@@ -363,14 +341,14 @@ export default function PaymentsTable({
                                                 {(user?.role === "admin" && payment.status === "pending") && (
 
                                                     <Box>
-                                                        <FilePreview filePath={`${import.meta.env.VITE_API_URL}${payment.filePath}`} />
+                                                        {payment.filePath &&
+                                                            <FilePreview filePath={payment.filePath} />
+                                                        }
                                                         <Button
                                                             size="small"
                                                             variant="outlined"
                                                             startIcon={<CheckIcon />}
                                                             onClick={async () => {
-                                                                // const confirmChange = window.confirm("האם אתה בטוח שהתשלום הועבר?");
-                                                                // if (!confirmChange) return;
                                                                 openConfirm({
                                                                     title: "אישור תשלום",
                                                                     description: "האם לאשר את התשלום?",
@@ -388,20 +366,6 @@ export default function PaymentsTable({
                                                                         closeConfirm();
                                                                     }
                                                                 })
-                                                                // try {
-                                                                //     dispatch(updatePaymentStatus({
-                                                                //         id: payment._id,
-                                                                //         status: "paid"
-                                                                //     }));
-                                                                //     // alert("סטטוס עודכן בהצלחה!");
-                                                                //     showSnackbar("סטטוס עודכן בהצלחה!", "success");
-
-                                                                // } catch (err) {
-                                                                //     console.error(err);
-                                                                //     // alert("שגיאה בעדכון הסטטוס");
-                                                                //     showSnackbar("שגיאה בעדכון הסטטוס", "error");
-
-                                                                // }
                                                             }}
                                                             sx={{
                                                                 textTransform: "none",

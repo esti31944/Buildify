@@ -44,7 +44,7 @@ export const uploadIssueImage = createAsyncThunk(
 
       return res.data.issue;
     } catch (error) {
-      return rejectWithValue(error.response?.data || error.message);
+      return rejectWithValue(error.response?.data?.message || "שגיאה בהעלאת קובץ");
     }
   }
 );
@@ -83,7 +83,11 @@ const issuesSlice = createSlice({
         if (idx !== -1) state.list[idx] = updated;
       })
       .addCase(uploadIssueImage.rejected, (state, action) => {
-        state.error = action.payload;
+        // state.error = action.payload;
+        state.error =
+          typeof action.payload === "string"
+            ? action.payload
+            : action.payload?.message || "שגיאה בהעלאת קובץ";
       });
   },
 });

@@ -16,18 +16,8 @@ if (!fs.existsSync(paymentsPath)) {
     if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
 });
 
-const issueStorage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, issuesPath),
-    filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
-});
-
-const paymentStorage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, paymentsPath),
-    filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
-});
-
-const uploadIssue = multer({ storage: issueStorage });
-const uploadPayment = multer({ storage: paymentStorage });
+const uploadIssue = multer({ storage: multer.memoryStorage() });
+const uploadPayment = multer({ storage: multer.memoryStorage() });
 
 module.exports = {
     uploadIssue,
